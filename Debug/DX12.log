@@ -1,0 +1,9 @@
+﻿  DX12App.cpp
+DX12App.obj : error LNK2019: 未解決の外部シンボル "public: class std::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> > __thiscall DxException::ToString(void)const " (?ToString@DxException@@QBE?AV?$basic_string@_WU?$char_traits@_W@std@@V?$allocator@_W@2@@std@@XZ) が関数 __catch$_WinMain@16$0 で参照されました。
+DX12App.obj : error LNK2019: 未解決の外部シンボル "public: __thiscall GameTimer::GameTimer(void)" (??0GameTimer@@QAE@XZ) が関数 "public: __thiscall DX12App::DX12App(struct HINSTANCE__ *)" (??0DX12App@@QAE@PAUHINSTANCE__@@@Z) で参照されました。
+DX12App.obj : error LNK2019: 未解決の外部シンボル "public: float __thiscall GameTimer::TotalTime(void)const " (?TotalTime@GameTimer@@QBEMXZ) が関数 "protected: void __thiscall DX12App::CalculateFrameStats(void)" (?CalculateFrameStats@DX12App@@IAEXXZ) で参照されました。
+DX12App.obj : error LNK2019: 未解決の外部シンボル "public: void __thiscall GameTimer::Reset(void)" (?Reset@GameTimer@@QAEXXZ) が関数 "public: int __thiscall DX12App::Run(void)" (?Run@DX12App@@QAEHXZ) で参照されました。
+DX12App.obj : error LNK2019: 未解決の外部シンボル "public: void __thiscall GameTimer::Start(void)" (?Start@GameTimer@@QAEXXZ) が関数 "public: virtual long __thiscall DX12App::MsgProc(struct HWND__ *,unsigned int,unsigned int,long)" (?MsgProc@DX12App@@UAEJPAUHWND__@@IIJ@Z) で参照されました。
+DX12App.obj : error LNK2019: 未解決の外部シンボル "public: void __thiscall GameTimer::Stop(void)" (?Stop@GameTimer@@QAEXXZ) が関数 "public: virtual long __thiscall DX12App::MsgProc(struct HWND__ *,unsigned int,unsigned int,long)" (?MsgProc@DX12App@@UAEJPAUHWND__@@IIJ@Z) で参照されました。
+DX12App.obj : error LNK2019: 未解決の外部シンボル "public: void __thiscall GameTimer::Tick(void)" (?Tick@GameTimer@@QAEXXZ) が関数 "public: int __thiscall DX12App::Run(void)" (?Run@DX12App@@QAEHXZ) で参照されました。
+D:\HAL\GM31\DX12\Debug\DX12.exe : fatal error LNK1120: 7 件の未解決の外部参照
