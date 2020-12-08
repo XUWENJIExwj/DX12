@@ -120,8 +120,8 @@ int DX12App::Run()
 			if (!mAppPaused)
 			{
 				CalculateFrameStats();
-				//Update(mTimer);
-				//Draw(mTimer);
+				CManager::Update(mTimer);
+				CManager::Draw(mTimer);
 			}
 			else
 			{
@@ -160,56 +160,56 @@ LRESULT DX12App::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		// Save the new client area dimensions.
 		mClientWidth = LOWORD(lParam);
 		mClientHeight = HIWORD(lParam);
-		//if (md3dDevice)
-		//{
-		//	if (wParam == SIZE_MINIMIZED)
-		//	{
-		//		mAppPaused = true;
-		//		mMinimized = true;
-		//		mMaximized = false;
-		//	}
-		//	else if (wParam == SIZE_MAXIMIZED)
-		//	{
-		//		mAppPaused = false;
-		//		mMinimized = false;
-		//		mMaximized = true;
-		//		OnResize();
-		//	}
-		//	else if (wParam == SIZE_RESTORED)
-		//	{
+		if (CManager::GetDevice())
+		{
+			if (wParam == SIZE_MINIMIZED)
+			{
+				mAppPaused = true;
+				mMinimized = true;
+				mMaximized = false;
+			}
+			else if (wParam == SIZE_MAXIMIZED)
+			{
+				mAppPaused = false;
+				mMinimized = false;
+				mMaximized = true;
+				CManager::OnResize();
+			}
+			else if (wParam == SIZE_RESTORED)
+			{
 
-		//		// Restoring from minimized state?
-		//		if (mMinimized)
-		//		{
-		//			mAppPaused = false;
-		//			mMinimized = false;
-		//			OnResize();
-		//		}
+				// Restoring from minimized state?
+				if (mMinimized)
+				{
+					mAppPaused = false;
+					mMinimized = false;
+					CManager::OnResize();
+				}
 
-		//		// Restoring from maximized state?
-		//		else if (mMaximized)
-		//		{
-		//			mAppPaused = false;
-		//			mMaximized = false;
-		//			OnResize();
-		//		}
-		//		else if (mResizing)
-		//		{
-		//			// If user is dragging the resize bars, we do not resize 
-		//			// the buffers here because as the user continuously 
-		//			// drags the resize bars, a stream of WM_SIZE messages are
-		//			// sent to the window, and it would be pointless (and slow)
-		//			// to resize for each WM_SIZE message received from dragging
-		//			// the resize bars.  So instead, we reset after the user is 
-		//			// done resizing the window and releases the resize bars, which 
-		//			// sends a WM_EXITSIZEMOVE message.
-		//		}
-		//		else // API call such as SetWindowPos or mSwapChain->SetFullscreenState.
-		//		{
-		//			OnResize();
-		//		}
-		//	}
-		//}
+				// Restoring from maximized state?
+				else if (mMaximized)
+				{
+					mAppPaused = false;
+					mMaximized = false;
+					CManager::OnResize();
+				}
+				else if (mResizing)
+				{
+					// If user is dragging the resize bars, we do not resize 
+					// the buffers here because as the user continuously 
+					// drags the resize bars, a stream of WM_SIZE messages are
+					// sent to the window, and it would be pointless (and slow)
+					// to resize for each WM_SIZE message received from dragging
+					// the resize bars.  So instead, we reset after the user is 
+					// done resizing the window and releases the resize bars, which 
+					// sends a WM_EXITSIZEMOVE message.
+				}
+				else // API call such as SetWindowPos or mSwapChain->SetFullscreenState.
+				{
+					CManager::OnResize();
+				}
+			}
+		}
 		return 0;
 
 		// WM_EXITSIZEMOVE is sent when the user grabs the resize bars.

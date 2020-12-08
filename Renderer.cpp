@@ -2,6 +2,7 @@
 
 using Microsoft::WRL::ComPtr;
 using namespace std;
+using namespace DirectX;
 
 DX12App* CRenderer::m_App = nullptr;
 
@@ -51,6 +52,7 @@ CD3DX12_CPU_DESCRIPTOR_HANDLE CRenderer::m_DynamicCubeDsvHandle;
 UINT                          CRenderer::m_CubeMapSize = 512;
 ComPtr<ID3D12Resource>        CRenderer::m_CubeDepthStencilBuffer = nullptr;
 
+// DX12初期化
 bool CRenderer::Init()
 {
 	m_App = DX12App::GetApp();
@@ -230,7 +232,7 @@ void CRenderer::OnResize()
 	// Flush before changing any resources.
 	FlushCommandQueue();
 
-	ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc.Get(), nullptr));
+	RestDirectCmdListAlloc();
 
 	// Release the previous resources we will be recreating.
 	for (int i = 0; i < SwapChainBufferCount; ++i)
@@ -299,10 +301,7 @@ void CRenderer::OnResize()
 	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(mDepthStencilBuffer.Get(),
 		D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE));
 
-	// Execute the resize commands.
-	ThrowIfFailed(mCommandList->Close());
-	ID3D12CommandList* cmdsLists[] = { mCommandList.Get() };
-	mCommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
+	ExecuteCommandLists();
 
 	// Wait until resize is complete.
 	FlushCommandQueue();
@@ -342,10 +341,25 @@ void CRenderer::FlushCommandQueue()
 	}
 }
 
-void CRenderer::CreateCommonResources()
+// CommandObjects操作
+void CRenderer::RestDirectCmdListAlloc()
 {
 	// Reset the command list to prep for initialization commands.
 	ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc.Get(), nullptr));
+}
+
+void CRenderer::ExecuteCommandLists()
+{
+	// Execute the initialization commands.
+	ThrowIfFailed(mCommandList->Close());
+	ID3D12CommandList* cmdsLists[] = { mCommandList.Get() };
+	mCommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
+}
+
+// CommonResources生成
+void CRenderer::CreateCommonResources()
+{
+	RestDirectCmdListAlloc();
 
 	CShaderManager::LoadShaders();
 	CTextureManager::LoadTextures(md3dDevice.Get(), mCommandList.Get());
@@ -355,10 +369,7 @@ void CRenderer::CreateCommonResources()
 	CreateDescriptorHeaps();
 	CreataPSOs();
 
-	// Execute the initialization commands.
-	ThrowIfFailed(mCommandList->Close());
-	ID3D12CommandList* cmdsLists[] = { mCommandList.Get() };
-	mCommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
+	ExecuteCommandLists();
 
 	// Wait until initialization is complete.
 	FlushCommandQueue();
@@ -576,6 +587,7 @@ void CRenderer::CreataPSOs()
 	ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&skyPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOs::PSO_01_Sky])));
 }
 
+// ゲッター
 D3D12_CPU_DESCRIPTOR_HANDLE CRenderer::CurrentBackBufferView()
 {
 	return CD3DX12_CPU_DESCRIPTOR_HANDLE(
@@ -584,6 +596,7 @@ D3D12_CPU_DESCRIPTOR_HANDLE CRenderer::CurrentBackBufferView()
 		mRtvDescriptorSize);
 }
 
+// デバッガ―
 void CRenderer::LogAdapters()
 {
 	UINT i = 0;
@@ -659,6 +672,7 @@ void CRenderer::LogOutputDisplayModes(IDXGIOutput* output, DXGI_FORMAT format)
 	}
 }
 
+// StaticSamplers
 array<const CD3DX12_STATIC_SAMPLER_DESC, 6> CRenderer::GetStaticSamplers()
 {
 	// Applications usually only need a handful of samplers.  So just define them all up front
@@ -714,4 +728,81 @@ array<const CD3DX12_STATIC_SAMPLER_DESC, 6> CRenderer::GetStaticSamplers()
 		pointWrap, pointClamp,
 		linearWrap, linearClamp,
 		anisotropicWrap, anisotropicClamp };
+}
+
+// 描画用
+void CRenderer::Begin()
+{
+	//auto cmdListAlloc = mCurrFrameResource->CmdListAlloc;
+	auto cmdListAlloc = mDirectCmdListAlloc;
+
+	// Reuse the memory associated with command recording.
+	// We can only reset when the associated command lists have finished execution on the GPU.
+	ThrowIfFailed(cmdListAlloc->Reset());
+
+	// A command list can be reset after it has been added to the command queue via ExecuteCommandList.
+	// Reusing the command list reuses memory.
+	ThrowIfFailed(mCommandList->Reset(cmdListAlloc.Get(), m_PSOs[(int)PSOs::PSO_00_Opaque].Get()));
+
+	ID3D12DescriptorHeap* descriptorHeaps[] = { mSrvDescriptorHeap.Get() };
+	mCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+
+	mCommandList->SetGraphicsRootSignature(mRootSignature.Get());
+}
+
+void CRenderer::SetUpCommonResources()
+{
+
+}
+
+void CRenderer::DrawDynamicCubeScene()
+{
+
+}
+
+void CRenderer::DrawScene()
+{
+	mCommandList->RSSetViewports(1, &mScreenViewport);
+	mCommandList->RSSetScissorRects(1, &mScissorRect);
+
+	// Indicate a state transition on the resource usage.
+	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
+		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
+
+	// Clear the back buffer and depth buffer.
+	mCommandList->ClearRenderTargetView(CurrentBackBufferView(), Colors::LightSteelBlue, 0, nullptr);
+	mCommandList->ClearDepthStencilView(DepthStencilView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+
+	// Specify the buffers we are going to render to.
+	mCommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilView());
+
+	DrawGameObjectsWithLayer();
+
+	// Indicate a state transition on the resource usage.
+	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+}
+
+void CRenderer::DrawGameObjectsWithLayer()
+{
+	
+}
+
+void CRenderer::End()
+{
+	ExecuteCommandLists();
+
+	// Swap the back and front buffers
+	ThrowIfFailed(mSwapChain->Present(0, 0));
+	mCurrBackBuffer = (mCurrBackBuffer + 1) % SwapChainBufferCount;
+
+	//// Advance the fence value to mark commands up to this fence point.
+	//mCurrFrameResource->Fence = ++mCurrentFence;
+
+	//// Add an instruction to the command queue to set a new fence point. 
+	//// Because we are on the GPU timeline, the new fence point won't be 
+	//// set until the GPU finishes processing all the commands prior to this Signal().
+	//mCommandQueue->Signal(mFence.Get(), mCurrentFence);
+
+	FlushCommandQueue();
 }

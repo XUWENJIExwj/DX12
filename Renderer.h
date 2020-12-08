@@ -74,6 +74,10 @@ public:
 	static void OnResize();
 	static void FlushCommandQueue();
 
+	// CommandObjects‘€ì
+	static void RestDirectCmdListAlloc();
+	static void ExecuteCommandLists();
+
 	// CommonResources¶¬
 	static void CreateCommonResources();
 	static void CreateRootSignature();
@@ -83,6 +87,7 @@ public:
 
 	// ƒQƒbƒ^[
 	static bool Get4xMsaaState() { return m4xMsaaState; }
+	static ID3D12Device* GetDevice() { return md3dDevice.Get(); }
 	static ID3D12Resource* CurrentBackBuffer() { return mSwapChainBuffer[mCurrBackBuffer].Get(); }
 	static D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView();
 	static D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView() { return mDsvHeap->GetCPUDescriptorHandleForHeapStart(); }
@@ -94,4 +99,12 @@ public:
 
 	// StaticSamplers
 	static std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> GetStaticSamplers();
+
+	// •`‰æ—p
+	static void Begin();
+	static void SetUpCommonResources();
+	static void DrawDynamicCubeScene();
+	static void DrawScene();
+	static void DrawGameObjectsWithLayer();
+	static void End();
 };
