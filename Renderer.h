@@ -2,10 +2,10 @@
 
 #include "DX12App.h"
 #include "CubeRenderTarget.h"
-#include "CommonResource.h"
+#include "GameObject.h"
 #include "FrameResource.h"
 
-enum class PSOs :int
+enum class PSOTypeIndex :int
 {
 	PSO_00_Opaque,
 	PSO_01_Sky,
@@ -55,11 +55,16 @@ private:
 	static Microsoft::WRL::ComPtr<ID3D12RootSignature>              mRootSignature;
 	static Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>             mSrvDescriptorHeap;
 	static std::vector<Microsoft::WRL::ComPtr<ID3D12PipelineState>> m_PSOs;
+	static int                                                      m_CurrentPSO;
 
-	// DynamicCube
+	// CubeMap
+	static CD3DX12_GPU_DESCRIPTOR_HANDLE m_SkyTextureDescriptorHandle;
+
+	// DynamicCubeMap
 	static bool                                   m_DynamicCubeOn;
 	static std::unique_ptr<CCubeRenderTarget>     m_DynamicCubeMap;
 	static CD3DX12_CPU_DESCRIPTOR_HANDLE          m_DynamicCubeDsvHandle;
+	static CD3DX12_GPU_DESCRIPTOR_HANDLE          m_DynamicCubeDescriptorHandle;
 	static UINT                                   m_CubeMapSize;
 	static Microsoft::WRL::ComPtr<ID3D12Resource> m_CubeDepthStencilBuffer;
 
@@ -72,6 +77,7 @@ public:
 	static void CreateSwapChain();
 	static void CreateRtvAndDsvDescriptorHeaps();
 	static void OnResize();
+	static void ResetFence();
 	static void FlushCommandQueue();
 
 	// CommandObjects操作
@@ -87,10 +93,15 @@ public:
 
 	// ゲッター
 	static bool Get4xMsaaState() { return m4xMsaaState; }
-	static ID3D12Device* GetDevice() { return md3dDevice.Get(); }
-	static ID3D12Resource* CurrentBackBuffer() { return mSwapChainBuffer[mCurrBackBuffer].Get(); }
+
+	static ID3D12Device*               GetDevice() { return md3dDevice.Get(); }
+	static ID3D12Fence*                GetFence() { return mFence.Get(); }
+	static ID3D12Resource*             CurrentBackBuffer() { return mSwapChainBuffer[mCurrBackBuffer].Get(); }
 	static D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView();
 	static D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView() { return mDsvHeap->GetCPUDescriptorHandleForHeapStart(); }
+
+	static CD3DX12_GPU_DESCRIPTOR_HANDLE CreateCubeMapDescriptorHandle(UINT Offset);
+	static bool GetDynamicCubeOn() { return m_DynamicCubeOn; }
 
 	// デバッガ―
 	static void LogAdapters();
@@ -104,7 +115,8 @@ public:
 	static void Begin();
 	static void SetUpCommonResources();
 	static void DrawDynamicCubeScene();
-	static void DrawScene();
-	static void DrawGameObjectsWithLayer();
+	static void SetUpBeforeDrawScene();
+	static void SetPSO(int PSOType);
+	static void DrawGameObjectsWithLayer(std::list<CGameObject*>& GameObjectsWithLayer);
 	static void End();
 };

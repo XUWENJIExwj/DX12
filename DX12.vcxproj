@@ -143,8 +143,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="CommonResource.h" />
-    <ClInclude Include="Common\Camera.h" />
     <ClInclude Include="Common\d3dUtil.h" />
     <ClInclude Include="Common\d3dx12.h" />
     <ClInclude Include="Common\DDSTextureLoader.h" />
@@ -155,15 +155,19 @@
     <ClInclude Include="CubeRenderTarget.h" />
     <ClInclude Include="DX12App.h" />
     <ClInclude Include="FrameResource.h" />
+    <ClInclude Include="Game.h" />
+    <ClInclude Include="GameObject.h" />
     <ClInclude Include="GeoShapeManager.h" />
     <ClInclude Include="Manager.h" />
     <ClInclude Include="MaterialManager.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="Scene.h" />
     <ClInclude Include="ShaderManager.h" />
+    <ClInclude Include="Sky.h" />
     <ClInclude Include="TextureManager.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Common\Camera.cpp" />
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Common\d3dUtil.cpp" />
     <ClCompile Include="Common\DDSTextureLoader.cpp" />
     <ClCompile Include="Common\GameTimer.cpp" />
@@ -172,11 +176,15 @@
     <ClCompile Include="CubeRenderTarget.cpp" />
     <ClCompile Include="DX12App.cpp" />
     <ClCompile Include="FrameResource.cpp" />
+    <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GeoShapeManager.cpp" />
     <ClCompile Include="Manager.cpp" />
     <ClCompile Include="MaterialManager.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="Scene.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
+    <ClCompile Include="Sky.cpp" />
     <ClCompile Include="TextureManager.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

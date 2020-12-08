@@ -1,12 +1,15 @@
-#include "DX12App.h"
 #include "Manager.h"
-//#include "Scene.h"
 #include "Renderer.h"
-#include "FrameResource.h"
+#include "Scene.h"
 
 using namespace std;
 
-vector<unique_ptr<FrameResource>> m_FrameResources;
+vector<unique_ptr<FrameResource>> CFrameResourceManager::m_FrameResources;
+
+FrameResource* CFrameResourceManager::m_CurrentFrameResource = nullptr;
+int            CFrameResourceManager::m_CurrentFrameResourceIndex = 0;
+
+UINT CFrameResourceManager::m_ObjectCBCount = 0;
 
 FrameResource::FrameResource(ID3D12Device* device, UINT passCount, UINT objectCount, UINT materialCount)
 {
@@ -19,21 +22,45 @@ FrameResource::FrameResource(ID3D12Device* device, UINT passCount, UINT objectCo
     ObjectCB = make_unique<UploadBuffer<ObjectConstants>>(device, objectCount, true);
 }
 
-FrameResource::~FrameResource()
+void CFrameResourceManager::Init()
 {
 
 }
 
-void CFrameResourceManager::Init()
+bool CFrameResourceManager::CreateFrameResources()
 {
-	for (int i = 0; i < gNumFrameResources; ++i)
+	UINT objCBCount = CManager::GetScene()->GetAllGameObjectsCount();
+
+	// Camera‚à‚È‚¢‚±‚Æ‚É‚È‚é‚Ì‚ÅAƒGƒ‰[‚É‚µ‚Ä‚¨‚­
+	assert(objCBCount > 0);
+
+	if (m_ObjectCBCount < objCBCount)
 	{
-		//m_FrameResources.push_back(make_unique<FrameResource>(CRenderer::GetDevice(),
-		//	CRenderer::GetDynamicCubeOn() ? 7 : 1, 1, 1));
+		m_ObjectCBCount = objCBCount;
 
-		//m_FrameResources[i] = make_unique<FrameResource>(CRenderer::GetDevice(),
-		//	7, 1, 1);
+		for (int i = 0; i < gNumFrameResources; ++i)
+		{
+			m_FrameResources.push_back(make_unique<FrameResource>(CRenderer::GetDevice(),
+				CRenderer::GetDynamicCubeOn() ? 7 : 1, m_ObjectCBCount, CMaterialManager::GetMaterialsCount()));
+		}
+		return true;
+	}
+	return false;
+}
 
-		//CRenderer::GetDynamicCubeOn() ? 7 : 1, (UINT)CManager::GetScene()->GetAllGameObjectsCount(), (UINT)mMaterials.size()));
+void CFrameResourceManager::Update()
+{
+	// Cycle through the circular frame resource array.
+	m_CurrentFrameResourceIndex = (m_CurrentFrameResourceIndex + 1) % gNumFrameResources;
+	m_CurrentFrameResource = m_FrameResources[m_CurrentFrameResourceIndex].get();
+
+	// Has the GPU finished processing the commands of the current frame resource?
+	// If not, wait until the GPU has completed commands up to this fence point.
+	if (m_CurrentFrameResource->Fence != 0 && CRenderer::GetFence()->GetCompletedValue() < m_CurrentFrameResource->Fence)
+	{
+		HANDLE eventHandle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
+		ThrowIfFailed(CRenderer::GetFence()->SetEventOnCompletion(m_CurrentFrameResource->Fence, eventHandle));
+		WaitForSingleObject(eventHandle, INFINITE);
+		CloseHandle(eventHandle);
 	}
 }

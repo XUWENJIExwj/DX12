@@ -1,3 +1,4 @@
+#include "Manager.h"
 #include "Renderer.h"
 
 using Microsoft::WRL::ComPtr;
@@ -43,12 +44,17 @@ DXGI_FORMAT     CRenderer::mDepthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 // CommonResources生成
 ComPtr<ID3D12RootSignature>         CRenderer::mRootSignature = nullptr;
 ComPtr<ID3D12DescriptorHeap>        CRenderer::mSrvDescriptorHeap = nullptr;
-vector<ComPtr<ID3D12PipelineState>> CRenderer::m_PSOs((int)PSOs::PSO_MAX);
+vector<ComPtr<ID3D12PipelineState>> CRenderer::m_PSOs((int)PSOTypeIndex::PSO_MAX);
+int                                 CRenderer::m_CurrentPSO = (int)PSOTypeIndex::PSO_00_Opaque;
 
-// DynamicCube
-bool                          CRenderer::m_DynamicCubeOn = false;
+// CubeMap
+CD3DX12_GPU_DESCRIPTOR_HANDLE CRenderer::m_SkyTextureDescriptorHandle;
+
+// DynamicCubeMap
+bool                          CRenderer::m_DynamicCubeOn = true;
 unique_ptr<CCubeRenderTarget> CRenderer::m_DynamicCubeMap = nullptr;
 CD3DX12_CPU_DESCRIPTOR_HANDLE CRenderer::m_DynamicCubeDsvHandle;
+CD3DX12_GPU_DESCRIPTOR_HANDLE CRenderer::m_DynamicCubeDescriptorHandle;
 UINT                          CRenderer::m_CubeMapSize = 512;
 ComPtr<ID3D12Resource>        CRenderer::m_CubeDepthStencilBuffer = nullptr;
 
@@ -317,6 +323,11 @@ void CRenderer::OnResize()
 	mScissorRect = { 0, 0, m_App->GetWindowWidth(), m_App->GetWindowWidth() };
 }
 
+void CRenderer::ResetFence()
+{
+	
+}
+
 void CRenderer::FlushCommandQueue()
 {
 	// Advance the fence value to mark commands up to this fence point.
@@ -368,6 +379,9 @@ void CRenderer::CreateCommonResources()
 	CreateRootSignature();
 	CreateDescriptorHeaps();
 	CreataPSOs();
+
+	m_SkyTextureDescriptorHandle = CreateCubeMapDescriptorHandle(CTextureManager::GetSkyTextureIndex());
+	m_DynamicCubeDescriptorHandle = CreateCubeMapDescriptorHandle(CTextureManager::GetDynamicTextureIndex());
 
 	ExecuteCommandLists();
 
@@ -561,7 +575,7 @@ void CRenderer::CreataPSOs()
 	opaquePsoDesc.SampleDesc.Count = m4xMsaaState ? 4 : 1;
 	opaquePsoDesc.SampleDesc.Quality = m4xMsaaState ? (m4xMsaaQuality - 1) : 0;
 	opaquePsoDesc.DSVFormat = mDepthStencilFormat;
-	ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOs::PSO_00_Opaque])));
+	ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_00_Opaque])));
 
 	// PSO for sky.
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC skyPsoDesc = opaquePsoDesc;
@@ -584,7 +598,7 @@ void CRenderer::CreataPSOs()
 		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_01_Sky].pixelShader->GetBufferPointer()),
 		shaderTypes[(int)ShaderTypeIndex::Shader_Type_01_Sky].pixelShader->GetBufferSize()
 	};
-	ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&skyPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOs::PSO_01_Sky])));
+	ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&skyPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_01_Sky])));
 }
 
 // ゲッター
@@ -594,6 +608,13 @@ D3D12_CPU_DESCRIPTOR_HANDLE CRenderer::CurrentBackBufferView()
 		mRtvHeap->GetCPUDescriptorHandleForHeapStart(),
 		mCurrBackBuffer,
 		mRtvDescriptorSize);
+}
+
+CD3DX12_GPU_DESCRIPTOR_HANDLE CRenderer::CreateCubeMapDescriptorHandle(UINT Offset)
+{
+	CD3DX12_GPU_DESCRIPTOR_HANDLE cubeMapDescriptor(mSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+	cubeMapDescriptor.Offset(Offset, mCbvSrvUavDescriptorSize);
+	return cubeMapDescriptor;
 }
 
 // デバッガ―
@@ -733,8 +754,8 @@ array<const CD3DX12_STATIC_SAMPLER_DESC, 6> CRenderer::GetStaticSamplers()
 // 描画用
 void CRenderer::Begin()
 {
-	//auto cmdListAlloc = mCurrFrameResource->CmdListAlloc;
-	auto cmdListAlloc = mDirectCmdListAlloc;
+	auto cmdListAlloc = CFrameResourceManager::GetCurrentFrameResource()->CmdListAlloc;
+	//auto cmdListAlloc = mDirectCmdListAlloc;
 
 	// Reuse the memory associated with command recording.
 	// We can only reset when the associated command lists have finished execution on the GPU.
@@ -742,7 +763,8 @@ void CRenderer::Begin()
 
 	// A command list can be reset after it has been added to the command queue via ExecuteCommandList.
 	// Reusing the command list reuses memory.
-	ThrowIfFailed(mCommandList->Reset(cmdListAlloc.Get(), m_PSOs[(int)PSOs::PSO_00_Opaque].Get()));
+	ThrowIfFailed(mCommandList->Reset(cmdListAlloc.Get(), m_PSOs[(int)PSOTypeIndex::PSO_00_Opaque].Get()));
+	m_CurrentPSO = (int)PSOTypeIndex::PSO_00_Opaque;
 
 	ID3D12DescriptorHeap* descriptorHeaps[] = { mSrvDescriptorHeap.Get() };
 	mCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
@@ -752,7 +774,21 @@ void CRenderer::Begin()
 
 void CRenderer::SetUpCommonResources()
 {
+	// Bind all the materials used in this scene.  For structured buffers, we can bypass the heap and 
+	// set as a root descriptor.
+	auto matBuffer = CFrameResourceManager::GetCurrentFrameResource()->MaterialBuffer->Resource();
+	mCommandList->SetGraphicsRootShaderResourceView(2, matBuffer->GetGPUVirtualAddress());
 
+	// Bind the sky cube map.  For our demos, we just use one "world" cube map representing the environment
+	// from far away, so all objects will use the same cube map and we only need to set it once per-frame.  
+	// If we wanted to use "local" cube maps, we would have to change them per-object, or dynamically
+	// index into an array of cube maps.
+	mCommandList->SetGraphicsRootDescriptorTable(3, m_SkyTextureDescriptorHandle);
+
+	// Bind all the textures used in this scene.  Observe
+	// that we only have to specify the first descriptor in the table.  
+	// The root signature knows how many descriptors are expected in the table.
+	mCommandList->SetGraphicsRootDescriptorTable(4, mSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 }
 
 void CRenderer::DrawDynamicCubeScene()
@@ -760,7 +796,7 @@ void CRenderer::DrawDynamicCubeScene()
 
 }
 
-void CRenderer::DrawScene()
+void CRenderer::SetUpBeforeDrawScene()
 {
 	mCommandList->RSSetViewports(1, &mScreenViewport);
 	mCommandList->RSSetScissorRects(1, &mScissorRect);
@@ -776,33 +812,59 @@ void CRenderer::DrawScene()
 	// Specify the buffers we are going to render to.
 	mCommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilView());
 
-	DrawGameObjectsWithLayer();
-
-	// Indicate a state transition on the resource usage.
-	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
-		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+	auto passCB = CFrameResourceManager::GetCurrentFrameResource()->PassCB->Resource();
+	mCommandList->SetGraphicsRootConstantBufferView(1, passCB->GetGPUVirtualAddress());
 }
 
-void CRenderer::DrawGameObjectsWithLayer()
+void CRenderer::SetPSO(int PSOType)
 {
-	
+	if (m_CurrentPSO != PSOType)
+	{
+		mCommandList->SetPipelineState(m_PSOs[PSOType].Get());
+		m_CurrentPSO = PSOType;
+	}
+}
+
+void CRenderer::DrawGameObjectsWithLayer(std::list<CGameObject*>& GameObjectsWithLayer)
+{
+	UINT objCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
+
+	auto objectCB = CFrameResourceManager::GetCurrentFrameResource()->ObjectCB->Resource();
+
+	// For each render item...
+	for (CGameObject* gameObject : GameObjectsWithLayer)
+	{
+		mCommandList->IASetVertexBuffers(0, 1, &gameObject->GetMeshGeometry()->VertexBufferView());
+		mCommandList->IASetIndexBuffer(&gameObject->GetMeshGeometry()->IndexBufferView());
+		mCommandList->IASetPrimitiveTopology(gameObject->GetPrimitiveTopology());
+
+		D3D12_GPU_VIRTUAL_ADDRESS objCBAddress = objectCB->GetGPUVirtualAddress() + gameObject->GetObjCBIndex() * objCBByteSize;
+
+		mCommandList->SetGraphicsRootConstantBufferView(0, objCBAddress);
+
+		mCommandList->DrawIndexedInstanced(gameObject->GetIndexCount(), 1, gameObject->GetStartIndexLocation(), gameObject->GetBaseVertexLocation(), 0);
+	}
 }
 
 void CRenderer::End()
 {
+	// Indicate a state transition on the resource usage.
+	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+
 	ExecuteCommandLists();
 
 	// Swap the back and front buffers
 	ThrowIfFailed(mSwapChain->Present(0, 0));
 	mCurrBackBuffer = (mCurrBackBuffer + 1) % SwapChainBufferCount;
 
-	//// Advance the fence value to mark commands up to this fence point.
-	//mCurrFrameResource->Fence = ++mCurrentFence;
+	// Advance the fence value to mark commands up to this fence point.
+	CFrameResourceManager::GetCurrentFrameResource()->Fence = ++mCurrentFence;
 
-	//// Add an instruction to the command queue to set a new fence point. 
-	//// Because we are on the GPU timeline, the new fence point won't be 
-	//// set until the GPU finishes processing all the commands prior to this Signal().
-	//mCommandQueue->Signal(mFence.Get(), mCurrentFence);
+	// Add an instruction to the command queue to set a new fence point. 
+	// Because we are on the GPU timeline, the new fence point won't be 
+	// set until the GPU finishes processing all the commands prior to this Signal().
+	mCommandQueue->Signal(mFence.Get(), mCurrentFence);
 
-	FlushCommandQueue();
+	//FlushCommandQueue();
 }

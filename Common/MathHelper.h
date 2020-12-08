@@ -22,7 +22,7 @@ public:
 	// Returns random float in [a, b).
 	static float RandF(float a, float b)
 	{
-		return a + RandF()*(b-a);
+		return a + RandF() * (b-a);
 	}
 
     static int Rand(int a, int b)
@@ -45,7 +45,7 @@ public:
 	template<typename T>
 	static T Lerp(const T& a, const T& b, float t)
 	{
-		return a + (b-a)*t;
+		return a + (b-a) * t;
 	}
 
 	template<typename T>
@@ -60,9 +60,9 @@ public:
 	static DirectX::XMVECTOR SphericalToCartesian(float radius, float theta, float phi)
 	{
 		return DirectX::XMVectorSet(
-			radius*sinf(phi)*cosf(theta),
-			radius*cosf(phi),
-			radius*sinf(phi)*sinf(theta),
+			radius * sinf(phi) * cosf(theta),
+			radius * cosf(phi),
+			radius * sinf(phi) * sinf(theta),
 			1.0f);
 	}
 
@@ -94,7 +94,4 @@ public:
 
 	static const float Infinity;
 	static const float Pi;
-
-
 };
-

@@ -19,13 +19,16 @@
     <Filter Include="ソース ファイル\Common">
       <UniqueIdentifier>{6e691d33-1694-43bb-9a4c-564a1d47a523}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\Scene">
+      <UniqueIdentifier>{8e687fc9-f8f7-4df4-9d72-42052ca148c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\GameObject">
+      <UniqueIdentifier>{628faba5-7b31-45e1-935c-891d711e16aa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DX12App.h">
       <Filter>ソース ファイル\System</Filter>
-    </ClInclude>
-    <ClInclude Include="Common\Camera.h">
-      <Filter>ソース ファイル\Common</Filter>
     </ClInclude>
     <ClInclude Include="Common\d3dUtil.h">
       <Filter>ソース ファイル\Common</Filter>
@@ -75,13 +78,25 @@
     <ClInclude Include="CubeRenderTarget.h">
       <Filter>ソース ファイル\System</Filter>
     </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>ソース ファイル\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>ソース ファイル\GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>ソース ファイル\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>ソース ファイル\GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Sky.h">
+      <Filter>ソース ファイル\GameObject</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DX12App.cpp">
       <Filter>ソース ファイル\System</Filter>
-    </ClCompile>
-    <ClCompile Include="Common\Camera.cpp">
-      <Filter>ソース ファイル\Common</Filter>
     </ClCompile>
     <ClCompile Include="Common\d3dUtil.cpp">
       <Filter>ソース ファイル\Common</Filter>
@@ -121,6 +136,21 @@
     </ClCompile>
     <ClCompile Include="CubeRenderTarget.cpp">
       <Filter>ソース ファイル\System</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>ソース ファイル\GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>ソース ファイル\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>ソース ファイル\GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>ソース ファイル\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Sky.cpp">
+      <Filter>ソース ファイル\GameObject</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

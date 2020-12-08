@@ -18,6 +18,7 @@ private:
 public:
 	static void CreateMaterials();
 
+	static std::vector<std::unique_ptr<Material>>& GetMaterials() { return m_Materials; }
 	static Material* GetMaterial(int MaterialIndex) { return m_Materials[MaterialIndex].get(); }
 	static int GetMaterialsCount() { return (int)m_Materials.size(); }
 };

@@ -225,7 +225,7 @@ LRESULT DX12App::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		mAppPaused = false;
 		mResizing = false;
 		mTimer.Start();
-		//OnResize();
+		CManager::OnResize();
 		return 0;
 
 		// WM_DESTROY is sent when the window is being destroyed.

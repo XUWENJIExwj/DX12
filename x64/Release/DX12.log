@@ -1,0 +1,21 @@
+﻿  Camera.cpp
+  d3dUtil.cpp
+  DDSTextureLoader.cpp
+  GameTimer.cpp
+  GeometryGenerator.cpp
+  MathHelper.cpp
+  CubeRenderTarget.cpp
+  DX12App.cpp
+  FrameResource.cpp
+  Game.cpp
+  GameObject.cpp
+  GeoShapeManager.cpp
+  Manager.cpp
+  MaterialManager.cpp
+  Renderer.cpp
+  ShaderManager.cpp
+  TextureManager.cpp
+  コード生成しています。
+  All 2274 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  コード生成が終了しました。
+  DX12.vcxproj -> D:\HAL\GM31\DX12\x64\Release\DX12.exe

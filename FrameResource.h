@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Common/d3dUtil.h"
-#include "Common/MathHelper.h"
-#include "Common/UploadBuffer.h"
+#include "Common\\d3dUtil.h"
+#include "Common\\MathHelper.h"
+#include "Common\\UploadBuffer.h"
 
 struct ObjectConstants
 {
@@ -71,7 +71,7 @@ public:
     FrameResource(ID3D12Device* device, UINT passCount, UINT objectCount, UINT materialCount);
     FrameResource(const FrameResource& rhs) = delete;
     FrameResource& operator=(const FrameResource& rhs) = delete;
-    ~FrameResource();
+	~FrameResource() = default;
 
     // We cannot reset the allocator until the GPU is done processing the commands.
     // So each frame needs their own allocator.
@@ -91,8 +91,18 @@ public:
 
 class CFrameResourceManager
 {
-public:
+private:
 	static std::vector<std::unique_ptr<FrameResource>> m_FrameResources;
 
+	static FrameResource* m_CurrentFrameResource;
+	static int            m_CurrentFrameResourceIndex;
+
+	static UINT m_ObjectCBCount;
+
+public:
 	static void Init();
+	static bool CreateFrameResources(); // true:çƒê∂ê¨ÇµÇΩ false:çƒê∂ê¨ÇµÇƒÇ¢Ç»Ç¢
+	static void Update();
+
+	static FrameResource* GetCurrentFrameResource() { return m_CurrentFrameResource; }
 };
