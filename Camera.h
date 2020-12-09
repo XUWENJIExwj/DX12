@@ -4,7 +4,7 @@
 
 class CCamera :public CGameObject
 {
-private:
+protected:
 	DirectX::XMFLOAT3 m_Right;
 	DirectX::XMFLOAT3 m_Up;
 	DirectX::XMFLOAT3 m_Look;
@@ -17,20 +17,19 @@ private:
 	float m_NearWindowHeight = 0.0f;
 	float m_FarWindowHeight = 0.0f;
 
-	bool mViewDirty = true;
+	bool m_ViewDirty = true;
 
 	// Cache View/Proj matrices.
-	DirectX::XMFLOAT4X4 mView = MathHelper::Identity4x4();
-	DirectX::XMFLOAT4X4 mProj = MathHelper::Identity4x4();
+	DirectX::XMFLOAT4X4 m_View = MathHelper::Identity4x4();
+	DirectX::XMFLOAT4X4 m_Proj = MathHelper::Identity4x4();
 
 public:
-
 	CCamera() = default;
 	~CCamera() = default;
 
-	void Init()override;
-	void Update(const GameTimer& GlobalTimer)override;
-	void LateUpdate(const GameTimer& GlobalTimer)override;
+	//virtual void Init()override = 0;
+	virtual void LateUpdate(const GameTimer& GlobalTimer)override;
+	virtual void UpdateViewMatrix();
 
 	// Get frustum properties.
 	float GetNearZ()const { return m_NearZ; }
@@ -42,11 +41,11 @@ public:
 	// Get near and far plane dimensions in view space coordinates.
 	float GetNearWindowWidth()const { return m_Aspect * m_NearWindowHeight; }
 	float GetNearWindowHeight()const { return m_NearWindowHeight; }
-	float GetFarWindowWidth()const{ return m_Aspect * m_FarWindowHeight; }
+	float GetFarWindowWidth()const { return m_Aspect * m_FarWindowHeight; }
 	float GetFarWindowHeight()const { return m_FarWindowHeight; }
-	
+
 	// Set frustum.
-	void SetLens(float fovY, float aspect, float zn, float zf);
+	void SetProjectionMatrix(float fovY, float aspect, float zn, float zf);
 
 	// Define camera space via LookAt parameters.
 	void LookAt(DirectX::FXMVECTOR pos, DirectX::FXMVECTOR target, DirectX::FXMVECTOR worldUp);
@@ -54,16 +53,8 @@ public:
 
 	// Get View/Proj matrices.
 	DirectX::XMMATRIX GetView()const;
-	DirectX::XMMATRIX GetProj()const { return XMLoadFloat4x4(&mProj); }
+	DirectX::XMMATRIX GetProj()const { return XMLoadFloat4x4(&m_Proj); }
 
 	DirectX::XMFLOAT4X4 GetView4x4f()const;
-	DirectX::XMFLOAT4X4 GetProj4x4f()const { return mProj; }
-
-	// Strafe/Walk the camera a distance d.
-	void Strafe(float d);
-	void Walk(float d);
-
-	// Rotate the camera.
-	void Pitch(float angle);
-	void RotateY(float angle);
+	DirectX::XMFLOAT4X4 GetProj4x4f()const { return m_Proj; }
 };

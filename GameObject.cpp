@@ -26,7 +26,7 @@ XMFLOAT3 CGameObject::GetRightWithRotation3f()const
 	return right;
 }
 
-XMVECTOR CGameObject::GetRightWithRotation() const
+XMVECTOR CGameObject::GetRightWithRotation()const
 {
 	return XMLoadFloat3(&GetRightWithRotation3f());
 }
@@ -47,7 +47,7 @@ XMFLOAT3 CGameObject::GetUpWithRotation3f()const
 	return up;
 }
 
-XMVECTOR CGameObject::GetUpWithRotation() const
+XMVECTOR CGameObject::GetUpWithRotation()const
 {
 	return XMLoadFloat3(&GetUpWithRotation3f());
 }
@@ -68,7 +68,7 @@ XMFLOAT3 CGameObject::GetForwardWithRotation3f()const
 	return forward;
 }
 
-XMVECTOR CGameObject::GetForwardWithRotation() const
+XMVECTOR CGameObject::GetForwardWithRotation()const
 {
 	return XMLoadFloat3(&GetForwardWithRotation3f());
 }
@@ -108,7 +108,7 @@ XMFLOAT3 CGameObject::GetUpWithQuaternion3f()const
 	return up;
 }
 
-XMVECTOR CGameObject::GetUpWithQuaternion() const
+XMVECTOR CGameObject::GetUpWithQuaternion()const
 {
 	return XMLoadFloat3(&GetUpWithQuaternion3f());
 }
@@ -128,9 +128,26 @@ XMFLOAT3 CGameObject::GetForwardWithQuaternion3f()const
 	return forward;
 }
 
-XMVECTOR CGameObject::GetForwardWithQuaternion() const
+XMVECTOR CGameObject::GetForwardWithQuaternion()const
 {
 	return XMLoadFloat3(&GetForwardWithQuaternion3f());
+}
+
+DirectX::XMFLOAT4X4 CGameObject::ComputeWorldMatrix4x4()const
+{
+	XMFLOAT4X4 world;
+	XMStoreFloat4x4(&world, ComputeWorldMatrix());
+
+	return world;
+}
+
+DirectX::XMMATRIX CGameObject::ComputeWorldMatrix()const
+{
+	XMMATRIX scl = XMMatrixScalingFromVector(GetScale());
+	XMMATRIX rot = XMMatrixRotationRollPitchYawFromVector(GetRotation());
+	XMMATRIX trs = XMMatrixTranslationFromVector(GetPosition());
+
+	return scl * rot * trs;
 }
 
 bool CGameObject::Destroy()

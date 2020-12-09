@@ -153,16 +153,79 @@ void CScene::UpdateMainPassCB(const GameTimer& GlobalTimer)
 
 	auto currPassCB = CFrameResourceManager::GetCurrentFrameResource()->PassCB.get();
 	currPassCB->CopyData(0, m_MainPassCB);
+
+	//UpdateDynamicCubeMapPassCB(GlobalTimer);
 }
 
-void CScene::Draw()
+void CScene::UpdateDynamicCubeMapPassCB(const GameTimer& GlobalTimer)
 {
-	//CRenderer::SetPSO((int)PSOTypeIndex::PSO_01_WireFrame_Opaque);
-	CRenderer::DrawGameObjectsWithLayer(m_GameObjectsLayer[(int)GameObjectsLayer::Layer_Opaque_3DOBJ]);
+	for (int i = 0; i < m_DCMCameras.size(); ++i)
+	{
+		PassConstants cubeFacePassCB = m_MainPassCB;
 
-	CRenderer::SetPSO((int)PSOTypeIndex::PSO_02_Solid_Sky);
-	//CRenderer::SetPSO((int)PSOTypeIndex::PSO_03_WireFrame_Sky);
-	CRenderer::DrawGameObjectsWithLayer(m_GameObjectsLayer[(int)GameObjectsLayer::Layer_Sky]);
+		XMMATRIX view = m_DCMCameras[i]->GetView();
+		XMMATRIX proj = m_DCMCameras[i]->GetProj();
+
+		XMMATRIX viewProj = XMMatrixMultiply(view, proj);
+		XMMATRIX invView = XMMatrixInverse(&XMMatrixDeterminant(view), view);
+		XMMATRIX invProj = XMMatrixInverse(&XMMatrixDeterminant(proj), proj);
+		XMMATRIX invViewProj = XMMatrixInverse(&XMMatrixDeterminant(viewProj), viewProj);
+
+		XMStoreFloat4x4(&cubeFacePassCB.View, XMMatrixTranspose(view));
+		XMStoreFloat4x4(&cubeFacePassCB.InvView, XMMatrixTranspose(invView));
+		XMStoreFloat4x4(&cubeFacePassCB.Proj, XMMatrixTranspose(proj));
+		XMStoreFloat4x4(&cubeFacePassCB.InvProj, XMMatrixTranspose(invProj));
+		XMStoreFloat4x4(&cubeFacePassCB.ViewProj, XMMatrixTranspose(viewProj));
+		XMStoreFloat4x4(&cubeFacePassCB.InvViewProj, XMMatrixTranspose(invViewProj));
+		cubeFacePassCB.EyePosW = m_DCMCameras[i]->GetPosition3f();
+
+		float dynamicCubeMapSize = (float)CRenderer::GetDynamicCubeMapSize();
+		cubeFacePassCB.RenderTargetSize = XMFLOAT2(dynamicCubeMapSize, dynamicCubeMapSize);
+		cubeFacePassCB.InvRenderTargetSize = XMFLOAT2(1.0f / dynamicCubeMapSize, 1.0f / dynamicCubeMapSize);
+
+		auto currPassCB = CFrameResourceManager::GetCurrentFrameResource()->PassCB.get();
+
+		// Cube map pass cbuffers are stored in elements 1-6.
+		currPassCB->CopyData(1 + i, cubeFacePassCB);
+	}
+}
+
+void CScene::SetUpDynamicCubeMapCamera(XMFLOAT3 Center)
+{
+	// Generate the cube map about the given position.
+	XMFLOAT3 worldUp = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	float x = Center.x;
+	float y = Center.y;
+	float z = Center.z;
+
+	// Look along each coordinate axis.
+	XMFLOAT3 targets[6] =
+	{
+		XMFLOAT3(x + 1.0f, y, z), // +X
+		XMFLOAT3(x - 1.0f, y, z), // -X
+		XMFLOAT3(x, y + 1.0f, z), // +Y
+		XMFLOAT3(x, y - 1.0f, z), // -Y
+		XMFLOAT3(x, y, z + 1.0f), // +Z
+		XMFLOAT3(x, y, z - 1.0f)  // -Z
+	};
+
+	// Use world up vector (0,1,0) for all directions except +Y/-Y.  In these cases, we
+	// are looking down +Y or -Y, so we need a different "up" vector.
+	XMFLOAT3 ups[6] =
+	{
+		XMFLOAT3(0.0f, 1.0f, 0.0f),  // +X
+		XMFLOAT3(0.0f, 1.0f, 0.0f),  // -X
+		XMFLOAT3(0.0f, 0.0f, -1.0f), // +Y
+		XMFLOAT3(0.0f, 0.0f, +1.0f), // -Y
+		XMFLOAT3(0.0f, 1.0f, 0.0f),	 // +Z
+		XMFLOAT3(0.0f, 1.0f, 0.0f)	 // -Z
+	};
+
+	for (int i = 0; i < m_DCMCameras.size(); ++i)
+	{
+		m_DCMCameras[i]->LookAt(Center, targets[i], ups[i]);
+		m_DCMCameras[i]->UpdateViewMatrix();
+	}
 }
 
 void CScene::CheckNecessaryCBBufferSize()

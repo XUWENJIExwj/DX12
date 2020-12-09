@@ -8,11 +8,11 @@ enum class GameObjectsLayer :int
 {
 	Layer_Camera,
 	Layer_Light,
-	Layer_Opaque_3DOBJ,
-	Layer_Opaque_DynamicReflectors_3DOBJ,
-	Layer_Sky,
-	Layer_BillBoard,
-	Layer_Opaque_2DOBJ,
+	Layer_3D_Opaque,
+	Layer_3D_Sky,
+	Layer_3D_BillBoard,
+	Layer_3D_Opaque_DynamicReflectors,
+	Layer_2D_Opaque,
 	Layer_Fade,
 	Layer_Max
 };
@@ -37,6 +37,8 @@ protected:
 	CCamera*      m_MainCamera;
 	PassConstants m_MainPassCB;
 
+	std::vector<CCamera*> m_DCMCameras;
+
 public:
 	CScene() = default;
 	virtual ~CScene() = default;
@@ -45,11 +47,14 @@ public:
 	virtual void Uninit();
 	virtual void Update(const GameTimer& GlobalTimer);
 	virtual void LateUpdate(const GameTimer& GlobalTimer);
+	virtual void Draw(const GameTimer& GlobalTimer) = 0;
+
 	virtual void UpdateGameObjectsCB(const GameTimer& GlobalTimer);
 	virtual void UpdateMaterialBuffer(const GameTimer& GlobalTimer);
 	virtual void UpdateMainPassCB(const GameTimer& GlobalTimer);
-	virtual void Draw();
+	virtual void UpdateDynamicCubeMapPassCB(const GameTimer& GlobalTimer);
 
+	void SetUpDynamicCubeMapCamera(DirectX::XMFLOAT3 Center);
 	void CheckNecessaryCBBufferSize();
 
 	template<typename T>
@@ -110,6 +115,8 @@ public:
 
 	std::list<CGameObject*>& GetAllGameObjects() { return m_AllGameObjects; }
 	std::list<CGameObject*>& GetGameObjectsWithLayer(int Layer) { return m_GameObjectsLayer[Layer]; }
+	std::list<CGameObject*>* GetAllGameObjectsWithLayer() { return m_GameObjectsLayer; }
 	AllGameObjectsListEmptyReference* GetListEmptyReference() { return &m_ListEmptyReference; }
 	UINT GetAllGameObjectsCount() { return (UINT)m_AllGameObjects.size(); }
+	std::vector<CCamera*>& GetDynamicCubeMapCameras() { return m_DCMCameras; }
 };

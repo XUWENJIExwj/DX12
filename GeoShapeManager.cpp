@@ -1,6 +1,5 @@
 #include "Common/GeometryGenerator.h"
 #include "Renderer.h"
-//#include "GeoShapeManager.h"
 
 using namespace std;
 
@@ -9,7 +8,7 @@ vector<unique_ptr<MeshGeometry>> CGeoShapeManager::m_Geometries;
 void CGeoShapeManager::CreateGeoShapes(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList)
 {
 	GeometryGenerator geoGen;
-	GeometryGenerator::MeshData box = geoGen.CreateBox(1.0f, 1.0f, 1.0f, 3);
+	GeometryGenerator::MeshData cube = geoGen.CreateCube(1.0f, 1.0f, 1.0f, 3);
 	GeometryGenerator::MeshData grid = geoGen.CreateGrid(20.0f, 30.0f, 60, 40);
 	GeometryGenerator::MeshData sphere = geoGen.CreateSphere(0.5f, 20, 20);
 	GeometryGenerator::MeshData cylinder = geoGen.CreateCylinder(0.5f, 0.3f, 3.0f, 20, 20);
@@ -20,21 +19,21 @@ void CGeoShapeManager::CreateGeoShapes(ID3D12Device* Device, ID3D12GraphicsComma
 	//
 
 	// Cache the vertex offsets to each object in the concatenated vertex buffer.
-	UINT boxVertexOffset = 0;
-	UINT gridVertexOffset = (UINT)box.Vertices.size();
+	UINT cubeVertexOffset = 0;
+	UINT gridVertexOffset = (UINT)cube.Vertices.size();
 	UINT sphereVertexOffset = gridVertexOffset + (UINT)grid.Vertices.size();
 	UINT cylinderVertexOffset = sphereVertexOffset + (UINT)sphere.Vertices.size();
 
 	// Cache the starting index for each object in the concatenated index buffer.
-	UINT boxIndexOffset = 0;
-	UINT gridIndexOffset = (UINT)box.Indices32.size();
+	UINT cubeIndexOffset = 0;
+	UINT gridIndexOffset = (UINT)cube.Indices32.size();
 	UINT sphereIndexOffset = gridIndexOffset + (UINT)grid.Indices32.size();
 	UINT cylinderIndexOffset = sphereIndexOffset + (UINT)sphere.Indices32.size();
 
-	SubmeshGeometry boxSubmesh;
-	boxSubmesh.IndexCount = (UINT)box.Indices32.size();
-	boxSubmesh.StartIndexLocation = boxIndexOffset;
-	boxSubmesh.BaseVertexLocation = boxVertexOffset;
+	SubmeshGeometry cubeSubmesh;
+	cubeSubmesh.IndexCount = (UINT)cube.Indices32.size();
+	cubeSubmesh.StartIndexLocation = cubeIndexOffset;
+	cubeSubmesh.BaseVertexLocation = cubeVertexOffset;
 
 	SubmeshGeometry gridSubmesh;
 	gridSubmesh.IndexCount = (UINT)grid.Indices32.size();
@@ -57,7 +56,7 @@ void CGeoShapeManager::CreateGeoShapes(ID3D12Device* Device, ID3D12GraphicsComma
 	////
 
 	auto totalVertexCount =
-		box.Vertices.size() +
+		cube.Vertices.size() +
 		grid.Vertices.size() +
 		sphere.Vertices.size() +
 		cylinder.Vertices.size();
@@ -65,11 +64,11 @@ void CGeoShapeManager::CreateGeoShapes(ID3D12Device* Device, ID3D12GraphicsComma
 	vector<Vertex> vertices(totalVertexCount);
 
 	UINT k = 0;
-	for (size_t i = 0; i < box.Vertices.size(); ++i, ++k)
+	for (size_t i = 0; i < cube.Vertices.size(); ++i, ++k)
 	{
-		vertices[k].Pos = box.Vertices[i].Position;
-		vertices[k].Normal = box.Vertices[i].Normal;
-		vertices[k].TexC = box.Vertices[i].TexC;
+		vertices[k].Pos = cube.Vertices[i].Position;
+		vertices[k].Normal = cube.Vertices[i].Normal;
+		vertices[k].TexC = cube.Vertices[i].TexC;
 	}
 
 	for (size_t i = 0; i < grid.Vertices.size(); ++i, ++k)
@@ -94,7 +93,7 @@ void CGeoShapeManager::CreateGeoShapes(ID3D12Device* Device, ID3D12GraphicsComma
 	}
 
 	vector<uint16_t> indices;
-	indices.insert(indices.end(), begin(box.GetIndices16()), end(box.GetIndices16()));
+	indices.insert(indices.end(), begin(cube.GetIndices16()), end(cube.GetIndices16()));
 	indices.insert(indices.end(), begin(grid.GetIndices16()), end(grid.GetIndices16()));
 	indices.insert(indices.end(), begin(sphere.GetIndices16()), end(sphere.GetIndices16()));
 	indices.insert(indices.end(), begin(cylinder.GetIndices16()), end(cylinder.GetIndices16()));
@@ -122,7 +121,7 @@ void CGeoShapeManager::CreateGeoShapes(ID3D12Device* Device, ID3D12GraphicsComma
 	geo->IndexFormat = DXGI_FORMAT_R16_UINT;
 	geo->IndexBufferByteSize = ibByteSize;
 
-	geo->DrawArgs["box"] = boxSubmesh;
+	geo->DrawArgs["cube"] = cubeSubmesh;
 	geo->DrawArgs["grid"] = gridSubmesh;
 	geo->DrawArgs["sphere"] = sphereSubmesh;
 	geo->DrawArgs["cylinder"] = cylinderSubmesh;

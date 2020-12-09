@@ -40,12 +40,15 @@ public:
 	virtual void Update(const GameTimer& GlobalTimer) {}
 	virtual void FixedUpdate(const GameTimer& GlobalTimer) {}
 	virtual void LateUpdate(const GameTimer& GlobalTimer) {}
-	virtual void Draw() {}
+	virtual void Draw(const GameTimer& GlobalTimer) {}
+
+	virtual void CreateDynamicCubeMapResources(const GameTimer& GlobalTimer) {}
 
 	void SetGameObjectLayer(int GameObjectLayer) { m_GameObjectLayer = GameObjectLayer; }
 	void SetPosition(DirectX::XMFLOAT3 Position) { m_Position = m_OldPosition = Position; }
 	void SetRotation(DirectX::XMFLOAT3 Rotation) { m_Rotation = Rotation; }
 	void SetScale(DirectX::XMFLOAT3 Scale) { m_Scale = Scale; }
+	void SetWorldMatrix() { m_World = ComputeWorldMatrix4x4(); }
 	void SetDestroy() { m_Destroy = true; }
 	void SetNumFramesDirty(int NumFramesDirty) { m_NumFramesDirty = NumFramesDirty; }
 	void SetObjCBIndex(UINT ObjCBIndex) { m_ObjCBIndex = ObjCBIndex; }
@@ -76,6 +79,9 @@ public:
 	DirectX::XMMATRIX   GetWorldMatrix()const { return XMLoadFloat4x4(&m_World); }
 	DirectX::XMFLOAT4X4 GetTexTransformMatrix4x4()const { return m_TexTransform; }
 	DirectX::XMMATRIX   GetTexTransformMatrix()const { return XMLoadFloat4x4(&m_TexTransform); }
+
+	DirectX::XMFLOAT4X4 ComputeWorldMatrix4x4()const;
+	DirectX::XMMATRIX   ComputeWorldMatrix()const;
 
 	int  GetNumFramesDirty() { return m_NumFramesDirty; }
 	UINT GetObjCBIndex() { return m_ObjCBIndex; }

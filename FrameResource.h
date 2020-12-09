@@ -97,11 +97,15 @@ private:
 	static int            m_CurrentFrameResourceIndex;
 
 	static UINT m_ObjectCBCount;
+	static UINT m_ObjCBByteSize;
+	static UINT m_PassCBByteSize;
 
 public:
-	static void Init();
+	static void ComputeConstantBufferSize();
 	static bool CreateFrameResources(); // true:çƒê∂ê¨ÇµÇΩ false:çƒê∂ê¨ÇµÇƒÇ¢Ç»Ç¢
-	static void Update();
+	static void CycleFrameResources();
 
 	static FrameResource* GetCurrentFrameResource() { return m_CurrentFrameResource; }
+	static UINT GetObjCBByteSize() { return m_ObjCBByteSize; }
+	static UINT GetPassCBByteSize() { return m_PassCBByteSize; }
 };

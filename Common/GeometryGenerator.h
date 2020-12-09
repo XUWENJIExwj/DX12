@@ -75,10 +75,10 @@ public:
 	};
 
 	///<summary>
-	/// Creates a box centered at the origin with the given dimensions, where each
+	/// Creates a cube centered at the origin with the given dimensions, where each
     /// face has m rows and n columns of vertices.
 	///</summary>
-    MeshData CreateBox(float width, float height, float depth, uint32 numSubdivisions);
+    MeshData CreateCube(float width, float height, float depth, uint32 numSubdivisions);
 
 	///<summary>
 	/// Creates a sphere centered at the origin with the given radius.  The

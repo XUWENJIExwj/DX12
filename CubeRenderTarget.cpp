@@ -29,12 +29,12 @@ CD3DX12_CPU_DESCRIPTOR_HANDLE CCubeRenderTarget::GetRtv(int FaceIndex)
 	return m_CpuRtvHandle[FaceIndex];
 }
 
-D3D12_VIEWPORT CCubeRenderTarget::Viewport()const
+D3D12_VIEWPORT CCubeRenderTarget::GetViewport()const
 {
 	return m_Viewport;
 }
 
-D3D12_RECT CCubeRenderTarget::ScissorRect()const
+D3D12_RECT CCubeRenderTarget::GetScissorRect()const
 {
 	return m_ScissorRect;
 }

@@ -10,6 +10,8 @@ FrameResource* CFrameResourceManager::m_CurrentFrameResource = nullptr;
 int            CFrameResourceManager::m_CurrentFrameResourceIndex = 0;
 
 UINT CFrameResourceManager::m_ObjectCBCount = 0;
+UINT CFrameResourceManager::m_ObjCBByteSize;
+UINT CFrameResourceManager::m_PassCBByteSize;
 
 FrameResource::FrameResource(ID3D12Device* device, UINT passCount, UINT objectCount, UINT materialCount)
 {
@@ -22,9 +24,10 @@ FrameResource::FrameResource(ID3D12Device* device, UINT passCount, UINT objectCo
     ObjectCB = make_unique<UploadBuffer<ObjectConstants>>(device, objectCount, true);
 }
 
-void CFrameResourceManager::Init()
+void CFrameResourceManager::ComputeConstantBufferSize()
 {
-
+	m_ObjCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
+	m_PassCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(PassConstants));
 }
 
 bool CFrameResourceManager::CreateFrameResources()
@@ -48,7 +51,7 @@ bool CFrameResourceManager::CreateFrameResources()
 	return false;
 }
 
-void CFrameResourceManager::Update()
+void CFrameResourceManager::CycleFrameResources()
 {
 	// Cycle through the circular frame resource array.
 	m_CurrentFrameResourceIndex = (m_CurrentFrameResourceIndex + 1) % gNumFrameResources;

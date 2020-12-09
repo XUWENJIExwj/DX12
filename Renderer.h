@@ -63,12 +63,12 @@ private:
 	static CD3DX12_GPU_DESCRIPTOR_HANDLE m_SkyTextureDescriptorHandle;
 
 	// DynamicCubeMap
-	static bool                                   m_DynamicCubeOn;
+	static bool                                   m_DynamicCubeMapOn;
 	static std::unique_ptr<CCubeRenderTarget>     m_DynamicCubeMap;
-	static CD3DX12_CPU_DESCRIPTOR_HANDLE          m_DynamicCubeDsvHandle;
-	static CD3DX12_GPU_DESCRIPTOR_HANDLE          m_DynamicCubeDescriptorHandle;
-	static UINT                                   m_CubeMapSize;
-	static Microsoft::WRL::ComPtr<ID3D12Resource> m_CubeDepthStencilBuffer;
+	static CD3DX12_CPU_DESCRIPTOR_HANDLE          m_DynamicCubeMapDsvHandle;
+	static CD3DX12_GPU_DESCRIPTOR_HANDLE          m_DynamicCubeMapDescHandle;
+	static UINT                                   m_DynamicCubeMapSize;
+	static Microsoft::WRL::ComPtr<ID3D12Resource> m_DynamicCubeMapDepthStencilBuffer;
 
 public:
 	// DX12初期化
@@ -102,8 +102,10 @@ public:
 	static D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentBackBufferView();
 	static D3D12_CPU_DESCRIPTOR_HANDLE GetDepthStencilView() { return m_DsvHeap->GetCPUDescriptorHandleForHeapStart(); }
 
+	// DynamicCubeMap
+	static bool                          GetDynamicCubeOn() { return m_DynamicCubeMapOn; }
 	static CD3DX12_GPU_DESCRIPTOR_HANDLE CreateCubeMapDescriptorHandle(UINT Offset);
-	static bool GetDynamicCubeOn() { return m_DynamicCubeOn; }
+	static UINT                          GetDynamicCubeMapSize() { return m_DynamicCubeMapSize; }
 
 	// デバッガ―
 	static void LogAdapters();
@@ -116,9 +118,14 @@ public:
 	// 描画用
 	static void Begin();
 	static void SetUpCommonResources();
-	static void DrawDynamicCubeScene();
+	static void SetUpCubeMapResources();
+	static void SetUpDynamicCubeMapResources();
+	static void SetUpBeforeCreateAllDynamicCubeMapResources();
+	static void SetUpBeforeCreateEachDynamicCubeMapResource(int i);
+	static void CompleteCreateDynamicCubeMapResources();
 	static void SetUpBeforeDrawScene();
 	static void SetPSO(int PSOType);
 	static void DrawGameObjectsWithLayer(std::list<CGameObject*>& GameObjectsWithLayer);
+	static void DrawSingleGameObject(CGameObject* GameObject, ID3D12Resource* ObjectCB);
 	static void End();
 };

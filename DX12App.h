@@ -29,8 +29,8 @@ private:
 
 	std::wstring m_MainWindowCaption = L"DX12App";
 	std::wstring m_WindowClassName = L"MainWnd";
-	int m_WindowWidth = 800;
-	int m_WindowHeight = 600;
+	int          m_WindowWidth = 1280;
+	int          m_WindowHeight = 720;
 
 	GameTimer m_Timer;
 

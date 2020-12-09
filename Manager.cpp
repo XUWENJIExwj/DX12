@@ -18,6 +18,7 @@ bool CManager::Init()
 
 	CRenderer::OnResize();
 	CRenderer::CreateCommonResources();
+	CFrameResourceManager::ComputeConstantBufferSize();
 
 	CInput::Init();
 
@@ -32,7 +33,7 @@ void CManager::OnResize()
 
 	if (m_MainCamera)
 	{
-		m_MainCamera->SetLens(0.25f * MathHelper::Pi, DX12App::GetApp()->GetAspectRatio(), 1.0f, 1000.0f);
+		m_MainCamera->SetProjectionMatrix(0.25f * MathHelper::Pi, DX12App::GetApp()->GetAspectRatio(), 1.0f, 1000.0f);
 	}
 }
 
@@ -48,7 +49,7 @@ void CManager::Update(const GameTimer& GlobalTimer)
 {
 	CInput::Update();
 
-	CFrameResourceManager::Update();
+	CFrameResourceManager::CycleFrameResources();
 	m_Scene->Update(GlobalTimer);
 	m_Scene->LateUpdate(GlobalTimer);
 	m_Scene->CheckNecessaryCBBufferSize();
@@ -61,10 +62,7 @@ void CManager::Draw(const GameTimer& GlobalTimer)
 {
 	CRenderer::Begin();
 
-	CRenderer::SetUpCommonResources();
-	CRenderer::DrawDynamicCubeScene();
-	CRenderer::SetUpBeforeDrawScene();
-	m_Scene->Draw();
+	m_Scene->Draw(GlobalTimer);
 
 	CRenderer::End();
 }

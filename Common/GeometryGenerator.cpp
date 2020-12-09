@@ -7,7 +7,7 @@
 
 using namespace DirectX;
 
-GeometryGenerator::MeshData GeometryGenerator::CreateBox(float width, float height, float depth, uint32 numSubdivisions)
+GeometryGenerator::MeshData GeometryGenerator::CreateCube(float width, float height, float depth, uint32 numSubdivisions)
 {
 	MeshData meshData;
 

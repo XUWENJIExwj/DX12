@@ -51,12 +51,12 @@ int                                 CRenderer::m_CurrentPSO = (int)PSOTypeIndex:
 CD3DX12_GPU_DESCRIPTOR_HANDLE CRenderer::m_SkyTextureDescriptorHandle;
 
 // DynamicCubeMap
-bool                          CRenderer::m_DynamicCubeOn = true;
+bool                          CRenderer::m_DynamicCubeMapOn = true;
 unique_ptr<CCubeRenderTarget> CRenderer::m_DynamicCubeMap = nullptr;
-CD3DX12_CPU_DESCRIPTOR_HANDLE CRenderer::m_DynamicCubeDsvHandle;
-CD3DX12_GPU_DESCRIPTOR_HANDLE CRenderer::m_DynamicCubeDescriptorHandle;
-UINT                          CRenderer::m_CubeMapSize = 512;
-ComPtr<ID3D12Resource>        CRenderer::m_CubeDepthStencilBuffer = nullptr;
+CD3DX12_CPU_DESCRIPTOR_HANDLE CRenderer::m_DynamicCubeMapDsvHandle;
+CD3DX12_GPU_DESCRIPTOR_HANDLE CRenderer::m_DynamicCubeMapDescHandle;
+UINT                          CRenderer::m_DynamicCubeMapSize = 512;
+ComPtr<ID3D12Resource>        CRenderer::m_DynamicCubeMapDepthStencilBuffer = nullptr;
 
 // DX12‰Šú‰»
 bool CRenderer::Init()
@@ -203,7 +203,7 @@ void CRenderer::CreateSwapChain()
 void CRenderer::CreateRtvAndDsvDescriptorHeaps()
 {
 	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc;
-	rtvHeapDesc.NumDescriptors = m_DynamicCubeOn ? m_SwapChainBufferCount + 6 : m_SwapChainBufferCount;
+	rtvHeapDesc.NumDescriptors = m_DynamicCubeMapOn ? m_SwapChainBufferCount + 6 : m_SwapChainBufferCount;
 	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	rtvHeapDesc.NodeMask = 0;
@@ -211,18 +211,18 @@ void CRenderer::CreateRtvAndDsvDescriptorHeaps()
 		&rtvHeapDesc, IID_PPV_ARGS(m_RtvHeap.GetAddressOf())));
 
 	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc;
-	dsvHeapDesc.NumDescriptors = m_DynamicCubeOn ? 2 : 1;
+	dsvHeapDesc.NumDescriptors = m_DynamicCubeMapOn ? 2 : 1;
 	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
 	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	dsvHeapDesc.NodeMask = 0;
 	ThrowIfFailed(m_D3DDevice->CreateDescriptorHeap(
 		&dsvHeapDesc, IID_PPV_ARGS(m_DsvHeap.GetAddressOf())));
 
-	if (m_DynamicCubeOn)
+	if (m_DynamicCubeMapOn)
 	{
 		m_DynamicCubeMap = make_unique<CCubeRenderTarget>(m_D3DDevice.Get(),
-			m_CubeMapSize, m_CubeMapSize, DXGI_FORMAT_R8G8B8A8_UNORM);
-		m_DynamicCubeDsvHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+			m_DynamicCubeMapSize, m_DynamicCubeMapSize, DXGI_FORMAT_R8G8B8A8_UNORM);
+		m_DynamicCubeMapDsvHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
 			m_DsvHeap->GetCPUDescriptorHandleForHeapStart(),
 			1,
 			m_DsvDescriptorSize);
@@ -381,7 +381,7 @@ void CRenderer::CreateCommonResources()
 	CreataPSOs();
 
 	m_SkyTextureDescriptorHandle = CreateCubeMapDescriptorHandle(CTextureManager::GetSkyTextureIndex());
-	m_DynamicCubeDescriptorHandle = CreateCubeMapDescriptorHandle(CTextureManager::GetDynamicTextureIndex());
+	m_DynamicCubeMapDescHandle = CreateCubeMapDescriptorHandle(CTextureManager::GetDynamicTextureIndex());
 
 	ExecuteCommandLists();
 
@@ -483,7 +483,7 @@ void CRenderer::CreateDescriptorHeaps()
 	}
 
 	// DynamicCube
-	if (m_DynamicCubeOn)
+	if (m_DynamicCubeMapOn)
 	{
 		auto srvCpuStart = m_SrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 		auto srvGpuStart = m_SrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
@@ -514,8 +514,8 @@ void CRenderer::CreateCubeDepthStencil()
 	D3D12_RESOURCE_DESC depthStencilDesc;
 	depthStencilDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	depthStencilDesc.Alignment = 0;
-	depthStencilDesc.Width = m_CubeMapSize;
-	depthStencilDesc.Height = m_CubeMapSize;
+	depthStencilDesc.Width = m_DynamicCubeMapSize;
+	depthStencilDesc.Height = m_DynamicCubeMapSize;
 	depthStencilDesc.DepthOrArraySize = 1;
 	depthStencilDesc.MipLevels = 1;
 	depthStencilDesc.Format = m_DepthStencilFormat;
@@ -534,13 +534,13 @@ void CRenderer::CreateCubeDepthStencil()
 		&depthStencilDesc,
 		D3D12_RESOURCE_STATE_COMMON,
 		&optClear,
-		IID_PPV_ARGS(m_CubeDepthStencilBuffer.GetAddressOf())));
+		IID_PPV_ARGS(m_DynamicCubeMapDepthStencilBuffer.GetAddressOf())));
 
 	// Create descriptor to mip level 0 of entire resource using the format of the resource.
-	m_D3DDevice->CreateDepthStencilView(m_CubeDepthStencilBuffer.Get(), nullptr, m_DynamicCubeDsvHandle);
+	m_D3DDevice->CreateDepthStencilView(m_DynamicCubeMapDepthStencilBuffer.Get(), nullptr, m_DynamicCubeMapDsvHandle);
 
 	// Transition the resource from its initial state to be used as a depth buffer.
-	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_CubeDepthStencilBuffer.Get(),
+	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_DynamicCubeMapDepthStencilBuffer.Get(),
 		D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE));
 }
 
@@ -791,21 +791,58 @@ void CRenderer::SetUpCommonResources()
 	auto matBuffer = CFrameResourceManager::GetCurrentFrameResource()->MaterialBuffer->Resource();
 	m_CommandList->SetGraphicsRootShaderResourceView(2, matBuffer->GetGPUVirtualAddress());
 
-	// Bind the sky cube map.  For our demos, we just use one "world" cube map representing the environment
-	// from far away, so all objects will use the same cube map and we only need to set it once per-frame.  
-	// If we wanted to use "local" cube maps, we would have to change them per-object, or dynamically
-	// index into an array of cube maps.
-	m_CommandList->SetGraphicsRootDescriptorTable(3, m_SkyTextureDescriptorHandle);
-
 	// Bind all the textures used in this scene.  Observe
 	// that we only have to specify the first descriptor in the table.  
 	// The root signature knows how many descriptors are expected in the table.
 	m_CommandList->SetGraphicsRootDescriptorTable(4, m_SrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 }
 
-void CRenderer::DrawDynamicCubeScene()
+void CRenderer::SetUpCubeMapResources()
 {
+	// Bind the sky cube map.  For our demos, we just use one "world" cube map representing the environment
+	// from far away, so all objects will use the same cube map and we only need to set it once per-frame.  
+	// If we wanted to use "local" cube maps, we would have to change them per-object, or dynamically
+	// index into an array of cube maps.
+	m_CommandList->SetGraphicsRootDescriptorTable(3, m_SkyTextureDescriptorHandle);
+}
 
+void CRenderer::SetUpDynamicCubeMapResources()
+{
+	// Use the dynamic cube map for the dynamic reflectors layer.
+	m_CommandList->SetGraphicsRootDescriptorTable(3, m_DynamicCubeMapDescHandle);
+}
+
+void CRenderer::SetUpBeforeCreateAllDynamicCubeMapResources()
+{
+	m_CommandList->RSSetViewports(1, &m_DynamicCubeMap->GetViewport());
+	m_CommandList->RSSetScissorRects(1, &m_DynamicCubeMap->GetScissorRect());
+
+	// Change to RENDER_TARGET.
+	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_DynamicCubeMap->GetResource(),
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_RENDER_TARGET));
+}
+
+void CRenderer::SetUpBeforeCreateEachDynamicCubeMapResource(int i)
+{
+	// Clear the back buffer and depth buffer.
+	m_CommandList->ClearRenderTargetView(m_DynamicCubeMap->GetRtv(i), Colors::LightSteelBlue, 0, nullptr);
+	m_CommandList->ClearDepthStencilView(m_DynamicCubeMapDsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+
+	// Specify the buffers we are going to render to.
+	m_CommandList->OMSetRenderTargets(1, &m_DynamicCubeMap->GetRtv(i), true, &m_DynamicCubeMapDsvHandle);
+
+	// Bind the pass constant buffer for this cube map face so we use 
+	// the right view/proj matrix for this cube face.
+	auto passCB = CFrameResourceManager::GetCurrentFrameResource()->PassCB->Resource();
+	D3D12_GPU_VIRTUAL_ADDRESS passCBAddress = passCB->GetGPUVirtualAddress() + (1 + i) * CFrameResourceManager::GetPassCBByteSize();
+	m_CommandList->SetGraphicsRootConstantBufferView(1, passCBAddress);
+}
+
+void CRenderer::CompleteCreateDynamicCubeMapResources()
+{
+	// Change back to GENERIC_READ so we can read the texture in a shader.
+	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_DynamicCubeMap->GetResource(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_GENERIC_READ));
 }
 
 void CRenderer::SetUpBeforeDrawScene()
@@ -839,22 +876,25 @@ void CRenderer::SetPSO(int PSOType)
 
 void CRenderer::DrawGameObjectsWithLayer(std::list<CGameObject*>& GameObjectsWithLayer)
 {
-	UINT objCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
-
 	auto objectCB = CFrameResourceManager::GetCurrentFrameResource()->ObjectCB->Resource();
 
 	for (CGameObject* gameObject : GameObjectsWithLayer)
 	{
-		m_CommandList->IASetVertexBuffers(0, 1, &gameObject->GetMeshGeometry()->VertexBufferView());
-		m_CommandList->IASetIndexBuffer(&gameObject->GetMeshGeometry()->IndexBufferView());
-		m_CommandList->IASetPrimitiveTopology(gameObject->GetPrimitiveTopology());
-
-		D3D12_GPU_VIRTUAL_ADDRESS objCBAddress = objectCB->GetGPUVirtualAddress() + gameObject->GetObjCBIndex() * objCBByteSize;
-
-		m_CommandList->SetGraphicsRootConstantBufferView(0, objCBAddress);
-
-		m_CommandList->DrawIndexedInstanced(gameObject->GetIndexCount(), 1, gameObject->GetStartIndexLocation(), gameObject->GetBaseVertexLocation(), 0);
+		DrawSingleGameObject(gameObject, objectCB);
 	}
+}
+
+void CRenderer::DrawSingleGameObject(CGameObject* GameObject, ID3D12Resource* ObjectCB)
+{
+	m_CommandList->IASetVertexBuffers(0, 1, &GameObject->GetMeshGeometry()->VertexBufferView());
+	m_CommandList->IASetIndexBuffer(&GameObject->GetMeshGeometry()->IndexBufferView());
+	m_CommandList->IASetPrimitiveTopology(GameObject->GetPrimitiveTopology());
+
+	D3D12_GPU_VIRTUAL_ADDRESS objCBAddress = ObjectCB->GetGPUVirtualAddress() + GameObject->GetObjCBIndex() * CFrameResourceManager::GetObjCBByteSize();
+
+	m_CommandList->SetGraphicsRootConstantBufferView(0, objCBAddress);
+
+	m_CommandList->DrawIndexedInstanced(GameObject->GetIndexCount(), 1, GameObject->GetStartIndexLocation(), GameObject->GetBaseVertexLocation(), 0);
 }
 
 void CRenderer::End()

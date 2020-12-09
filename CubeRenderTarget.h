@@ -15,7 +15,6 @@ enum class CubeMapFace :int
 class CCubeRenderTarget
 {
 private:
-
 	ID3D12Device* m_D3DDevice = nullptr;
 
 	D3D12_VIEWPORT m_Viewport;
@@ -41,8 +40,8 @@ public:
 	CD3DX12_GPU_DESCRIPTOR_HANDLE GetSrv();
 	CD3DX12_CPU_DESCRIPTOR_HANDLE GetRtv(int FaceIndex);
 
-	D3D12_VIEWPORT Viewport()const;
-	D3D12_RECT     ScissorRect()const;
+	D3D12_VIEWPORT GetViewport()const;
+	D3D12_RECT     GetScissorRect()const;
 
 	void CreateDescriptors(
 		CD3DX12_CPU_DESCRIPTOR_HANDLE CpuSrvHandle,
