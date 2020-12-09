@@ -1,67 +1,65 @@
 #include "CubeRenderTarget.h"
  
-CCubeRenderTarget::CCubeRenderTarget(ID3D12Device* device, 
-	                       UINT width, UINT height,
-                           DXGI_FORMAT format)
+CCubeRenderTarget::CCubeRenderTarget(ID3D12Device* Device, UINT Width, UINT Height, DXGI_FORMAT Format)
 {
-	md3dDevice = device;
+	m_D3DDevice = Device;
 
-	mWidth = width;
-	mHeight = height;
-	mFormat = format;
+	m_Width = Width;
+	m_Height = Height;
+	m_Format = Format;
 
-	mViewport = { 0.0f, 0.0f, (float)width, (float)height, 0.0f, 1.0f };
-	mScissorRect = { 0, 0, (int)width, (int)height };
+	m_Viewport = { 0.0f, 0.0f, (float)Width, (float)Height, 0.0f, 1.0f };
+	m_ScissorRect = { 0, 0, (int)Width, (int)Height };
 
 	CreateResource();
 }
 
-ID3D12Resource*  CCubeRenderTarget::Resource()
+ID3D12Resource*  CCubeRenderTarget::GetResource()
 {
-	return mCubeMap.Get();
+	return m_CubeMapResource.Get();
 }
 
-CD3DX12_GPU_DESCRIPTOR_HANDLE CCubeRenderTarget::Srv()
+CD3DX12_GPU_DESCRIPTOR_HANDLE CCubeRenderTarget::GetSrv()
 {
-	return mhGpuSrv;
+	return m_GpuSrvHandle;
 }
 
-CD3DX12_CPU_DESCRIPTOR_HANDLE CCubeRenderTarget::Rtv(int faceIndex)
+CD3DX12_CPU_DESCRIPTOR_HANDLE CCubeRenderTarget::GetRtv(int FaceIndex)
 {
-	return mhCpuRtv[faceIndex];
+	return m_CpuRtvHandle[FaceIndex];
 }
 
 D3D12_VIEWPORT CCubeRenderTarget::Viewport()const
 {
-	return mViewport;
+	return m_Viewport;
 }
 
 D3D12_RECT CCubeRenderTarget::ScissorRect()const
 {
-	return mScissorRect;
+	return m_ScissorRect;
 }
 
-void CCubeRenderTarget::CreateDescriptors(CD3DX12_CPU_DESCRIPTOR_HANDLE hCpuSrv,
-	                                CD3DX12_GPU_DESCRIPTOR_HANDLE hGpuSrv,
-	                                CD3DX12_CPU_DESCRIPTOR_HANDLE hCpuRtv[6])
+void CCubeRenderTarget::CreateDescriptors(CD3DX12_CPU_DESCRIPTOR_HANDLE CpuSrvHandle,
+	                                CD3DX12_GPU_DESCRIPTOR_HANDLE GpuSrvHandle,
+	                                CD3DX12_CPU_DESCRIPTOR_HANDLE CpuRtvHandle[6])
 {
 	// Save references to the descriptors. 
-	mhCpuSrv = hCpuSrv;
-	mhGpuSrv = hGpuSrv;
+	m_CpuSrvHandle = CpuSrvHandle;
+	m_GpuSrvHandle = GpuSrvHandle;
 
 	for(int i = 0; i < 6; ++i)
-		mhCpuRtv[i] = hCpuRtv[i];
+		m_CpuRtvHandle[i] = CpuRtvHandle[i];
 
 	//  Create the descriptors
 	CreateDescriptors();
 }
 
-void CCubeRenderTarget::OnResize(UINT newWidth, UINT newHeight)
+void CCubeRenderTarget::OnResize(UINT NewWidth, UINT NewHeight)
 {
-	if((mWidth != newWidth) || (mHeight != newHeight))
+	if((m_Width != NewWidth) || (m_Height != NewHeight))
 	{
-		mWidth = newWidth;
-		mHeight = newHeight;
+		m_Width = NewWidth;
+		m_Height = NewHeight;
 
 		CreateResource();
 
@@ -74,21 +72,21 @@ void CCubeRenderTarget::CreateDescriptors()
 {
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.Format = mFormat;
+	srvDesc.Format = m_Format;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
 	srvDesc.TextureCube.MostDetailedMip = 0;
 	srvDesc.TextureCube.MipLevels = 1;
 	srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
 
 	// Create SRV to the entire cubemap resource.
-	md3dDevice->CreateShaderResourceView(mCubeMap.Get(), &srvDesc, mhCpuSrv);
+	m_D3DDevice->CreateShaderResourceView(m_CubeMapResource.Get(), &srvDesc, m_CpuSrvHandle);
 
 	// Create RTV to each cube face.
 	for(int i = 0; i < 6; ++i)
 	{
 		D3D12_RENDER_TARGET_VIEW_DESC rtvDesc; 
 		rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
-		rtvDesc.Format = mFormat;
+		rtvDesc.Format = m_Format;
 		rtvDesc.Texture2DArray.MipSlice = 0;
 		rtvDesc.Texture2DArray.PlaneSlice = 0;
 
@@ -99,7 +97,7 @@ void CCubeRenderTarget::CreateDescriptors()
 		rtvDesc.Texture2DArray.ArraySize = 1;
 
 		// Create RTV to ith cubemap face.
-		md3dDevice->CreateRenderTargetView(mCubeMap.Get(), &rtvDesc, mhCpuRtv[i]);
+		m_D3DDevice->CreateRenderTargetView(m_CubeMapResource.Get(), &rtvDesc, m_CpuRtvHandle[i]);
 	}
 }
 
@@ -115,21 +113,21 @@ void CCubeRenderTarget::CreateResource()
 	ZeroMemory(&texDesc, sizeof(D3D12_RESOURCE_DESC));
 	texDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	texDesc.Alignment = 0;
-	texDesc.Width = mWidth;
-	texDesc.Height = mHeight;
+	texDesc.Width = m_Width;
+	texDesc.Height = m_Height;
 	texDesc.DepthOrArraySize = 6;
 	texDesc.MipLevels = 1;
-	texDesc.Format = mFormat;
+	texDesc.Format = m_Format;
 	texDesc.SampleDesc.Count = 1;
 	texDesc.SampleDesc.Quality = 0;
 	texDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 	texDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 
-	ThrowIfFailed(md3dDevice->CreateCommittedResource(
+	ThrowIfFailed(m_D3DDevice->CreateCommittedResource(
 		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 		D3D12_HEAP_FLAG_NONE,
 		&texDesc,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
-		IID_PPV_ARGS(&mCubeMap)));
+		IID_PPV_ARGS(&m_CubeMapResource)));
 }

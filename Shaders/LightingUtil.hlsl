@@ -1,26 +1,20 @@
-//***************************************************************************************
-// LightingUtil.hlsl by Frank Luna (C) 2015 All Rights Reserved.
-//
-// Contains API for shader lighting.
-//***************************************************************************************
-
 #define MaxLights 16
 
 struct Light
 {
     float3 Strength;
-    float FalloffStart; // point/spot light only
-    float3 Direction;   // directional/spot light only
-    float FalloffEnd;   // point/spot light only
-    float3 Position;    // point light only
-    float SpotPower;    // spot light only
+    float  FalloffStart; // point/spot light only
+    float3 Direction;    // directional/spot light only
+    float  FalloffEnd;   // point/spot light only
+    float3 Position;     // point light only
+    float  SpotPower;    // spot light only
 };
 
 struct Material
 {
     float4 DiffuseAlbedo;
     float3 FresnelR0;
-    float Shininess;
+    float  Shininess;
 };
 
 float CalcAttenuation(float d, float falloffStart, float falloffEnd)

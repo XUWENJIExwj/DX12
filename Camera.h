@@ -5,17 +5,17 @@
 class CCamera :public CGameObject
 {
 private:
-	DirectX::XMFLOAT3 mRight;
-	DirectX::XMFLOAT3 mUp;
-	DirectX::XMFLOAT3 mLook;
+	DirectX::XMFLOAT3 m_Right;
+	DirectX::XMFLOAT3 m_Up;
+	DirectX::XMFLOAT3 m_Look;
 
 	// Cache frustum properties.
-	float mNearZ = 0.0f;
-	float mFarZ = 0.0f;
-	float mAspect = 0.0f;
-	float mFovY = 0.0f;
-	float mNearWindowHeight = 0.0f;
-	float mFarWindowHeight = 0.0f;
+	float m_NearZ = 0.0f;
+	float m_FarZ = 0.0f;
+	float m_Aspect = 0.0f;
+	float m_FovY = 0.0f;
+	float m_NearWindowHeight = 0.0f;
+	float m_FarWindowHeight = 0.0f;
 
 	bool mViewDirty = true;
 
@@ -29,21 +29,21 @@ public:
 	~CCamera() = default;
 
 	void Init()override;
-	void Update(const GameTimer& gt)override;
-	void LateUpdate(const GameTimer& gt)override;
+	void Update(const GameTimer& GlobalTimer)override;
+	void LateUpdate(const GameTimer& GlobalTimer)override;
 
 	// Get frustum properties.
-	float GetNearZ()const { return mNearZ; }
-	float GetFarZ()const { return mFarZ; }
-	float GetAspect()const { return mAspect; }
-	float GetFovY()const { return mFovY; }
+	float GetNearZ()const { return m_NearZ; }
+	float GetFarZ()const { return m_FarZ; }
+	float GetAspect()const { return m_Aspect; }
+	float GetFovY()const { return m_FovY; }
 	float GetFovX()const;
 
 	// Get near and far plane dimensions in view space coordinates.
-	float GetNearWindowWidth()const { return mAspect * mNearWindowHeight; }
-	float GetNearWindowHeight()const { return mNearWindowHeight; }
-	float GetFarWindowWidth()const{ return mAspect * mFarWindowHeight; }
-	float GetFarWindowHeight()const { return mFarWindowHeight; }
+	float GetNearWindowWidth()const { return m_Aspect * m_NearWindowHeight; }
+	float GetNearWindowHeight()const { return m_NearWindowHeight; }
+	float GetFarWindowWidth()const{ return m_Aspect * m_FarWindowHeight; }
+	float GetFarWindowHeight()const { return m_FarWindowHeight; }
 	
 	// Set frustum.
 	void SetLens(float fovY, float aspect, float zn, float zf);

@@ -37,9 +37,9 @@ public:
 
 	virtual void Init() = 0;
 	virtual void Uninit() {}
-	virtual void Update(const GameTimer& gt) {}
-	virtual void FixedUpdate(const GameTimer& gt) {}
-	virtual void LateUpdate(const GameTimer& gt) {}
+	virtual void Update(const GameTimer& GlobalTimer) {}
+	virtual void FixedUpdate(const GameTimer& GlobalTimer) {}
+	virtual void LateUpdate(const GameTimer& GlobalTimer) {}
 	virtual void Draw() {}
 
 	void SetGameObjectLayer(int GameObjectLayer) { m_GameObjectLayer = GameObjectLayer; }

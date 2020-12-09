@@ -17,13 +17,13 @@ void CScene::Uninit()
 	m_AllGameObjects.resize(0);
 }
 
-void CScene::Update(const GameTimer & gt)
+void CScene::Update(const GameTimer& GlobalTimer)
 {
 	for (int i = 0; i < (int)GameObjectsLayer::Layer_Max - 1; ++i)
 	{
 		for (CGameObject* gameObject : m_GameObjectsLayer[i])
 		{
-			gameObject->Update(gt);
+			gameObject->Update(GlobalTimer);
 		}
 
 		m_GameObjectsLayer[i].remove_if
@@ -36,13 +36,13 @@ void CScene::Update(const GameTimer & gt)
 	}
 }
 
-void CScene::LateUpdate(const GameTimer & gt)
+void CScene::LateUpdate(const GameTimer& GlobalTimer)
 {
 	for (int i = 0; i < (int)GameObjectsLayer::Layer_Max - 1; ++i)
 	{
 		for (CGameObject* object : m_GameObjectsLayer[i])
 		{
-			object->LateUpdate(gt);
+			object->LateUpdate(GlobalTimer);
 		}
 
 		m_GameObjectsLayer[i].remove_if
@@ -55,7 +55,7 @@ void CScene::LateUpdate(const GameTimer & gt)
 	}
 }
 
-void CScene::UpdateGameObjectsCB(const GameTimer & gt)
+void CScene::UpdateGameObjectsCB(const GameTimer& GlobalTimer)
 {
 	auto currObjectCB = CFrameResourceManager::GetCurrentFrameResource()->ObjectCB.get();
 	for (auto& gameObject : m_AllGameObjects)
@@ -85,7 +85,7 @@ void CScene::UpdateGameObjectsCB(const GameTimer & gt)
 	}
 }
 
-void CScene::UpdateMaterialBuffer(const GameTimer & gt)
+void CScene::UpdateMaterialBuffer(const GameTimer& GlobalTimer)
 {
 	auto currMaterialBuffer = CFrameResourceManager::GetCurrentFrameResource()->MaterialBuffer.get();
 	auto materials = CMaterialManager::GetMaterials().data();
@@ -113,7 +113,7 @@ void CScene::UpdateMaterialBuffer(const GameTimer & gt)
 	}
 }
 
-void CScene::UpdateMainPassCB(const GameTimer & gt)
+void CScene::UpdateMainPassCB(const GameTimer& GlobalTimer)
 {
 	DX12App* app = DX12App::GetApp();
 	int windowWidth = app->GetWindowWidth();
@@ -139,8 +139,8 @@ void CScene::UpdateMainPassCB(const GameTimer & gt)
 	m_MainPassCB.FarZ = 1000.0f;
 
 	// Time
-	m_MainPassCB.TotalTime = gt.TotalTime();
-	m_MainPassCB.DeltaTime = gt.DeltaTime();
+	m_MainPassCB.TotalTime = GlobalTimer.TotalTime();
+	m_MainPassCB.DeltaTime = GlobalTimer.DeltaTime();
 
 	// Light
 	m_MainPassCB.AmbientLight = { 0.25f, 0.25f, 0.35f, 1.0f };
@@ -157,7 +157,11 @@ void CScene::UpdateMainPassCB(const GameTimer & gt)
 
 void CScene::Draw()
 {
-	CRenderer::SetPSO((int)PSOTypeIndex::PSO_01_Sky);
+	//CRenderer::SetPSO((int)PSOTypeIndex::PSO_01_WireFrame_Opaque);
+	CRenderer::DrawGameObjectsWithLayer(m_GameObjectsLayer[(int)GameObjectsLayer::Layer_Opaque_3DOBJ]);
+
+	CRenderer::SetPSO((int)PSOTypeIndex::PSO_02_Solid_Sky);
+	//CRenderer::SetPSO((int)PSOTypeIndex::PSO_03_WireFrame_Sky);
 	CRenderer::DrawGameObjectsWithLayer(m_GameObjectsLayer[(int)GameObjectsLayer::Layer_Sky]);
 }
 

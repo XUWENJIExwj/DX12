@@ -10,5 +10,5 @@ public:
 
 	void Init()override;
 	void Uninit()override;
-	void Update(const GameTimer& gt)override;
+	void Update(const GameTimer& GlobalTimer)override;
 };

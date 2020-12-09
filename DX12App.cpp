@@ -3,9 +3,8 @@
 #include "Manager.h"
 
 using namespace std;
-//using namespace DirectX;
 
-DX12App* DX12App::mApp = nullptr;
+DX12App* DX12App::m_App = nullptr;
 
 LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -38,11 +37,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
 }
 
 DX12App::DX12App(HINSTANCE hInstance)
-	: mhAppInst(hInstance)
+	: m_AppInstanceHandle(hInstance)
 {
 	// Only one D3DApp can be constructed.
-	assert(mApp == nullptr);
-	mApp = this;
+	assert(m_App == nullptr);
+	m_App = this;
 }
 
 bool DX12App::Init()
@@ -65,7 +64,7 @@ bool DX12App::InitMainWindow()
 	wc.lpfnWndProc = MainWndProc;
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
-	wc.hInstance = mhAppInst;
+	wc.hInstance = m_AppInstanceHandle;
 	wc.hIcon = LoadIcon(0, IDI_APPLICATION);
 	wc.hCursor = LoadCursor(0, IDC_ARROW);
 	wc.hbrBackground = (HBRUSH)GetStockObject(NULL_BRUSH);
@@ -79,21 +78,21 @@ bool DX12App::InitMainWindow()
 	}
 
 	// Compute window rectangle dimensions based on requested client area dimensions.
-	RECT R = { 0, 0, mClientWidth, mClientHeight };
+	RECT R = { 0, 0, m_WindowWidth, m_WindowHeight };
 	AdjustWindowRect(&R, WS_OVERLAPPEDWINDOW, false);
 	int width = R.right - R.left;
 	int height = R.bottom - R.top;
 
-	mhMainWnd = CreateWindow(L"MainWnd", mMainWndCaption.c_str(),
-		WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, width, height, 0, 0, mhAppInst, 0);
-	if (!mhMainWnd)
+	m_MainWindowHandle = CreateWindow(L"MainWnd", m_MainWindowCaption.c_str(),
+		WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, width, height, 0, 0, m_AppInstanceHandle, 0);
+	if (!m_MainWindowHandle)
 	{
 		MessageBox(0, L"CreateWindow Failed.", 0, 0);
 		return false;
 	}
 
-	ShowWindow(mhMainWnd, SW_SHOW);
-	UpdateWindow(mhMainWnd);
+	ShowWindow(m_MainWindowHandle, SW_SHOW);
+	UpdateWindow(m_MainWindowHandle);
 
 	return true;
 }
@@ -102,7 +101,7 @@ int DX12App::Run()
 {
 	MSG msg = { 0 };
 
-	mTimer.Reset();
+	m_Timer.Reset();
 
 	while (msg.message != WM_QUIT)
 	{
@@ -115,13 +114,13 @@ int DX12App::Run()
 		// Otherwise, do animation/game stuff.
 		else
 		{
-			mTimer.Tick();
+			m_Timer.Tick();
 
-			if (!mAppPaused)
+			if (!m_AppPaused)
 			{
 				CalculateFrameStats();
-				CManager::Update(mTimer);
-				CManager::Draw(mTimer);
+				CManager::Update(m_Timer);
+				CManager::Draw(m_Timer);
 			}
 			else
 			{
@@ -135,9 +134,9 @@ int DX12App::Run()
 	return (int)msg.wParam;
 }
 
-LRESULT DX12App::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT DX12App::MsgProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-	switch (msg)
+	switch (Msg)
 	{
 		// WM_ACTIVATE is sent when the window is activated or deactivated.  
 		// We pause the game when the window is deactivated and unpause it 
@@ -145,55 +144,55 @@ LRESULT DX12App::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_ACTIVATE:
 		if (LOWORD(wParam) == WA_INACTIVE)
 		{
-			mAppPaused = true;
-			mTimer.Stop();
+			m_AppPaused = true;
+			m_Timer.Stop();
 		}
 		else
 		{
-			mAppPaused = false;
-			mTimer.Start();
+			m_AppPaused = false;
+			m_Timer.Start();
 		}
 		return 0;
 
 		// WM_SIZE is sent when the user resizes the window.  
 	case WM_SIZE:
 		// Save the new client area dimensions.
-		mClientWidth = LOWORD(lParam);
-		mClientHeight = HIWORD(lParam);
+		m_WindowWidth = LOWORD(lParam);
+		m_WindowHeight = HIWORD(lParam);
 		if (CManager::GetDevice())
 		{
 			if (wParam == SIZE_MINIMIZED)
 			{
-				mAppPaused = true;
-				mMinimized = true;
-				mMaximized = false;
+				m_AppPaused = true;
+				m_Minimized = true;
+				m_Maximized = false;
 			}
 			else if (wParam == SIZE_MAXIMIZED)
 			{
-				mAppPaused = false;
-				mMinimized = false;
-				mMaximized = true;
+				m_AppPaused = false;
+				m_Minimized = false;
+				m_Maximized = true;
 				CManager::OnResize();
 			}
 			else if (wParam == SIZE_RESTORED)
 			{
 
 				// Restoring from minimized state?
-				if (mMinimized)
+				if (m_Minimized)
 				{
-					mAppPaused = false;
-					mMinimized = false;
+					m_AppPaused = false;
+					m_Minimized = false;
 					CManager::OnResize();
 				}
 
 				// Restoring from maximized state?
-				else if (mMaximized)
+				else if (m_Maximized)
 				{
-					mAppPaused = false;
-					mMaximized = false;
+					m_AppPaused = false;
+					m_Maximized = false;
 					CManager::OnResize();
 				}
-				else if (mResizing)
+				else if (m_Resizing)
 				{
 					// If user is dragging the resize bars, we do not resize 
 					// the buffers here because as the user continuously 
@@ -214,17 +213,17 @@ LRESULT DX12App::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 		// WM_EXITSIZEMOVE is sent when the user grabs the resize bars.
 	case WM_ENTERSIZEMOVE:
-		mAppPaused = true;
-		mResizing = true;
-		mTimer.Stop();
+		m_AppPaused = true;
+		m_Resizing = true;
+		m_Timer.Stop();
 		return 0;
 
 		// WM_EXITSIZEMOVE is sent when the user releases the resize bars.
 		// Here we reset everything based on the new window dimensions.
 	case WM_EXITSIZEMOVE:
-		mAppPaused = false;
-		mResizing = false;
-		mTimer.Start();
+		m_AppPaused = false;
+		m_Resizing = false;
+		m_Timer.Start();
 		CManager::OnResize();
 		return 0;
 
@@ -269,7 +268,7 @@ LRESULT DX12App::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			return 0;
 	}
 
-	return DefWindowProc(hwnd, msg, wParam, lParam);
+	return DefWindowProc(hWnd, Msg, wParam, lParam);
 }
 
 void DX12App::CalculateFrameStats()
@@ -284,7 +283,7 @@ void DX12App::CalculateFrameStats()
 	frameCnt++;
 
 	// Compute averages over one second period.
-	if ((mTimer.TotalTime() - timeElapsed) >= 1.0f)
+	if ((m_Timer.TotalTime() - timeElapsed) >= 1.0f)
 	{
 		float fps = (float)frameCnt; // fps = frameCnt / 1
 		float mspf = 1000.0f / fps;
@@ -292,11 +291,11 @@ void DX12App::CalculateFrameStats()
 		wstring fpsStr = to_wstring(fps);
 		wstring mspfStr = to_wstring(mspf);
 
-		wstring windowText = mMainWndCaption +
+		wstring windowText = m_MainWindowCaption +
 			L"    fps: " + fpsStr +
 			L"   mspf: " + mspfStr;
 
-		SetWindowText(mhMainWnd, windowText.c_str());
+		SetWindowText(m_MainWindowHandle, windowText.c_str());
 
 		// Reset for next average.
 		frameCnt = 0;

@@ -16,23 +16,23 @@
 class DX12App
 {
 private:
-	static DX12App* mApp;
+	static DX12App* m_App;
 
 	// WindowèÓïÒ
-	HINSTANCE mhAppInst = nullptr; // application instance handle
-	HWND      mhMainWnd = nullptr; // main window handle
-	bool      mAppPaused = false;  // is the application paused?
-	bool      mMinimized = false;  // is the application minimized?
-	bool      mMaximized = false;  // is the application maximized?
-	bool      mResizing = false;   // are the resize bars being dragged?
-	bool      mFullscreenState = false;// fullscreen enabled
+	HINSTANCE m_AppInstanceHandle = nullptr; // application instance handle
+	HWND      m_MainWindowHandle = nullptr;  // main window handle
+	bool      m_AppPaused = false;           // is the application paused?
+	bool      m_Minimized = false;           // is the application minimized?
+	bool      m_Maximized = false;           // is the application maximized?
+	bool      m_Resizing = false;            // are the resize bars being dragged?
+	bool      m_FullscreenState = false;     // fullscreen enabled
 
-	std::wstring mMainWndCaption = L"DX12App";
+	std::wstring m_MainWindowCaption = L"DX12App";
 	std::wstring m_WindowClassName = L"MainWnd";
-	int mClientWidth = 800;
-	int mClientHeight = 600;
+	int m_WindowWidth = 800;
+	int m_WindowHeight = 600;
 
-	GameTimer mTimer;
+	GameTimer m_Timer;
 
 public:
 	DX12App(HINSTANCE hInstance);
@@ -44,7 +44,7 @@ public:
 	bool InitMainWindow();
 	int  Run();
 
-	LRESULT MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+	LRESULT MsgProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
 	virtual void OnMouseDown(WPARAM btnState, int x, int y) { }
 	virtual void OnMouseUp(WPARAM btnState, int x, int y) { }
@@ -52,11 +52,11 @@ public:
 
 	void CalculateFrameStats();
 
-	static DX12App* GetApp() { return mApp; }
+	static DX12App* GetApp() { return m_App; }
 
-	HINSTANCE AppInst()const { return mhAppInst; }
-	HWND      MainWnd()const { return mhMainWnd; }
-	float     AspectRatio()const { return static_cast<float>(mClientWidth) / mClientHeight; }
-	int       GetWindowWidth()const { return mClientWidth; }
-	int       GetWindowHeight()const { return mClientHeight; }
+	HINSTANCE GetAppInstanceHandle()const { return m_AppInstanceHandle; }
+	HWND      GetMainWindowHandle()const { return m_MainWindowHandle; }
+	float     GetAspectRatio()const { return static_cast<float>(m_WindowWidth) / m_WindowHeight; }
+	int       GetWindowWidth()const { return m_WindowWidth; }
+	int       GetWindowHeight()const { return m_WindowHeight; }
 };

@@ -17,8 +17,8 @@ public:
 	static bool Init();
 	static void OnResize();
 	static void Uninit();
-	static void Update(const GameTimer& gt);
-	static void Draw(const GameTimer& gt);
+	static void Update(const GameTimer& GlobalTimer);
+	static void Draw(const GameTimer& GlobalTimer);
 
 	template <typename T>
 	static void SetScene()

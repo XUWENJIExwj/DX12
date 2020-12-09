@@ -7,8 +7,10 @@
 
 enum class PSOTypeIndex :int
 {
-	PSO_00_Opaque,
-	PSO_01_Sky,
+	PSO_00_Solid_Opaque,
+	PSO_01_WireFrame_Opaque,
+	PSO_02_Solid_Sky,
+	PSO_03_WireFrame_Sky,
 	PSO_MAX
 };
 
@@ -18,42 +20,42 @@ private:
 	static DX12App* m_App;
 
 	// DX12èâä˙âª
-	static bool m4xMsaaState;    // 4X MSAA enabled
-	static UINT m4xMsaaQuality;      // quality level of 4X MSAA
+	static bool m_4xMsaaState;    // 4X MSAA enabled
+	static UINT m_4xMsaaQuality;      // quality level of 4X MSAA
 
-	static Microsoft::WRL::ComPtr<IDXGIFactory4>  mdxgiFactory;
-	static Microsoft::WRL::ComPtr<IDXGISwapChain> mSwapChain;
-	static Microsoft::WRL::ComPtr<ID3D12Device>   md3dDevice;
+	static Microsoft::WRL::ComPtr<IDXGIFactory4>  m_DxgiFactory;
+	static Microsoft::WRL::ComPtr<IDXGISwapChain> m_SwapChain;
+	static Microsoft::WRL::ComPtr<ID3D12Device>   m_D3DDevice;
 
-	static Microsoft::WRL::ComPtr<ID3D12Fence> mFence;
-	static UINT64                              mCurrentFence;
+	static Microsoft::WRL::ComPtr<ID3D12Fence> m_Fence;
+	static UINT64                              m_CurrentFence;
 
-	static Microsoft::WRL::ComPtr<ID3D12CommandQueue>        mCommandQueue;
-	static Microsoft::WRL::ComPtr<ID3D12CommandAllocator>    mDirectCmdListAlloc;
-	static Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> mCommandList;
+	static Microsoft::WRL::ComPtr<ID3D12CommandQueue>        m_CommandQueue;
+	static Microsoft::WRL::ComPtr<ID3D12CommandAllocator>    m_DirectCmdListAlloc;
+	static Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> m_CommandList;
 
-	static const int SwapChainBufferCount;
-	static int       mCurrBackBuffer;
-	static Microsoft::WRL::ComPtr<ID3D12Resource> mSwapChainBuffer[];
-	static Microsoft::WRL::ComPtr<ID3D12Resource> mDepthStencilBuffer;
+	static const int m_SwapChainBufferCount;
+	static int       m_CurrentBackBuffer;
+	static Microsoft::WRL::ComPtr<ID3D12Resource> m_SwapChainBuffer[];
+	static Microsoft::WRL::ComPtr<ID3D12Resource> m_DepthStencilBuffer;
 
-	static Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mRtvHeap;
-	static Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mDsvHeap;
+	static Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_RtvHeap;
+	static Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_DsvHeap;
 
-	static D3D12_VIEWPORT mScreenViewport;
-	static D3D12_RECT     mScissorRect;
+	static D3D12_VIEWPORT m_ScreenViewport;
+	static D3D12_RECT     m_ScissorRect;
 
-	static UINT mRtvDescriptorSize;
-	static UINT mDsvDescriptorSize;
-	static UINT mCbvSrvUavDescriptorSize;
+	static UINT m_RtvDescriptorSize;
+	static UINT m_DsvDescriptorSize;
+	static UINT m_CbvSrvUavDescriptorSize;
 
-	static D3D_DRIVER_TYPE md3dDriverType;
-	static DXGI_FORMAT     mBackBufferFormat;
-	static DXGI_FORMAT     mDepthStencilFormat;
+	static D3D_DRIVER_TYPE m_D3DDriverType;
+	static DXGI_FORMAT     m_BackBufferFormat;
+	static DXGI_FORMAT     m_DepthStencilFormat;
 
 	// CommonResourcesê∂ê¨
-	static Microsoft::WRL::ComPtr<ID3D12RootSignature>              mRootSignature;
-	static Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>             mSrvDescriptorHeap;
+	static Microsoft::WRL::ComPtr<ID3D12RootSignature>              m_RootSignature;
+	static Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>             m_SrvDescriptorHeap;
 	static std::vector<Microsoft::WRL::ComPtr<ID3D12PipelineState>> m_PSOs;
 	static int                                                      m_CurrentPSO;
 
@@ -92,13 +94,13 @@ public:
 	static void CreataPSOs();
 
 	// ÉQÉbÉ^Å[
-	static bool Get4xMsaaState() { return m4xMsaaState; }
+	static bool Get4xMsaaState() { return m_4xMsaaState; }
 
-	static ID3D12Device*               GetDevice() { return md3dDevice.Get(); }
-	static ID3D12Fence*                GetFence() { return mFence.Get(); }
-	static ID3D12Resource*             CurrentBackBuffer() { return mSwapChainBuffer[mCurrBackBuffer].Get(); }
-	static D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView();
-	static D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView() { return mDsvHeap->GetCPUDescriptorHandleForHeapStart(); }
+	static ID3D12Device*               GetDevice() { return m_D3DDevice.Get(); }
+	static ID3D12Fence*                GetFence() { return m_Fence.Get(); }
+	static ID3D12Resource*             GetCurrentBackBuffer() { return m_SwapChainBuffer[m_CurrentBackBuffer].Get(); }
+	static D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentBackBufferView();
+	static D3D12_CPU_DESCRIPTOR_HANDLE GetDepthStencilView() { return m_DsvHeap->GetCPUDescriptorHandleForHeapStart(); }
 
 	static CD3DX12_GPU_DESCRIPTOR_HANDLE CreateCubeMapDescriptorHandle(UINT Offset);
 	static bool GetDynamicCubeOn() { return m_DynamicCubeOn; }

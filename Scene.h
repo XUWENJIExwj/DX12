@@ -43,11 +43,11 @@ public:
 
 	virtual void Init() = 0;
 	virtual void Uninit();
-	virtual void Update(const GameTimer& gt);
-	virtual void LateUpdate(const GameTimer& gt);
-	virtual void UpdateGameObjectsCB(const GameTimer& gt);
-	virtual void UpdateMaterialBuffer(const GameTimer& gt);
-	virtual void UpdateMainPassCB(const GameTimer& gt);
+	virtual void Update(const GameTimer& GlobalTimer);
+	virtual void LateUpdate(const GameTimer& GlobalTimer);
+	virtual void UpdateGameObjectsCB(const GameTimer& GlobalTimer);
+	virtual void UpdateMaterialBuffer(const GameTimer& GlobalTimer);
+	virtual void UpdateMainPassCB(const GameTimer& GlobalTimer);
 	virtual void Draw();
 
 	void CheckNecessaryCBBufferSize();

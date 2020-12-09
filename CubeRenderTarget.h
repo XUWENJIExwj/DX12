@@ -14,47 +14,44 @@ enum class CubeMapFace :int
 
 class CCubeRenderTarget
 {
-public:
-	CCubeRenderTarget(ID3D12Device* device,
-		UINT width, UINT height,
-		DXGI_FORMAT format);
-		
-	CCubeRenderTarget(const CCubeRenderTarget& rhs)=delete;
-	CCubeRenderTarget& operator=(const CCubeRenderTarget& rhs)=delete;
-	~CCubeRenderTarget()=default;
+private:
 
-	ID3D12Resource* Resource();
-	CD3DX12_GPU_DESCRIPTOR_HANDLE Srv();
-	CD3DX12_CPU_DESCRIPTOR_HANDLE Rtv(int faceIndex);
+	ID3D12Device* m_D3DDevice = nullptr;
+
+	D3D12_VIEWPORT m_Viewport;
+	D3D12_RECT     m_ScissorRect;
+
+	UINT m_Width = 0;
+	UINT m_Height = 0;
+	DXGI_FORMAT m_Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+
+	CD3DX12_CPU_DESCRIPTOR_HANDLE m_CpuSrvHandle;
+	CD3DX12_GPU_DESCRIPTOR_HANDLE m_GpuSrvHandle;
+	CD3DX12_CPU_DESCRIPTOR_HANDLE m_CpuRtvHandle[6];
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> m_CubeMapResource = nullptr;
+
+public:
+	CCubeRenderTarget(ID3D12Device* Device, UINT Width, UINT Height, DXGI_FORMAT Format);
+	CCubeRenderTarget(const CCubeRenderTarget& rhs) = delete;
+	CCubeRenderTarget& operator=(const CCubeRenderTarget& rhs) = delete;
+	~CCubeRenderTarget() = default;
+
+	ID3D12Resource*               GetResource();
+	CD3DX12_GPU_DESCRIPTOR_HANDLE GetSrv();
+	CD3DX12_CPU_DESCRIPTOR_HANDLE GetRtv(int FaceIndex);
 
 	D3D12_VIEWPORT Viewport()const;
-	D3D12_RECT ScissorRect()const;
+	D3D12_RECT     ScissorRect()const;
 
 	void CreateDescriptors(
-		CD3DX12_CPU_DESCRIPTOR_HANDLE hCpuSrv,
-		CD3DX12_GPU_DESCRIPTOR_HANDLE hGpuSrv,
-		CD3DX12_CPU_DESCRIPTOR_HANDLE hCpuRtv[6]);
+		CD3DX12_CPU_DESCRIPTOR_HANDLE CpuSrvHandle,
+		CD3DX12_GPU_DESCRIPTOR_HANDLE GpuSrvHandle,
+		CD3DX12_CPU_DESCRIPTOR_HANDLE CpuRtvHandle[6]);
 
-	void OnResize(UINT newWidth, UINT newHeight);
+	void OnResize(UINT NewWidth, UINT NewHeight);
 
 private:
 	void CreateDescriptors();
 	void CreateResource();
-
-private:
-
-	ID3D12Device* md3dDevice = nullptr;
-
-	D3D12_VIEWPORT mViewport;
-	D3D12_RECT mScissorRect;
-
-	UINT mWidth = 0;
-	UINT mHeight = 0;
-	DXGI_FORMAT mFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
-
-	CD3DX12_CPU_DESCRIPTOR_HANDLE mhCpuSrv;
-	CD3DX12_GPU_DESCRIPTOR_HANDLE mhGpuSrv;
-	CD3DX12_CPU_DESCRIPTOR_HANDLE mhCpuRtv[6];
-
-	Microsoft::WRL::ComPtr<ID3D12Resource> mCubeMap = nullptr;
 }; 
