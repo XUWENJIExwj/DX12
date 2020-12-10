@@ -37,6 +37,9 @@
     <Filter Include="ソース ファイル\GameObject\DynamicReflectorObj">
       <UniqueIdentifier>{de7c0522-43ee-4540-bc8d-820b24eaafb4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\System\Renderer">
+      <UniqueIdentifier>{f4659611-7c0e-448b-acb5-8e957bdd8e8b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DX12App.h">
@@ -63,16 +66,10 @@
     <ClInclude Include="Common\UploadBuffer.h">
       <Filter>ソース ファイル\Common</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer.h">
-      <Filter>ソース ファイル\System</Filter>
-    </ClInclude>
     <ClInclude Include="CommonResource.h">
       <Filter>ソース ファイル\System</Filter>
     </ClInclude>
     <ClInclude Include="FrameResource.h">
-      <Filter>ソース ファイル\System</Filter>
-    </ClInclude>
-    <ClInclude Include="CubeRenderTarget.h">
       <Filter>ソース ファイル\System</Filter>
     </ClInclude>
     <ClInclude Include="Scene.h">
@@ -123,6 +120,12 @@
     <ClInclude Include="Cube.h">
       <Filter>ソース ファイル\GameObject</Filter>
     </ClInclude>
+    <ClInclude Include="CubeRenderTarget.h">
+      <Filter>ソース ファイル\System\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>ソース ファイル\System\Renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DX12App.cpp">
@@ -143,13 +146,7 @@
     <ClCompile Include="Common\MathHelper.cpp">
       <Filter>ソース ファイル\Common</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer.cpp">
-      <Filter>ソース ファイル\System</Filter>
-    </ClCompile>
     <ClCompile Include="FrameResource.cpp">
-      <Filter>ソース ファイル\System</Filter>
-    </ClCompile>
-    <ClCompile Include="CubeRenderTarget.cpp">
       <Filter>ソース ファイル\System</Filter>
     </ClCompile>
     <ClCompile Include="GameObject.cpp">
@@ -199,6 +196,12 @@
     </ClCompile>
     <ClCompile Include="Cube.cpp">
       <Filter>ソース ファイル\GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="CubeRenderTarget.cpp">
+      <Filter>ソース ファイル\System\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>ソース ファイル\System\Renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

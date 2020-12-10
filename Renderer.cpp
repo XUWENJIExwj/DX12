@@ -54,7 +54,9 @@ CD3DX12_GPU_DESCRIPTOR_HANDLE CRenderer::m_SkyTextureDescriptorHandle;
 bool                          CRenderer::m_DynamicCubeMapOn = true;
 unique_ptr<CCubeRenderTarget> CRenderer::m_DynamicCubeMap = nullptr;
 CD3DX12_CPU_DESCRIPTOR_HANDLE CRenderer::m_DynamicCubeMapDsvHandle;
-CD3DX12_GPU_DESCRIPTOR_HANDLE CRenderer::m_DynamicCubeMapDescHandle;
+//DCM
+//CD3DX12_GPU_DESCRIPTOR_HANDLE CRenderer::m_DynamicCubeMapDescHandle;
+vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> CRenderer::m_DynamicCubeMapsDescHandle;
 UINT                          CRenderer::m_DynamicCubeMapSize = 512;
 ComPtr<ID3D12Resource>        CRenderer::m_DynamicCubeMapDepthStencilBuffer = nullptr;
 
@@ -381,7 +383,13 @@ void CRenderer::CreateCommonResources()
 	CreataPSOs();
 
 	m_SkyTextureDescriptorHandle = CreateCubeMapDescriptorHandle(CTextureManager::GetSkyTextureIndex());
-	m_DynamicCubeMapDescHandle = CreateCubeMapDescriptorHandle(CTextureManager::GetDynamicTextureIndex());
+	// DCM
+	//m_DynamicCubeMapDescHandle = CreateCubeMapDescriptorHandle(CTextureManager::GetDynamicTextureIndex());
+	m_DynamicCubeMapsDescHandle.resize(CTextureManager::GetDynamicTextureNum());
+	for (int i = 0; i < m_DynamicCubeMapsDescHandle.size(); ++i)
+	{
+		m_DynamicCubeMapsDescHandle[i] = CreateCubeMapDescriptorHandle(CTextureManager::GetDynamicTextureIndex() + i);
+	}
 
 	ExecuteCommandLists();
 
@@ -395,7 +403,7 @@ void CRenderer::CreateRootSignature()
 	texTable0.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
 
 	CD3DX12_DESCRIPTOR_RANGE texTable1;
-	texTable1.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 5, 1, 0);
+	texTable1.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 4 + CTextureManager::GetDynamicTextureNum(), 1, 0);
 
 	// Root parameter can be a table, root descriptor or root constants.
 	CD3DX12_ROOT_PARAMETER slotRootParameter[5];
@@ -437,7 +445,7 @@ void CRenderer::CreateDescriptorHeaps()
 {
 	// Create the SRV heap.
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
-	srvHeapDesc.NumDescriptors = 5;
+	srvHeapDesc.NumDescriptors = 4 + CTextureManager::GetDynamicTextureNum();
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	ThrowIfFailed(m_D3DDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_SrvDescriptorHeap)));
@@ -499,10 +507,13 @@ void CRenderer::CreateDescriptorHeaps()
 		}
 
 		// Dynamic cubemap SRV is after the sky SRV.
-		m_DynamicCubeMap->CreateDescriptors(
-			CD3DX12_CPU_DESCRIPTOR_HANDLE(srvCpuStart, dynamicTextureIndex, m_CbvSrvUavDescriptorSize),
-			CD3DX12_GPU_DESCRIPTOR_HANDLE(srvGpuStart, dynamicTextureIndex, m_CbvSrvUavDescriptorSize),
-			cubeRtvHandles);
+		// DCM
+		//m_DynamicCubeMap->CreateDescriptors(
+		//	CD3DX12_CPU_DESCRIPTOR_HANDLE(srvCpuStart, dynamicTextureIndex, m_CbvSrvUavDescriptorSize),
+		//	CD3DX12_GPU_DESCRIPTOR_HANDLE(srvGpuStart, dynamicTextureIndex, m_CbvSrvUavDescriptorSize),
+		//	cubeRtvHandles);
+
+		m_DynamicCubeMap->CreateDescriptors(srvCpuStart, srvGpuStart, cubeRtvHandles, dynamicTextureIndex, m_CbvSrvUavDescriptorSize);
 
 		CreateCubeDepthStencil();
 	}
@@ -806,19 +817,25 @@ void CRenderer::SetUpCubeMapResources()
 	m_CommandList->SetGraphicsRootDescriptorTable(3, m_SkyTextureDescriptorHandle);
 }
 
-void CRenderer::SetUpDynamicCubeMapResources()
+void CRenderer::SetUpDynamicCubeMapResources(int DCMResourcesIndex)
 {
 	// Use the dynamic cube map for the dynamic reflectors layer.
-	m_CommandList->SetGraphicsRootDescriptorTable(3, m_DynamicCubeMapDescHandle);
+	// DCM
+	//m_CommandList->SetGraphicsRootDescriptorTable(3, m_DynamicCubeMapDescHandle);
+	//m_CommandList->SetGraphicsRootDescriptorTable(3, m_DynamicCubeMapsDescHandle[DCMResourcesIndex]);
+	m_CommandList->SetGraphicsRootDescriptorTable(3, m_DynamicCubeMap->GetSrv(DCMResourcesIndex));
 }
 
-void CRenderer::SetUpBeforeCreateAllDynamicCubeMapResources()
+void CRenderer::SetUpBeforeCreateAllDynamicCubeMapResources(int DCMResourcesIndex)
 {
 	m_CommandList->RSSetViewports(1, &m_DynamicCubeMap->GetViewport());
 	m_CommandList->RSSetScissorRects(1, &m_DynamicCubeMap->GetScissorRect());
 
 	// Change to RENDER_TARGET.
-	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_DynamicCubeMap->GetResource(),
+	// DCM
+	//m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_DynamicCubeMap->GetResource(),
+	//	D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_RENDER_TARGET));
+	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_DynamicCubeMap->GetResource(DCMResourcesIndex),
 		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_RENDER_TARGET));
 }
 
@@ -838,10 +855,13 @@ void CRenderer::SetUpBeforeCreateEachDynamicCubeMapResource(int i)
 	m_CommandList->SetGraphicsRootConstantBufferView(1, passCBAddress);
 }
 
-void CRenderer::CompleteCreateDynamicCubeMapResources()
+void CRenderer::CompleteCreateDynamicCubeMapResources(int DCMResourcesIndex)
 {
 	// Change back to GENERIC_READ so we can read the texture in a shader.
-	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_DynamicCubeMap->GetResource(),
+	// DCM
+	//m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_DynamicCubeMap->GetResource(),
+	//	D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_GENERIC_READ));
+	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_DynamicCubeMap->GetResource(DCMResourcesIndex),
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_GENERIC_READ));
 }
 
@@ -881,6 +901,19 @@ void CRenderer::DrawGameObjectsWithLayer(std::list<CGameObject*>& GameObjectsWit
 	for (CGameObject* gameObject : GameObjectsWithLayer)
 	{
 		DrawSingleGameObject(gameObject, objectCB);
+	}
+}
+
+void CRenderer::DrawGameObjectsWithDynamicCubeMap(std::list<CGameObject*>& GameObjectsWithLayer)
+{
+	auto objectCB = CFrameResourceManager::GetCurrentFrameResource()->ObjectCB->Resource();
+	int dcmResourcesIndex = 0;
+
+	for (CGameObject* gameObject : GameObjectsWithLayer)
+	{
+		CRenderer::SetUpDynamicCubeMapResources(dcmResourcesIndex);
+		CRenderer::DrawSingleGameObject(gameObject, objectCB);
+		++dcmResourcesIndex;
 	}
 }
 

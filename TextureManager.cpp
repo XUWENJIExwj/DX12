@@ -8,6 +8,7 @@ vector<unique_ptr<Texture>> CTextureManager::m_Textures((int)TextureIndex::Textu
 
 UINT CTextureManager::m_SkyTextureIndex = (int)TextureIndex::Texture_03_SkyCube;
 UINT CTextureManager::m_DynamicTextureIndex = m_SkyTextureIndex + 1;
+UINT CTextureManager::m_DynamicTextureNum = 2;
 
 void CTextureManager::LoadTextures(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList)
 {

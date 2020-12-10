@@ -40,9 +40,9 @@ public:
 	virtual void Update(const GameTimer& GlobalTimer) {}
 	virtual void FixedUpdate(const GameTimer& GlobalTimer) {}
 	virtual void LateUpdate(const GameTimer& GlobalTimer) {}
-	virtual void Draw(const GameTimer& GlobalTimer) {}
+	virtual void Draw(const GameTimer& GlobalTimer, int DCMResourcesIndex = 0) {}
 
-	virtual void CreateDynamicCubeMapResources(const GameTimer& GlobalTimer) {}
+	virtual void CreateDynamicCubeMapResources(const GameTimer& GlobalTimer, int DCMResourcesIndex = 0) {}
 
 	void SetGameObjectLayer(int GameObjectLayer) { m_GameObjectLayer = GameObjectLayer; }
 	void SetPosition(DirectX::XMFLOAT3 Position) { m_Position = m_OldPosition = Position; }

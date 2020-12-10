@@ -23,11 +23,11 @@ void CSphereDR::Update(const GameTimer& GlobalTimer)
 	GlobalRotate(GlobalTimer);
 }
 
-void CSphereDR::Draw(const GameTimer& GlobalTimer)
+void CSphereDR::Draw(const GameTimer& GlobalTimer, int DCMResourcesIndex)
 {
-	CreateDynamicCubeMapResources(GlobalTimer);
+	CreateDynamicCubeMapResources(GlobalTimer, DCMResourcesIndex);
 	CRenderer::SetUpBeforeDrawScene();
-	CRenderer::SetUpDynamicCubeMapResources();
+	CRenderer::SetUpDynamicCubeMapResources(DCMResourcesIndex);
 	CRenderer::DrawSingleGameObject(this, CFrameResourceManager::GetCurrentFrameResource()->ObjectCB->Resource());
 	CRenderer::SetUpCubeMapResources();
 }
@@ -44,10 +44,10 @@ void CSphereDR::GlobalRotate(const GameTimer& GlobalTimer)
 
 	m_NumFramesDirty = gNumFrameResources;
 
-	CManager::GetScene()->SetUpDynamicCubeMapCamera(m_Position);
+	//CManager::GetScene()->SetUpDynamicCubeMapCamera(m_Position);
 }
 
-void CSphereDR::CreateDynamicCubeMapResources(const GameTimer& GlobalTimer)
+void CSphereDR::CreateDynamicCubeMapResources(const GameTimer& GlobalTimer, int DCMResourcesIndex)
 {
 	CManager::GetScene()->SetUpDynamicCubeMapCamera(m_Position);
 	CManager::GetScene()->UpdateDynamicCubeMapPassCB(GlobalTimer);
@@ -56,7 +56,7 @@ void CSphereDR::CreateDynamicCubeMapResources(const GameTimer& GlobalTimer)
 	auto gameObjectsLayer = CManager::GetScene()->GetAllGameObjectsWithLayer();
 
 	// CreateDynamicCubeMapResource
-	CRenderer::SetUpBeforeCreateAllDynamicCubeMapResources();
+	CRenderer::SetUpBeforeCreateAllDynamicCubeMapResources(DCMResourcesIndex);
 
 	for (int i = 0; i < dcmCameras.size(); ++i)
 	{
@@ -66,5 +66,5 @@ void CSphereDR::CreateDynamicCubeMapResources(const GameTimer& GlobalTimer)
 		CRenderer::DrawGameObjectsWithLayer(gameObjectsLayer[(int)GameObjectsLayer::Layer_3D_Sky]);
 		CRenderer::SetPSO((int)PSOTypeIndex::PSO_00_Solid_Opaque);
 	}
-	CRenderer::CompleteCreateDynamicCubeMapResources();
+	CRenderer::CompleteCreateDynamicCubeMapResources(DCMResourcesIndex);
 }

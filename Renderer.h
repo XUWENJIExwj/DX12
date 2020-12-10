@@ -66,7 +66,9 @@ private:
 	static bool                                   m_DynamicCubeMapOn;
 	static std::unique_ptr<CCubeRenderTarget>     m_DynamicCubeMap;
 	static CD3DX12_CPU_DESCRIPTOR_HANDLE          m_DynamicCubeMapDsvHandle;
-	static CD3DX12_GPU_DESCRIPTOR_HANDLE          m_DynamicCubeMapDescHandle;
+	// DCM
+	//static CD3DX12_GPU_DESCRIPTOR_HANDLE          m_DynamicCubeMapDescHandle;
+	static std::vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> m_DynamicCubeMapsDescHandle;
 	static UINT                                   m_DynamicCubeMapSize;
 	static Microsoft::WRL::ComPtr<ID3D12Resource> m_DynamicCubeMapDepthStencilBuffer;
 
@@ -119,13 +121,14 @@ public:
 	static void Begin();
 	static void SetUpCommonResources();
 	static void SetUpCubeMapResources();
-	static void SetUpDynamicCubeMapResources();
-	static void SetUpBeforeCreateAllDynamicCubeMapResources();
+	static void SetUpDynamicCubeMapResources(int DCMResourcesIndex = 0);
+	static void SetUpBeforeCreateAllDynamicCubeMapResources(int DCMResourcesIndex = 0);
 	static void SetUpBeforeCreateEachDynamicCubeMapResource(int i);
-	static void CompleteCreateDynamicCubeMapResources();
+	static void CompleteCreateDynamicCubeMapResources(int DCMResourcesIndex = 0);
 	static void SetUpBeforeDrawScene();
 	static void SetPSO(int PSOType);
 	static void DrawGameObjectsWithLayer(std::list<CGameObject*>& GameObjectsWithLayer);
+	static void DrawGameObjectsWithDynamicCubeMap(std::list<CGameObject*>& GameObjectsWithLayer);
 	static void DrawSingleGameObject(CGameObject* GameObject, ID3D12Resource* ObjectCB);
 	static void End();
 };

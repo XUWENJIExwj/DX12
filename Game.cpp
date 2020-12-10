@@ -29,6 +29,10 @@ void CGame::Init()
 	sphereDR2->SetPosition(XMFLOAT3(-3.0f, 1.0f, 0.0f));
 	sphereDR2->SetWorldMatrix();
 
+	//CSphere* sphereDR3 = AddGameObject<CSphereDR>((int)GameObjectsLayer::Layer_3D_Opaque_DynamicReflectors);
+	//sphereDR3->SetPosition(XMFLOAT3(0.0f, 1.0f, 3.0f));
+	//sphereDR3->SetWorldMatrix();
+
 	CFrameResourceManager::CreateFrameResources();
 }
 
@@ -49,10 +53,22 @@ void CGame::Draw(const GameTimer& GlobalTimer)
 	CRenderer::SetUpCubeMapResources();
 
 	// DrawDynamicCubeMap
+	int dcmResourcesIndex = 0;
 	for (CGameObject* gameObject : m_GameObjectsLayer[(int)GameObjectsLayer::Layer_3D_Opaque_DynamicReflectors])
 	{
-		gameObject->Draw(GlobalTimer);
+		// DCM
+		//gameObject->Draw(GlobalTimer, dcmResourcesIndex);
+		gameObject->CreateDynamicCubeMapResources(GlobalTimer, dcmResourcesIndex);
+		++dcmResourcesIndex;
 	}
+	CRenderer::SetUpBeforeDrawScene();
+	CRenderer::DrawGameObjectsWithDynamicCubeMap(m_GameObjectsLayer[(int)GameObjectsLayer::Layer_3D_Opaque_DynamicReflectors]);
+	/*dcmResourcesIndex = 0;
+	for (CGameObject* gameObject : m_GameObjectsLayer[(int)GameObjectsLayer::Layer_3D_Opaque_DynamicReflectors])
+	{
+		CRenderer::SetUpDynamicCubeMapResources(dcmResourcesIndex);
+		CRenderer::DrawSingleGameObject(gameObject, CFrameResourceManager::GetCurrentFrameResource()->ObjectCB->Resource());
+	}*/
 
 	// CreateDynamicCubeMapResource
 	//CRenderer::SetUpBeforeCreateAllDynamicCubeMapResources();
@@ -73,7 +89,7 @@ void CGame::Draw(const GameTimer& GlobalTimer)
 	//CRenderer::SetUpDynamicCubeMapResources();
 	//CRenderer::DrawGameObjectsWithLayer(m_GameObjectsLayer[(int)GameObjectsLayer::Layer_3D_Opaque_DynamicReflectors]);
 
-	//CRenderer::SetUpCubeMapResources();
+	CRenderer::SetUpCubeMapResources();
 	//CRenderer::SetPSO((int)PSOTypeIndex::PSO_01_WireFrame_Opaque);
 	CRenderer::DrawGameObjectsWithLayer(m_GameObjectsLayer[(int)GameObjectsLayer::Layer_3D_Opaque]);
 

@@ -17,6 +17,7 @@ private:
 
 	static UINT m_SkyTextureIndex;
 	static UINT m_DynamicTextureIndex;
+	static UINT m_DynamicTextureNum;
 
 public:
 	static void LoadTextures(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList);
@@ -24,4 +25,5 @@ public:
 	static std::vector<std::unique_ptr<Texture>>& GetTextures() { return m_Textures; }
 	static UINT GetSkyTextureIndex() { return m_SkyTextureIndex; }
 	static UINT GetDynamicTextureIndex() { return m_DynamicTextureIndex; }
+	static UINT GetDynamicTextureNum() { return m_DynamicTextureNum; }
 };
