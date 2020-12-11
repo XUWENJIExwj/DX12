@@ -1,5 +1,4 @@
 #include "CubeRenderTarget.h"
-#include "TextureManager.h"
  
 CCubeRenderTarget::CCubeRenderTarget(ID3D12Device* Device, UINT Width, UINT Height, DXGI_FORMAT Format)
 {
@@ -11,51 +10,20 @@ CCubeRenderTarget::CCubeRenderTarget(ID3D12Device* Device, UINT Width, UINT Heig
 
 	m_Viewport = { 0.0f, 0.0f, (float)Width, (float)Height, 0.0f, 1.0f };
 	m_ScissorRect = { 0, 0, (int)Width, (int)Height };
-
-	//CreateResource();
 }
-
-// DCM
-//void CCubeRenderTarget::CreateDescriptors(
-//	CD3DX12_CPU_DESCRIPTOR_HANDLE CpuSrvHandle,
-//	CD3DX12_GPU_DESCRIPTOR_HANDLE GpuSrvHandle,
-//	CD3DX12_CPU_DESCRIPTOR_HANDLE CpuRtvHandle[6])
-//{
-//	// Save references to the descriptors.
-//	m_CpuSrvHandle = CpuSrvHandle;
-//	m_GpuSrvHandle = GpuSrvHandle;
-//
-//	for (int i = 0; i < 6; ++i)
-//	{
-//		m_CpuRtvHandle[i] = CpuRtvHandle[i];
-//	}
-//
-//	CreateResource();
-//
-//	//  Create the descriptors
-//	CreateDescriptors();
-//}
 
 void CCubeRenderTarget::CreateDescriptors(
 	D3D12_CPU_DESCRIPTOR_HANDLE SrvCPUStartHandle,
 	D3D12_GPU_DESCRIPTOR_HANDLE SrvGPUStartHandle,
-	CD3DX12_CPU_DESCRIPTOR_HANDLE CpuRtvHandle[6],
+	std::vector<std::vector<CD3DX12_CPU_DESCRIPTOR_HANDLE>>& RtvCpuHandles,
 	UINT Offset, UINT CbvSrvUavDescriptorSize)
 {
 	// Save references to the descriptors.
-	int SrvHandlesNum = (int)CTextureManager::GetDynamicTextureNum();
-	m_CpuSrvHandles.resize(SrvHandlesNum);
-	m_GpuSrvHandles.resize(SrvHandlesNum);
-
-	for (int i = 0; i < SrvHandlesNum; ++i)
+	for (int i = 0; i < (int)RtvCpuHandles.size(); ++i)
 	{
-		m_CpuSrvHandles[i] = CD3DX12_CPU_DESCRIPTOR_HANDLE(SrvCPUStartHandle, Offset + i, CbvSrvUavDescriptorSize);
-		m_GpuSrvHandles[i] = CD3DX12_GPU_DESCRIPTOR_HANDLE(SrvGPUStartHandle, Offset + i, CbvSrvUavDescriptorSize);
-	}
-
-	for (int i = 0; i < 6; ++i)
-	{
-		m_CpuRtvHandle[i] = CpuRtvHandle[i];
+		m_CpuSrvHandles.push_back(CD3DX12_CPU_DESCRIPTOR_HANDLE(SrvCPUStartHandle, Offset + i, CbvSrvUavDescriptorSize));
+		m_GpuSrvHandles.push_back(CD3DX12_GPU_DESCRIPTOR_HANDLE(SrvGPUStartHandle, Offset + i, CbvSrvUavDescriptorSize));
+		m_CpuRtvHandles.push_back(RtvCpuHandles[i]);
 	}
 
 	CreateResource();
@@ -75,15 +43,6 @@ void CCubeRenderTarget::OnResize(UINT NewWidth, UINT NewHeight)
 
 		// New resource, so we need new descriptors to that resource.
 		CreateDescriptors();
-	}
-}
-
-void CCubeRenderTarget::CreateRtvToEachCubeFace(int DCMResourcesIndex, int FaceIndex)
-{
-	//for (int i = 0; i < 6; ++i)
-	{
-		UpdateRtvDesc(FaceIndex);
-		m_D3DDevice->CreateRenderTargetView(m_CubeMapResources[DCMResourcesIndex].Get(), &m_RtvDesc, m_CpuRtvHandle[FaceIndex]);
 	}
 }
 
@@ -109,16 +68,7 @@ void CCubeRenderTarget::CreateResource()
 	texDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 	texDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 
-	// DCM
-	//ThrowIfFailed(m_D3DDevice->CreateCommittedResource(
-	//	&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
-	//	D3D12_HEAP_FLAG_NONE,
-	//	&texDesc,
-	//	D3D12_RESOURCE_STATE_GENERIC_READ,
-	//	nullptr,
-	//	IID_PPV_ARGS(&m_CubeMapResource)));
-
-	m_CubeMapResources.resize(CTextureManager::GetDynamicTextureNum());
+	m_CubeMapResources.resize(m_CpuRtvHandles.size());
 
 	for (int i = 0; i < m_CubeMapResources.size(); ++i)
 	{
@@ -142,48 +92,26 @@ void CCubeRenderTarget::CreateDescriptors()
 	srvDesc.TextureCube.MipLevels = 1;
 	srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
 
-	// Create SRV to the entire cubemap resource.
-	// DCM
-	//m_D3DDevice->CreateShaderResourceView(m_CubeMapResource.Get(), &srvDesc, m_CpuSrvHandle);
+	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc;
+	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
+	rtvDesc.Format = m_Format;
+	rtvDesc.Texture2DArray.MipSlice = 0;
+	rtvDesc.Texture2DArray.PlaneSlice = 0;
+
+	// Only view one element of the array.
+	rtvDesc.Texture2DArray.ArraySize = 1;
 
 	for (int i = 0; i < m_CubeMapResources.size(); ++i)
 	{
+		// Create SRV to the entire cubemap resource.
 		m_D3DDevice->CreateShaderResourceView(m_CubeMapResources[i].Get(), &srvDesc, m_CpuSrvHandles[i]);
+
+		// Create RTV to each cube face.
+		for (int j = 0; j < 6; ++j)
+		{
+			// Render target to FaceIndexth element.
+			rtvDesc.Texture2DArray.FirstArraySlice = j;
+			m_D3DDevice->CreateRenderTargetView(m_CubeMapResources[i].Get(), &rtvDesc, m_CpuRtvHandles[i][j]);
+		}
 	}
-
-	CreateRtvDesc();
-
-	// Create RTV to each cube face.
-	//for(int i = 0; i < 6; ++i)
-	//{
-	//	UpdateRtvDesc(i);
-
-	//	// Create RTV to ith cubemap face.
-	//	// DCM
-	//	//m_D3DDevice->CreateRenderTargetView(m_CubeMapResource.Get(), &rtvDesc, m_CpuRtvHandle[i]);
-
-	//	// Bug‚ÌŒ´ˆö:Rtv‚ªã‘‚«‚³‚ê‚é
-	//	//for (int j = (int)m_CubeMapResources.size() - 1; j >= 0; --j)
-	//	for (int j = 0; j < (int)m_CubeMapResources.size(); ++j)
-	//	{
-	//		m_D3DDevice->CreateRenderTargetView(m_CubeMapResources[j].Get(), &m_RtvDesc, m_CpuRtvHandle[i]);
-	//	}
-	//}
-}
-
-void CCubeRenderTarget::CreateRtvDesc()
-{
-	m_RtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
-	m_RtvDesc.Format = m_Format;
-	m_RtvDesc.Texture2DArray.MipSlice = 0;
-	m_RtvDesc.Texture2DArray.PlaneSlice = 0;
-
-	// Only view one element of the array.
-	m_RtvDesc.Texture2DArray.ArraySize = 1;
-}
-
-void CCubeRenderTarget::UpdateRtvDesc(int FaceIndex)
-{
-	// Render target to FaceIndexth element.
-	m_RtvDesc.Texture2DArray.FirstArraySlice = FaceIndex;
 }

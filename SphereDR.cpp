@@ -14,22 +14,11 @@ void CSphereDR::Init()
 	m_IndexCount = m_MeshGeometry->DrawArgs["sphere"].IndexCount;
 	m_StartIndexLocation = m_MeshGeometry->DrawArgs["sphere"].StartIndexLocation;
 	m_BaseVertexLocation = m_MeshGeometry->DrawArgs["sphere"].BaseVertexLocation;
-
-	//CManager::GetScene()->SetUpDynamicCubeMapCamera(m_Position);
 }
 
 void CSphereDR::Update(const GameTimer& GlobalTimer)
 {
 	GlobalRotate(GlobalTimer);
-}
-
-void CSphereDR::Draw(const GameTimer& GlobalTimer, int DCMResourcesIndex)
-{
-	CreateDynamicCubeMapResources(GlobalTimer, DCMResourcesIndex);
-	CRenderer::SetUpBeforeDrawScene();
-	CRenderer::SetUpDynamicCubeMapResources(DCMResourcesIndex);
-	CRenderer::DrawSingleGameObject(this, CFrameResourceManager::GetCurrentFrameResource()->ObjectCB->Resource());
-	CRenderer::SetUpCubeMapResources();
 }
 
 void CSphereDR::GlobalRotate(const GameTimer& GlobalTimer)
@@ -43,29 +32,12 @@ void CSphereDR::GlobalRotate(const GameTimer& GlobalTimer)
 	m_Position.z = m_World(3, 2);
 
 	m_NumFramesDirty = gNumFrameResources;
-
-	//CManager::GetScene()->SetUpDynamicCubeMapCamera(m_Position);
 }
 
-void CSphereDR::CreateDynamicCubeMapResources(const GameTimer& GlobalTimer, int DCMResourcesIndex)
+void CSphereDR::DrawDynamicCubeMapScene(std::list<CGameObject*>* AllGameObjectsWithLayer)
 {
-	CManager::GetScene()->SetUpDynamicCubeMapCamera(m_Position);
-	CManager::GetScene()->UpdateDynamicCubeMapPassCB(GlobalTimer);
-
-	auto dcmCameras = CManager::GetScene()->GetDynamicCubeMapCameras();
-	auto gameObjectsLayer = CManager::GetScene()->GetAllGameObjectsWithLayer();
-
-	// CreateDynamicCubeMapResource
-	CRenderer::SetUpBeforeCreateAllDynamicCubeMapResources(DCMResourcesIndex);
-
-	for (int i = 0; i < dcmCameras.size(); ++i)
-	{
-		CRenderer::SetUpRtvBeforeCreateEachDynamicCubeMapResource(DCMResourcesIndex, i);
-		CRenderer::SetUpBeforeCreateEachDynamicCubeMapResource(i);
-		CRenderer::DrawGameObjectsWithLayer(gameObjectsLayer[(int)GameObjectsLayer::Layer_3D_Opaque]);
-		CRenderer::SetPSO((int)PSOTypeIndex::PSO_02_Solid_Sky);
-		CRenderer::DrawGameObjectsWithLayer(gameObjectsLayer[(int)GameObjectsLayer::Layer_3D_Sky]);
-		CRenderer::SetPSO((int)PSOTypeIndex::PSO_00_Solid_Opaque);
-	}
-	CRenderer::CompleteCreateDynamicCubeMapResources(DCMResourcesIndex);
+	CRenderer::DrawGameObjectsWithLayer(AllGameObjectsWithLayer[(int)GameObjectsLayer::Layer_3D_Opaque]);
+	CRenderer::SetPSO((int)PSOTypeIndex::PSO_02_Solid_Sky);
+	CRenderer::DrawGameObjectsWithLayer(AllGameObjectsWithLayer[(int)GameObjectsLayer::Layer_3D_Sky]);
+	CRenderer::SetPSO((int)PSOTypeIndex::PSO_00_Solid_Opaque);
 }

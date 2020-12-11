@@ -1,8 +1,8 @@
 #include "CameraFP.h"
 #include "Input.h"
 
-#define CAMERA_MOVE 2.0f * GlobalTimer.DeltaTime()
-#define CAMERA_ROT 0.5f * GlobalTimer.DeltaTime()
+#define CAMERA_MOVE 5.0f * GlobalTimer.DeltaTime()
+#define CAMERA_ROT 1.0f * GlobalTimer.DeltaTime()
 
 using namespace DirectX;
 

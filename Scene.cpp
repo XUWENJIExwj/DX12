@@ -153,11 +153,9 @@ void CScene::UpdateMainPassCB(const GameTimer& GlobalTimer)
 
 	auto currPassCB = CFrameResourceManager::GetCurrentFrameResource()->PassCB.get();
 	currPassCB->CopyData(0, m_MainPassCB);
-
-	//UpdateDynamicCubeMapPassCB(GlobalTimer);
 }
 
-void CScene::UpdateDynamicCubeMapPassCB(const GameTimer& GlobalTimer)
+void CScene::UpdateDynamicCubeMapPassCB(const GameTimer& GlobalTimer, int DCMResourcesIndex)
 {
 	for (int i = 0; i < m_DCMCameras.size(); ++i)
 	{
@@ -185,8 +183,8 @@ void CScene::UpdateDynamicCubeMapPassCB(const GameTimer& GlobalTimer)
 
 		auto currPassCB = CFrameResourceManager::GetCurrentFrameResource()->PassCB.get();
 
-		// Cube map pass cbuffers are stored in elements 1-6.
-		currPassCB->CopyData(1 + i, cubeFacePassCB);
+		// Cube map pass cbuffers are stored in elements from 1 to DCMResourcesIndex * 6.
+		currPassCB->CopyData(1 + i + DCMResourcesIndex * 6, cubeFacePassCB);
 	}
 }
 

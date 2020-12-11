@@ -52,7 +52,7 @@ public:
 	virtual void UpdateGameObjectsCB(const GameTimer& GlobalTimer);
 	virtual void UpdateMaterialBuffer(const GameTimer& GlobalTimer);
 	virtual void UpdateMainPassCB(const GameTimer& GlobalTimer);
-	virtual void UpdateDynamicCubeMapPassCB(const GameTimer& GlobalTimer);
+	virtual void UpdateDynamicCubeMapPassCB(const GameTimer& GlobalTimer, int DCMResourcesIndex);
 
 	void SetUpDynamicCubeMapCamera(DirectX::XMFLOAT3 Center);
 	void CheckNecessaryCBBufferSize();

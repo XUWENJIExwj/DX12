@@ -1,4 +1,5 @@
 #include "Manager.h"
+#include "Renderer.h"
 #include "Scene.h"
 #include "GameObject.h"
 
@@ -8,6 +9,24 @@ using namespace DirectX;
 CGameObject::CGameObject()
 {
 	XMStoreFloat4(&m_Quaternion, XMQuaternionIdentity());
+}
+
+void CGameObject::CreateDynamicCubeMapResources(const GameTimer & GlobalTimer, int DCMResourcesIndex)
+{
+	CManager::GetScene()->SetUpDynamicCubeMapCamera(m_Position);
+	CManager::GetScene()->UpdateDynamicCubeMapPassCB(GlobalTimer, DCMResourcesIndex);
+
+	auto dcmCameras = CManager::GetScene()->GetDynamicCubeMapCameras();
+	auto allGameObjectsWithLayer = CManager::GetScene()->GetAllGameObjectsWithLayer();
+
+	CRenderer::SetUpBeforeCreateAllDynamicCubeMapResources(DCMResourcesIndex);
+
+	for (int i = 0; i < dcmCameras.size(); ++i)
+	{
+		CRenderer::SetUpBeforeCreateEachDynamicCubeMapResource(DCMResourcesIndex, i);
+		DrawDynamicCubeMapScene(allGameObjectsWithLayer);
+	}
+	CRenderer::CompleteCreateDynamicCubeMapResources(DCMResourcesIndex);
 }
 
 XMFLOAT3 CGameObject::GetRightWithRotation3f()const
