@@ -4,7 +4,9 @@
 #include "Camera.h"
 #include "CameraFP.h"
 #include "CameraDynamicCubeMap.h"
+#include "Logo.h"
 #include "Sky.h"
+#include "MeshField.h"
 #include "Cube.h"
 #include "Sphere.h"
 #include "SphereDR.h"
@@ -22,16 +24,18 @@ void CGame::Init()
 	}
 	
 	CSky* sky = AddGameObject<CSky>((int)GameObjectsLayer::Layer_3D_Sky);
+	CMeshField* meshField= AddGameObject<CMeshField>((int)GameObjectsLayer::Layer_3D_Opaque);
 	CCube* cube = AddGameObject<CCube>((int)GameObjectsLayer::Layer_3D_Opaque);
 	CSphere* sphere = AddGameObject<CSphere>((int)GameObjectsLayer::Layer_3D_Opaque);
 	CSphere* sphereDR = AddGameObject<CSphereDR>((int)GameObjectsLayer::Layer_3D_Opaque_DynamicReflectors);
+	//CLogo* logo = AddGameObject<CLogo>((int)GameObjectsLayer::Layer_3D_Opaque);
 	CSphere* sphereDR2 = AddGameObject<CSphereDR>((int)GameObjectsLayer::Layer_3D_Opaque_DynamicReflectors);
 	sphereDR2->SetPosition(XMFLOAT3(-3.0f, 1.0f, 0.0f));
 	sphereDR2->SetWorldMatrix();
 
-	//CSphere* sphereDR3 = AddGameObject<CSphereDR>((int)GameObjectsLayer::Layer_3D_Opaque_DynamicReflectors);
-	//sphereDR3->SetPosition(XMFLOAT3(0.0f, 1.0f, 3.0f));
-	//sphereDR3->SetWorldMatrix();
+	CSphere* sphereDR3 = AddGameObject<CSphereDR>((int)GameObjectsLayer::Layer_3D_Opaque_DynamicReflectors);
+	sphereDR3->SetPosition(XMFLOAT3(0.0f, 2.0f, 3.0f));
+	sphereDR3->SetWorldMatrix();
 
 	CFrameResourceManager::CreateFrameResources();
 }
@@ -58,6 +62,7 @@ void CGame::Draw(const GameTimer& GlobalTimer)
 	{
 		// DCM
 		//gameObject->Draw(GlobalTimer, dcmResourcesIndex);
+		//gameObject->CreateDynamicCubeMapResources(GlobalTimer, dcmResourcesIndex);
 		gameObject->CreateDynamicCubeMapResources(GlobalTimer, dcmResourcesIndex);
 		++dcmResourcesIndex;
 	}

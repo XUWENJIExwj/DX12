@@ -32,6 +32,8 @@ private:
 	std::vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> m_GpuSrvHandles;
 	CD3DX12_CPU_DESCRIPTOR_HANDLE m_CpuRtvHandle[6];
 
+	D3D12_RENDER_TARGET_VIEW_DESC m_RtvDesc;
+
 	// DCM
 	//Microsoft::WRL::ComPtr<ID3D12Resource> m_CubeMapResource = nullptr;
 	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> m_CubeMapResources;
@@ -61,13 +63,17 @@ public:
 	ID3D12Resource*               GetResource(int Index) { return m_CubeMapResources[Index].Get(); }
 	// DCM
 	//CD3DX12_GPU_DESCRIPTOR_HANDLE GetSrv() { return m_GpuSrvHandle; }
-	CD3DX12_GPU_DESCRIPTOR_HANDLE GetSrv(int Index) { return m_GpuSrvHandles[Index]; }
-	CD3DX12_CPU_DESCRIPTOR_HANDLE GetRtv(int FaceIndex) { return m_CpuRtvHandle[FaceIndex]; }
+	CD3DX12_GPU_DESCRIPTOR_HANDLE GetSrvHandle(int Index) { return m_GpuSrvHandles[Index]; }
+	CD3DX12_CPU_DESCRIPTOR_HANDLE GetRtvHandle(int FaceIndex) { return m_CpuRtvHandle[FaceIndex]; }
 
 	D3D12_VIEWPORT GetViewport()const { return m_Viewport; }
 	D3D12_RECT     GetScissorRect()const { return m_ScissorRect; }
 
+	void CreateRtvToEachCubeFace(int DCMResourcesIndex, int FaceIndex);
+
 private:
 	void CreateResource();
 	void CreateDescriptors();
+	void CreateRtvDesc();
+	void UpdateRtvDesc(int FaceIndex);
 }; 

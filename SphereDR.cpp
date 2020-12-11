@@ -9,7 +9,7 @@ void CSphereDR::Init()
 {
 	m_Position = XMFLOAT3(3.0f, 0.0f, 0.0f);
 	m_World = ComputeWorldMatrix4x4();
-	m_Material = CMaterialManager::GetMaterial((int)MaterialIndex::Material_02_Mirror);
+	m_Material = CMaterialManager::GetMaterial((int)MaterialIndex::Material_Mirror_00);
 	m_MeshGeometry = CGeoShapeManager::GetMeshGeometry((int)GeoShapeType::Type_00_GeoShapes);
 	m_IndexCount = m_MeshGeometry->DrawArgs["sphere"].IndexCount;
 	m_StartIndexLocation = m_MeshGeometry->DrawArgs["sphere"].StartIndexLocation;
@@ -60,6 +60,7 @@ void CSphereDR::CreateDynamicCubeMapResources(const GameTimer& GlobalTimer, int 
 
 	for (int i = 0; i < dcmCameras.size(); ++i)
 	{
+		CRenderer::SetUpRtvBeforeCreateEachDynamicCubeMapResource(DCMResourcesIndex, i);
 		CRenderer::SetUpBeforeCreateEachDynamicCubeMapResource(i);
 		CRenderer::DrawGameObjectsWithLayer(gameObjectsLayer[(int)GameObjectsLayer::Layer_3D_Opaque]);
 		CRenderer::SetPSO((int)PSOTypeIndex::PSO_02_Solid_Sky);

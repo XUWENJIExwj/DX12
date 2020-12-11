@@ -123,6 +123,7 @@ public:
 	static void SetUpCubeMapResources();
 	static void SetUpDynamicCubeMapResources(int DCMResourcesIndex = 0);
 	static void SetUpBeforeCreateAllDynamicCubeMapResources(int DCMResourcesIndex = 0);
+	static void SetUpRtvBeforeCreateEachDynamicCubeMapResource(int DCMResourcesIndex, int FaceIndex);
 	static void SetUpBeforeCreateEachDynamicCubeMapResource(int i);
 	static void CompleteCreateDynamicCubeMapResources(int DCMResourcesIndex = 0);
 	static void SetUpBeforeDrawScene();

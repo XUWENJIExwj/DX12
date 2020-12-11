@@ -8,10 +8,12 @@ using namespace DirectX;
 
 void CCameraFP::Init()
 {
-	m_Position = XMFLOAT3(0.0f, 0.0f, -5.0f);
+	m_Position = XMFLOAT3(0.0f, 0.0f, -10.0f);
 	m_Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	m_Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	m_Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
+
+	//Pitch(0.2f * MathHelper::Pi);
 
 	SetProjectionMatrix(0.25f * MathHelper::Pi, DX12App::GetApp()->GetAspectRatio(), 1.0f, 1000.0f);
 }

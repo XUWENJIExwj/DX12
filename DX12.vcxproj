@@ -162,8 +162,10 @@
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GeoShapeManager.h" />
     <ClInclude Include="Input.h" />
+    <ClInclude Include="Logo.h" />
     <ClInclude Include="Manager.h" />
     <ClInclude Include="MaterialManager.h" />
+    <ClInclude Include="MeshField.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="ShaderManager.h" />
@@ -189,8 +191,10 @@
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GeoShapeManager.cpp" />
     <ClCompile Include="Input.cpp" />
+    <ClCompile Include="Logo.cpp" />
     <ClCompile Include="Manager.cpp" />
     <ClCompile Include="MaterialManager.cpp" />
+    <ClCompile Include="MeshField.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="ShaderManager.cpp" />

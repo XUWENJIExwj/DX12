@@ -403,7 +403,7 @@ void CRenderer::CreateRootSignature()
 	texTable0.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
 
 	CD3DX12_DESCRIPTOR_RANGE texTable1;
-	texTable1.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 4 + CTextureManager::GetDynamicTextureNum(), 1, 0);
+	texTable1.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, CTextureManager::GetTextureNum() + CTextureManager::GetDynamicTextureNum(), 1, 0);
 
 	// Root parameter can be a table, root descriptor or root constants.
 	CD3DX12_ROOT_PARAMETER slotRootParameter[5];
@@ -445,7 +445,7 @@ void CRenderer::CreateDescriptorHeaps()
 {
 	// Create the SRV heap.
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
-	srvHeapDesc.NumDescriptors = 4 + CTextureManager::GetDynamicTextureNum();
+	srvHeapDesc.NumDescriptors = CTextureManager::GetTextureNum() + CTextureManager::GetDynamicTextureNum();
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	ThrowIfFailed(m_D3DDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_SrvDescriptorHeap)));
@@ -823,7 +823,7 @@ void CRenderer::SetUpDynamicCubeMapResources(int DCMResourcesIndex)
 	// DCM
 	//m_CommandList->SetGraphicsRootDescriptorTable(3, m_DynamicCubeMapDescHandle);
 	//m_CommandList->SetGraphicsRootDescriptorTable(3, m_DynamicCubeMapsDescHandle[DCMResourcesIndex]);
-	m_CommandList->SetGraphicsRootDescriptorTable(3, m_DynamicCubeMap->GetSrv(DCMResourcesIndex));
+	m_CommandList->SetGraphicsRootDescriptorTable(3, m_DynamicCubeMap->GetSrvHandle(DCMResourcesIndex));
 }
 
 void CRenderer::SetUpBeforeCreateAllDynamicCubeMapResources(int DCMResourcesIndex)
@@ -839,14 +839,19 @@ void CRenderer::SetUpBeforeCreateAllDynamicCubeMapResources(int DCMResourcesInde
 		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_RENDER_TARGET));
 }
 
+void CRenderer::SetUpRtvBeforeCreateEachDynamicCubeMapResource(int DCMResourcesIndex, int FaceIndex)
+{
+	m_DynamicCubeMap->CreateRtvToEachCubeFace(DCMResourcesIndex, FaceIndex);
+}
+
 void CRenderer::SetUpBeforeCreateEachDynamicCubeMapResource(int i)
 {
 	// Clear the back buffer and depth buffer.
-	m_CommandList->ClearRenderTargetView(m_DynamicCubeMap->GetRtv(i), Colors::LightSteelBlue, 0, nullptr);
+	m_CommandList->ClearRenderTargetView(m_DynamicCubeMap->GetRtvHandle(i), Colors::LightSteelBlue, 0, nullptr);
 	m_CommandList->ClearDepthStencilView(m_DynamicCubeMapDsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 	// Specify the buffers we are going to render to.
-	m_CommandList->OMSetRenderTargets(1, &m_DynamicCubeMap->GetRtv(i), true, &m_DynamicCubeMapDsvHandle);
+	m_CommandList->OMSetRenderTargets(1, &m_DynamicCubeMap->GetRtvHandle(i), true, &m_DynamicCubeMapDsvHandle);
 
 	// Bind the pass constant buffer for this cube map face so we use 
 	// the right view/proj matrix for this cube face.

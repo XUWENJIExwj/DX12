@@ -78,6 +78,15 @@ void CCubeRenderTarget::OnResize(UINT NewWidth, UINT NewHeight)
 	}
 }
 
+void CCubeRenderTarget::CreateRtvToEachCubeFace(int DCMResourcesIndex, int FaceIndex)
+{
+	//for (int i = 0; i < 6; ++i)
+	{
+		UpdateRtvDesc(FaceIndex);
+		m_D3DDevice->CreateRenderTargetView(m_CubeMapResources[DCMResourcesIndex].Get(), &m_RtvDesc, m_CpuRtvHandle[FaceIndex]);
+	}
+}
+
 void CCubeRenderTarget::CreateResource()
 {
 	// Note, compressed formats cannot be used for UAV.  We get error like:
@@ -137,33 +146,44 @@ void CCubeRenderTarget::CreateDescriptors()
 	// DCM
 	//m_D3DDevice->CreateShaderResourceView(m_CubeMapResource.Get(), &srvDesc, m_CpuSrvHandle);
 
-	for (int i = 0; i < m_CubeMapResources.size(); i++)
+	for (int i = 0; i < m_CubeMapResources.size(); ++i)
 	{
 		m_D3DDevice->CreateShaderResourceView(m_CubeMapResources[i].Get(), &srvDesc, m_CpuSrvHandles[i]);
 	}
 
+	CreateRtvDesc();
+
 	// Create RTV to each cube face.
-	for(int i = 0; i < 6; ++i)
-	{
-		D3D12_RENDER_TARGET_VIEW_DESC rtvDesc; 
-		rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
-		rtvDesc.Format = m_Format;
-		rtvDesc.Texture2DArray.MipSlice = 0;
-		rtvDesc.Texture2DArray.PlaneSlice = 0;
+	//for(int i = 0; i < 6; ++i)
+	//{
+	//	UpdateRtvDesc(i);
 
-		// Render target to ith element.
-		rtvDesc.Texture2DArray.FirstArraySlice = i;
+	//	// Create RTV to ith cubemap face.
+	//	// DCM
+	//	//m_D3DDevice->CreateRenderTargetView(m_CubeMapResource.Get(), &rtvDesc, m_CpuRtvHandle[i]);
 
-		// Only view one element of the array.
-		rtvDesc.Texture2DArray.ArraySize = 1;
+	//	// Bug‚ÌŒ´ˆö:Rtv‚ªã‘‚«‚³‚ê‚é
+	//	//for (int j = (int)m_CubeMapResources.size() - 1; j >= 0; --j)
+	//	for (int j = 0; j < (int)m_CubeMapResources.size(); ++j)
+	//	{
+	//		m_D3DDevice->CreateRenderTargetView(m_CubeMapResources[j].Get(), &m_RtvDesc, m_CpuRtvHandle[i]);
+	//	}
+	//}
+}
 
-		// Create RTV to ith cubemap face.
-		// DCM
-		//m_D3DDevice->CreateRenderTargetView(m_CubeMapResource.Get(), &rtvDesc, m_CpuRtvHandle[i]);
+void CCubeRenderTarget::CreateRtvDesc()
+{
+	m_RtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
+	m_RtvDesc.Format = m_Format;
+	m_RtvDesc.Texture2DArray.MipSlice = 0;
+	m_RtvDesc.Texture2DArray.PlaneSlice = 0;
 
-		for (int j = 0; j < m_CubeMapResources.size(); j++)
-		{
-			m_D3DDevice->CreateRenderTargetView(m_CubeMapResources[j].Get(), &rtvDesc, m_CpuRtvHandle[i]);
-		}
-	}
+	// Only view one element of the array.
+	m_RtvDesc.Texture2DArray.ArraySize = 1;
+}
+
+void CCubeRenderTarget::UpdateRtvDesc(int FaceIndex)
+{
+	// Render target to FaceIndexth element.
+	m_RtvDesc.Texture2DArray.FirstArraySlice = FaceIndex;
 }

@@ -2,10 +2,12 @@
 
 enum class MaterialIndex :int
 {
-	Material_00_Bricks,
-	Material_01_Tile,
-	Material_02_Mirror,
-	Material_03_Sky,
+	Material_Logo_00,
+	Material_Bricks_00,
+	Material_Tile_00,
+	Material_Glass_00,
+	Material_Mirror_00,
+	Material_SkyCube_00,
 	Material_Max
 };
 

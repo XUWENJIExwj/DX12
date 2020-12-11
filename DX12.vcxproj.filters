@@ -126,6 +126,12 @@
     <ClInclude Include="Renderer.h">
       <Filter>ソース ファイル\System\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="MeshField.h">
+      <Filter>ソース ファイル\GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Logo.h">
+      <Filter>ソース ファイル\GameObject</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DX12App.cpp">
@@ -202,6 +208,12 @@
     </ClCompile>
     <ClCompile Include="Renderer.cpp">
       <Filter>ソース ファイル\System\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshField.cpp">
+      <Filter>ソース ファイル\GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Logo.cpp">
+      <Filter>ソース ファイル\GameObject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
