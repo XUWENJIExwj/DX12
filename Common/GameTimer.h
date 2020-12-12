@@ -12,11 +12,13 @@ public:
 
 	float TotalTime()const; // in seconds
 	float DeltaTime()const; // in seconds
+	bool  GetFixed()const { return mFixed; } // FixedUpdate用
 
 	void Reset(); // Call before message loop.
 	void Start(); // Call when unpaused.
 	void Stop();  // Call when paused.
 	void Tick();  // Call every frame.
+	void FixedTick(int TargetFPS); // FixedUpdate用
 
 private:
 	double mSecondsPerCount;
@@ -26,9 +28,11 @@ private:
 	__int64 mPausedTime;
 	__int64 mStopTime;
 	__int64 mPrevTime;
+	__int64 mExecLastTime; // FixedUpdate用
 	__int64 mCurrTime;
 
 	bool mStopped;
+	bool mFixed; // FixedUpdate用
 };
 
 #endif // GAMETIMER_H

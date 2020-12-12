@@ -17,6 +17,39 @@ void CScene::Uninit()
 	m_AllGameObjects.resize(0);
 }
 
+void CScene::UpdateAll(const GameTimer& GlobalTimer)
+{
+	FixedUpdate(GlobalTimer);
+	Update(GlobalTimer);
+	LateUpdate(GlobalTimer);
+	CheckNecessaryCBBufferSize();
+	UpdateGameObjectsCB(GlobalTimer);
+	UpdateMaterialBuffer(GlobalTimer);
+	UpdateMainPassCB(GlobalTimer);
+}
+
+void CScene::FixedUpdate(const GameTimer& GlobalTimer)
+{
+	if (GlobalTimer.GetFixed())
+	{
+		for (int i = 0; i < (int)GameObjectsLayer::Layer_Max - 1; ++i)
+		{
+			for (CGameObject* gameObject : m_GameObjectsLayer[i])
+			{
+				gameObject->FixedUpdate(GlobalTimer);
+			}
+
+			m_GameObjectsLayer[i].remove_if
+			(
+				[](CGameObject* GameObject)
+			{
+				return GameObject->Destroy();
+			}
+			); // ƒ‰ƒ€ƒ_Ž®
+		}
+	}
+}
+
 void CScene::Update(const GameTimer& GlobalTimer)
 {
 	for (int i = 0; i < (int)GameObjectsLayer::Layer_Max - 1; ++i)
@@ -157,7 +190,7 @@ void CScene::UpdateMainPassCB(const GameTimer& GlobalTimer)
 
 void CScene::UpdateDynamicCubeMapPassCB(const GameTimer& GlobalTimer, int DCMResourcesIndex)
 {
-	for (int i = 0; i < m_DCMCameras.size(); ++i)
+	for (int i = 0; i < (int)m_DCMCameras.size(); ++i)
 	{
 		PassConstants cubeFacePassCB = m_MainPassCB;
 
@@ -219,7 +252,7 @@ void CScene::SetUpDynamicCubeMapCamera(XMFLOAT3 Center)
 		XMFLOAT3(0.0f, 1.0f, 0.0f)	 // -Z
 	};
 
-	for (int i = 0; i < m_DCMCameras.size(); ++i)
+	for (int i = 0; i < (int)m_DCMCameras.size(); ++i)
 	{
 		m_DCMCameras[i]->LookAt(Center, targets[i], ups[i]);
 		m_DCMCameras[i]->UpdateViewMatrix();

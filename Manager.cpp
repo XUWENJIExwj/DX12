@@ -1,8 +1,11 @@
 #include "Manager.h"
 #include "Renderer.h"
-#include "Input.h"
+#include "InputManager.h"
 #include "Game.h"
 #include "Camera.h"
+
+using namespace DirectX;
+using namespace InputManager;
 
 const int gNumFrameResources = 3;
 
@@ -20,7 +23,8 @@ bool CManager::Init()
 	CRenderer::CreateCommonResources();
 	CFrameResourceManager::ComputeConstantBufferSize();
 
-	CInput::Init();
+	CKeyboard::Init();
+	CMouse::Init();
 
 	SetScene<CGame>();
 
@@ -41,21 +45,19 @@ void CManager::Uninit()
 {
 	m_Scene->Uninit();
 	delete m_Scene;
-	CInput::Uninit();
 	CRenderer::Uninit();
 }
 
 void CManager::Update(const GameTimer& GlobalTimer)
 {
-	CInput::Update();
+	CKeyboard::Update();
+	CMouse::Update();
+
+	EndTheApp();
 
 	CFrameResourceManager::CycleFrameResources();
-	m_Scene->Update(GlobalTimer);
-	m_Scene->LateUpdate(GlobalTimer);
-	m_Scene->CheckNecessaryCBBufferSize();
-	m_Scene->UpdateGameObjectsCB(GlobalTimer);
-	m_Scene->UpdateMaterialBuffer(GlobalTimer);
-	m_Scene->UpdateMainPassCB(GlobalTimer);
+
+	m_Scene->UpdateAll(GlobalTimer);
 }
 
 void CManager::Draw(const GameTimer& GlobalTimer)
@@ -65,6 +67,14 @@ void CManager::Draw(const GameTimer& GlobalTimer)
 	m_Scene->Draw(GlobalTimer);
 
 	CRenderer::End();
+}
+
+void CManager::EndTheApp()
+{
+	if (CKeyboard::IsPressed(Keyboard::Escape))
+	{
+		SendMessage(DX12App::GetApp()->GetMainWindowHandle(), WM_DESTROY, 0, 0);
+	}
 }
 
 ID3D12Device* CManager::GetDevice()

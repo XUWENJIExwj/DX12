@@ -58,32 +58,32 @@ public:
 	int GetGameObjectLayer() { return m_GameObjectLayer; }
 
 	DirectX::XMFLOAT3   GetPosition3f()const { return m_Position; }
-	DirectX::XMVECTOR   GetPosition()const { return XMLoadFloat3(&m_Position); }
 	DirectX::XMFLOAT3   GetRotation3f()const { return m_Rotation; }
-	DirectX::XMVECTOR   GetRotation()const { return XMLoadFloat3(&m_Rotation); }
 	DirectX::XMFLOAT4   GetQuaternion4f()const { return m_Quaternion; }
-	DirectX::XMVECTOR   GetQuaternion()const { return XMLoadFloat4(&m_Quaternion); }
 	DirectX::XMFLOAT3   GetScale3f()const { return m_Scale; }
-	DirectX::XMVECTOR   GetScale()const { return XMLoadFloat3(&m_Scale); }
 	DirectX::XMFLOAT3   GetRightWithRotation3f()const;
-	DirectX::XMVECTOR   GetRightWithRotation()const;
 	DirectX::XMFLOAT3   GetUpWithRotation3f()const;
-	DirectX::XMVECTOR   GetUpWithRotation()const;
 	DirectX::XMFLOAT3   GetForwardWithRotation3f()const;
-	DirectX::XMVECTOR   GetForwardWithRotation()const;
 	DirectX::XMFLOAT3   GetRightWithQuaternion3f()const;
-	DirectX::XMVECTOR   GetRightWithQuaternion()const;
 	DirectX::XMFLOAT3   GetUpWithQuaternion3f()const;
-	DirectX::XMVECTOR   GetUpWithQuaternion()const;
 	DirectX::XMFLOAT3   GetForwardWithQuaternion3f()const;
-	DirectX::XMVECTOR   GetForwardWithQuaternion()const;
 	DirectX::XMFLOAT4X4 GetWorldMatrix4x4()const { return m_World; }
-	DirectX::XMMATRIX   GetWorldMatrix()const { return XMLoadFloat4x4(&m_World); }
 	DirectX::XMFLOAT4X4 GetTexTransformMatrix4x4()const { return m_TexTransform; }
-	DirectX::XMMATRIX   GetTexTransformMatrix()const { return XMLoadFloat4x4(&m_TexTransform); }
-
 	DirectX::XMFLOAT4X4 ComputeWorldMatrix4x4()const;
-	DirectX::XMMATRIX   ComputeWorldMatrix()const;
+
+	DirectX::XMVECTOR XM_CALLCONV GetPosition()const { return XMLoadFloat3(&m_Position); }
+	DirectX::XMVECTOR XM_CALLCONV GetRotation()const { return XMLoadFloat3(&m_Rotation); }
+	DirectX::XMVECTOR XM_CALLCONV GetQuaternion()const { return XMLoadFloat4(&m_Quaternion); }
+	DirectX::XMVECTOR XM_CALLCONV GetScale()const { return XMLoadFloat3(&m_Scale); }
+	DirectX::XMVECTOR XM_CALLCONV GetRightWithRotation()const;
+	DirectX::XMVECTOR XM_CALLCONV GetUpWithRotation()const;
+	DirectX::XMVECTOR XM_CALLCONV GetForwardWithRotation()const;
+	DirectX::XMVECTOR XM_CALLCONV GetRightWithQuaternion()const;
+	DirectX::XMVECTOR XM_CALLCONV GetUpWithQuaternion()const;
+	DirectX::XMVECTOR XM_CALLCONV GetForwardWithQuaternion()const;
+	DirectX::XMMATRIX XM_CALLCONV GetWorldMatrix()const { return XMLoadFloat4x4(&m_World); }
+	DirectX::XMMATRIX XM_CALLCONV GetTexTransformMatrix()const { return XMLoadFloat4x4(&m_TexTransform); }
+	DirectX::XMMATRIX XM_CALLCONV ComputeWorldMatrix()const;
 
 	int  GetNumFramesDirty() { return m_NumFramesDirty; }
 	UINT GetObjCBIndex() { return m_ObjCBIndex; }

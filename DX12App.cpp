@@ -1,8 +1,10 @@
 #include <WindowsX.h>
 #include "DX12App.h"
 #include "Manager.h"
+#include "InputManager.h"
 
 using namespace std;
+using namespace InputManager;
 
 DX12App* DX12App::m_App = nullptr;
 
@@ -115,6 +117,7 @@ int DX12App::Run()
 		else
 		{
 			m_Timer.Tick();
+			m_Timer.FixedTick(60);
 
 			if (!m_AppPaused)
 			{
@@ -176,7 +179,6 @@ LRESULT DX12App::MsgProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 			}
 			else if (wParam == SIZE_RESTORED)
 			{
-
 				// Restoring from minimized state?
 				if (m_Minimized)
 				{
@@ -244,28 +246,45 @@ LRESULT DX12App::MsgProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 		((MINMAXINFO*)lParam)->ptMinTrackSize.y = 200;
 		return 0;
 
+		// InputWatcher
+	case WM_INPUT:
+
 	case WM_LBUTTONDOWN:
 	case WM_MBUTTONDOWN:
 	case WM_RBUTTONDOWN:
-		OnMouseDown(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-		return 0;
+	case WM_XBUTTONDOWN:
+
 	case WM_LBUTTONUP:
 	case WM_MBUTTONUP:
 	case WM_RBUTTONUP:
-		OnMouseUp(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-		return 0;
-	case WM_MOUSEMOVE:
-		OnMouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-		return 0;
-	case WM_KEYUP:
-		if (wParam == VK_ESCAPE)
-		{
-			PostQuitMessage(0);
-		}
-		else if ((int)wParam == VK_F2)
-			//Set4xMsaaState(!m4xMsaaState);
+	case WM_XBUTTONUP:
 
-			return 0;
+	case WM_MOUSEWHEEL:
+	case WM_MOUSEHOVER:
+	case WM_MOUSEMOVE:
+		CMouse::Get()->ProcessMessage(Msg, wParam, lParam);
+		return 0;
+
+	case WM_KEYDOWN:
+	case WM_SYSKEYDOWN:
+	case WM_KEYUP:
+	case WM_SYSKEYUP:
+		CKeyboard::Get()->ProcessMessage(Msg, wParam, lParam);
+		return 0;
+
+	case WM_ACTIVATEAPP:
+		CMouse::Get()->ProcessMessage(Msg, wParam, lParam);
+		CKeyboard::Get()->ProcessMessage(Msg, wParam, lParam);
+		return 0;
+	//case WM_KEYUP:
+	//	if (wParam == VK_ESCAPE)
+	//	{
+	//		PostQuitMessage(0);
+	//	}
+	//	else if ((int)wParam == VK_F2)
+	//		//Set4xMsaaState(!m4xMsaaState);
+
+	//		return 0;
 	}
 
 	return DefWindowProc(hWnd, Msg, wParam, lParam);

@@ -70,7 +70,7 @@ void CCubeRenderTarget::CreateResource()
 
 	m_CubeMapResources.resize(m_CpuRtvHandles.size());
 
-	for (int i = 0; i < m_CubeMapResources.size(); ++i)
+	for (int i = 0; i < (int)m_CubeMapResources.size(); ++i)
 	{
 		ThrowIfFailed(m_D3DDevice->CreateCommittedResource(
 			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
@@ -101,7 +101,7 @@ void CCubeRenderTarget::CreateDescriptors()
 	// Only view one element of the array.
 	rtvDesc.Texture2DArray.ArraySize = 1;
 
-	for (int i = 0; i < m_CubeMapResources.size(); ++i)
+	for (int i = 0; i < (int)m_CubeMapResources.size(); ++i)
 	{
 		// Create SRV to the entire cubemap resource.
 		m_D3DDevice->CreateShaderResourceView(m_CubeMapResources[i].Get(), &srvDesc, m_CpuSrvHandles[i]);

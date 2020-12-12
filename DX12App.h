@@ -31,6 +31,7 @@ private:
 	std::wstring m_WindowClassName = L"MainWnd";
 	int          m_WindowWidth = 1280;
 	int          m_WindowHeight = 720;
+	int          m_TargetFPS = 60;
 
 	GameTimer m_Timer;
 
@@ -59,4 +60,5 @@ public:
 	float     GetAspectRatio()const { return static_cast<float>(m_WindowWidth) / m_WindowHeight; }
 	int       GetWindowWidth()const { return m_WindowWidth; }
 	int       GetWindowHeight()const { return m_WindowHeight; }
+	int       GetTargetFPS()const { return m_TargetFPS; }
 };

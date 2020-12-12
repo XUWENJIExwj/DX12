@@ -1,10 +1,12 @@
 #include "CameraFP.h"
-#include "Input.h"
-
-#define CAMERA_MOVE 5.0f * GlobalTimer.DeltaTime()
-#define CAMERA_ROT 1.0f * GlobalTimer.DeltaTime()
+#include "InputManager.h"
 
 using namespace DirectX;
+using namespace InputManager;
+
+#define CAMERA_MOVE 10.0f * GlobalTimer.DeltaTime()
+#define CAMERA_ROTX 1.0f * CMouse::GetMoveY() * GlobalTimer.DeltaTime()
+#define CAMERA_ROTY 1.0f * CMouse::GetMoveX() * GlobalTimer.DeltaTime()
 
 void CCameraFP::Init()
 {
@@ -61,27 +63,27 @@ void CCameraFP::WalkVertical(float d)
 
 void CCameraFP::CameraWalk(const GameTimer& GlobalTimer)
 {
-	if (CInput::GetKeyPress('W'))
+	if (CKeyboard::IsDown(Keyboard::W))
 	{
 		WalkDepth(CAMERA_MOVE);
 	}
-	if (CInput::GetKeyPress('S'))
+	if (CKeyboard::IsDown(Keyboard::S))
 	{
 		WalkDepth(-CAMERA_MOVE);
 	}
-	if (CInput::GetKeyPress('A'))
+	if (CKeyboard::IsDown(Keyboard::A))
 	{
 		WalkHorizontal(-CAMERA_MOVE);
 	}
-	if (CInput::GetKeyPress('D'))
+	if (CKeyboard::IsDown(Keyboard::D))
 	{
 		WalkHorizontal(CAMERA_MOVE);
 	}
-	if (CInput::GetKeyPress('R'))
+	if (CKeyboard::IsDown(Keyboard::R))
 	{
 		WalkVertical(CAMERA_MOVE);
 	}
-	if (CInput::GetKeyPress('F'))
+	if (CKeyboard::IsDown(Keyboard::F))
 	{
 		WalkVertical(-CAMERA_MOVE);
 	}
@@ -114,20 +116,6 @@ void CCameraFP::RotateY(float angle)
 
 void CCameraFP::CameraRotate(const GameTimer& GlobalTimer)
 {
-	if (CInput::GetKeyPress(VK_UP))
-	{
-		Pitch(-CAMERA_ROT);
-	}
-	if (CInput::GetKeyPress(VK_DOWN))
-	{
-		Pitch(CAMERA_ROT);
-	}
-	if (CInput::GetKeyPress(VK_LEFT))
-	{
-		RotateY(-CAMERA_ROT);
-	}
-	if (CInput::GetKeyPress(VK_RIGHT))
-	{
-		RotateY(CAMERA_ROT);
-	}
+	Pitch(CAMERA_ROTX);
+	RotateY(CAMERA_ROTY);
 }

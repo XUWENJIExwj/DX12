@@ -19,6 +19,7 @@ public:
 	static void Uninit();
 	static void Update(const GameTimer& GlobalTimer);
 	static void Draw(const GameTimer& GlobalTimer);
+	static void EndTheApp();
 
 	template <typename T>
 	static void SetScene()
@@ -37,5 +38,5 @@ public:
 	static void SetMainCamera(CCamera* Camera = nullptr) { m_MainCamera = Camera; }
 
 	static ID3D12Device* GetDevice();
-	static CScene* GetScene() { return m_Scene; }
+	static CScene*       GetScene() { return m_Scene; }
 };

@@ -21,7 +21,7 @@ void CGameObject::CreateDynamicCubeMapResources(const GameTimer & GlobalTimer, i
 
 	CRenderer::SetUpBeforeCreateAllDynamicCubeMapResources(DCMResourcesIndex);
 
-	for (int i = 0; i < dcmCameras.size(); ++i)
+	for (int i = 0; i < (int)dcmCameras.size(); ++i)
 	{
 		CRenderer::SetUpBeforeCreateEachDynamicCubeMapResource(DCMResourcesIndex, i);
 		DrawDynamicCubeMapScene(allGameObjectsWithLayer);

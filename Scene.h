@@ -45,6 +45,8 @@ public:
 
 	virtual void Init() = 0;
 	virtual void Uninit();
+	virtual void UpdateAll(const GameTimer& GlobalTimer);
+	virtual void FixedUpdate(const GameTimer& GlobalTimer);
 	virtual void Update(const GameTimer& GlobalTimer);
 	virtual void LateUpdate(const GameTimer& GlobalTimer);
 	virtual void Draw(const GameTimer& GlobalTimer) = 0;
