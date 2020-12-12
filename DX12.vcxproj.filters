@@ -40,6 +40,9 @@
     <Filter Include="ソース ファイル\System\Renderer">
       <UniqueIdentifier>{f4659611-7c0e-448b-acb5-8e957bdd8e8b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\ImGui">
+      <UniqueIdentifier>{932c3f69-028b-4fbb-bbf0-500defa92183}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DX12App.h">
@@ -138,6 +141,30 @@
     <ClInclude Include="InputManager.h">
       <Filter>ソース ファイル\System\Manager</Filter>
     </ClInclude>
+    <ClInclude Include="ImGui\imconfig.h">
+      <Filter>ソース ファイル\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\imgui.h">
+      <Filter>ソース ファイル\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\imgui_impl_dx12.h">
+      <Filter>ソース ファイル\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\imgui_impl_win32.h">
+      <Filter>ソース ファイル\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\imgui_internal.h">
+      <Filter>ソース ファイル\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\imstb_rectpack.h">
+      <Filter>ソース ファイル\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\imstb_textedit.h">
+      <Filter>ソース ファイル\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\imstb_truetype.h">
+      <Filter>ソース ファイル\ImGui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DX12App.cpp">
@@ -226,6 +253,24 @@
     </ClCompile>
     <ClCompile Include="InputManager.cpp">
       <Filter>ソース ファイル\System\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\imgui.cpp">
+      <Filter>ソース ファイル\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\imgui_demo.cpp">
+      <Filter>ソース ファイル\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\imgui_draw.cpp">
+      <Filter>ソース ファイル\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\imgui_impl_dx12.cpp">
+      <Filter>ソース ファイル\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\imgui_impl_win32.cpp">
+      <Filter>ソース ファイル\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\imgui_widgets.cpp">
+      <Filter>ソース ファイル\ImGui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

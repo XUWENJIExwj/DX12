@@ -54,9 +54,26 @@ void CMouse::Init()
 
 void CMouse::Update()
 {
+	SwithMode();
 	m_MouseState = m_Mouse->GetState();
 	m_MouseLastState = m_MouseTracker.GetLastState();
 	m_MouseTracker.Update(m_MouseState);
+}
+
+void CMouse::SwithMode()
+{
+	if (CKeyboard::IsPressed(Keyboard::LeftAlt))
+	{
+		m_Mouse->SetMode((Mouse::Mode)((m_MouseState.positionMode + 1) % 2));
+		if (IsModeRelative())
+		{
+			m_Mouse->SetVisible(false);
+		}
+		else
+		{
+			m_Mouse->SetVisible(true);
+		}
+	}
 }
 
 int CMouse::GetMoveX()

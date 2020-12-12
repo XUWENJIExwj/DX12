@@ -116,6 +116,9 @@ void CCameraFP::RotateY(float angle)
 
 void CCameraFP::CameraRotate(const GameTimer& GlobalTimer)
 {
-	Pitch(CAMERA_ROTX);
-	RotateY(CAMERA_ROTY);
+	if (CMouse::IsModeRelative())
+	{
+		Pitch(CAMERA_ROTX);
+		RotateY(CAMERA_ROTY);
+	}
 }
