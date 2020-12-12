@@ -8,6 +8,8 @@ using namespace InputManager;
 
 DX12App* DX12App::m_App = nullptr;
 
+LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
 LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	// Forward hwnd on because we can get messages (e.g., WM_CREATE)
@@ -139,6 +141,11 @@ int DX12App::Run()
 
 LRESULT DX12App::MsgProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
+	if (ImGui_ImplWin32_WndProcHandler(hWnd, Msg, wParam, lParam))
+	{
+		return true;
+	}
+
 	switch (Msg)
 	{
 		// WM_ACTIVATE is sent when the window is activated or deactivated.  

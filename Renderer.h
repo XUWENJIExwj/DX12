@@ -55,7 +55,7 @@ private:
 
 	// CommonResourcesê∂ê¨
 	static Microsoft::WRL::ComPtr<ID3D12RootSignature>              m_RootSignature;
-	static Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>             m_SrvDescriptorHeap;
+	static Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>             m_SrvHeap;
 	static std::vector<Microsoft::WRL::ComPtr<ID3D12PipelineState>> m_PSOs;
 	static int                                                      m_CurrentPSO;
 
@@ -97,9 +97,12 @@ public:
 
 	static ID3D12Device*               GetDevice() { return m_D3DDevice.Get(); }
 	static ID3D12Fence*                GetFence() { return m_Fence.Get(); }
+	static ID3D12GraphicsCommandList*  GetCommondList() { return m_CommandList.Get(); }
 	static ID3D12Resource*             GetCurrentBackBuffer() { return m_SwapChainBuffer[m_CurrentBackBuffer].Get(); }
 	static D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentBackBufferView();
 	static D3D12_CPU_DESCRIPTOR_HANDLE GetDepthStencilView() { return m_DsvHeap->GetCPUDescriptorHandleForHeapStart(); }
+	static DXGI_FORMAT                 GetBackBufferFormat() { return m_BackBufferFormat; }
+	static ID3D12DescriptorHeap*       GetSrvHeap() { return m_SrvHeap.Get(); }
 
 	// DynamicCubeMap
 	static bool                          GetDynamicCubeOn() { return m_DynamicCubeMapOn; }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DX12App.h"
+#include "ImGuiManager.h"
 #include "CommonResource.h"
 
 class CGameObject

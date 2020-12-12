@@ -57,6 +57,7 @@ public:
 
 	HINSTANCE GetAppInstanceHandle()const { return m_AppInstanceHandle; }
 	HWND      GetMainWindowHandle()const { return m_MainWindowHandle; }
+	LPCWSTR   GetWindowClassName()const { return m_WindowClassName.c_str(); }
 	float     GetAspectRatio()const { return static_cast<float>(m_WindowWidth) / m_WindowHeight; }
 	int       GetWindowWidth()const { return m_WindowWidth; }
 	int       GetWindowHeight()const { return m_WindowHeight; }

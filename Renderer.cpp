@@ -43,7 +43,7 @@ DXGI_FORMAT     CRenderer::m_DepthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
 // CommonResourcesê∂ê¨
 ComPtr<ID3D12RootSignature>         CRenderer::m_RootSignature = nullptr;
-ComPtr<ID3D12DescriptorHeap>        CRenderer::m_SrvDescriptorHeap = nullptr;
+ComPtr<ID3D12DescriptorHeap>        CRenderer::m_SrvHeap = nullptr;
 vector<ComPtr<ID3D12PipelineState>> CRenderer::m_PSOs((int)PSOTypeIndex::PSO_MAX);
 int                                 CRenderer::m_CurrentPSO = (int)PSOTypeIndex::PSO_00_Solid_Opaque;
 
@@ -438,10 +438,10 @@ void CRenderer::CreateDescriptorHeaps()
 	srvHeapDesc.NumDescriptors = CTextureManager::GetTextureNum() + CTextureManager::GetDynamicTextureNum();
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	ThrowIfFailed(m_D3DDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_SrvDescriptorHeap)));
+	ThrowIfFailed(m_D3DDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_SrvHeap)));
 
 	// Fill out the heap with actual descriptors.
-	CD3DX12_CPU_DESCRIPTOR_HANDLE hDescriptor(m_SrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+	CD3DX12_CPU_DESCRIPTOR_HANDLE hDescriptor(m_SrvHeap->GetCPUDescriptorHandleForHeapStart());
 
 	// Texture
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -483,8 +483,8 @@ void CRenderer::CreateDescriptorHeaps()
 	// DynamicCube
 	if (m_DynamicCubeMapOn)
 	{
-		auto srvCpuStart = m_SrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-		auto srvGpuStart = m_SrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+		auto srvCpuStart = m_SrvHeap->GetCPUDescriptorHandleForHeapStart();
+		auto srvGpuStart = m_SrvHeap->GetGPUDescriptorHandleForHeapStart();
 		auto rtvCpuStart = m_RtvHeap->GetCPUDescriptorHandleForHeapStart();
 
 		// Cubemap RTV goes after the swap chain descriptors.
@@ -625,7 +625,7 @@ D3D12_CPU_DESCRIPTOR_HANDLE CRenderer::GetCurrentBackBufferView()
 
 CD3DX12_GPU_DESCRIPTOR_HANDLE CRenderer::CreateCubeMapDescriptorHandle(UINT Offset)
 {
-	CD3DX12_GPU_DESCRIPTOR_HANDLE cubeMapDescriptor(m_SrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+	CD3DX12_GPU_DESCRIPTOR_HANDLE cubeMapDescriptor(m_SrvHeap->GetGPUDescriptorHandleForHeapStart());
 	cubeMapDescriptor.Offset(Offset, m_CbvSrvUavDescriptorSize);
 	return cubeMapDescriptor;
 }
@@ -779,7 +779,7 @@ void CRenderer::Begin()
 	ThrowIfFailed(m_CommandList->Reset(cmdListAlloc.Get(), m_PSOs[(int)PSOTypeIndex::PSO_00_Solid_Opaque].Get()));
 	m_CurrentPSO = (int)PSOTypeIndex::PSO_00_Solid_Opaque;
 
-	ID3D12DescriptorHeap* descriptorHeaps[] = { m_SrvDescriptorHeap.Get() };
+	ID3D12DescriptorHeap* descriptorHeaps[] = { m_SrvHeap.Get() };
 	m_CommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
 	m_CommandList->SetGraphicsRootSignature(m_RootSignature.Get());
@@ -795,7 +795,7 @@ void CRenderer::SetUpCommonResources()
 	// Bind all the textures used in this scene.  Observe
 	// that we only have to specify the first descriptor in the table.  
 	// The root signature knows how many descriptors are expected in the table.
-	m_CommandList->SetGraphicsRootDescriptorTable(4, m_SrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+	m_CommandList->SetGraphicsRootDescriptorTable(4, m_SrvHeap->GetGPUDescriptorHandleForHeapStart());
 }
 
 void CRenderer::SetUpCubeMapResources()

@@ -1,6 +1,7 @@
 #include "Manager.h"
 #include "Renderer.h"
 #include "InputManager.h"
+#include "ImGuiManager.h"
 #include "Game.h"
 #include "Camera.h"
 
@@ -26,6 +27,8 @@ bool CManager::Init()
 	CKeyboard::Init();
 	CMouse::Init();
 
+	CImGuiManager::Init();
+
 	SetScene<CGame>();
 
 	return true;
@@ -45,7 +48,9 @@ void CManager::Uninit()
 {
 	m_Scene->Uninit();
 	delete m_Scene;
+
 	CRenderer::Uninit();
+	CImGuiManager::Uninit();
 }
 
 void CManager::Update(const GameTimer& GlobalTimer)
@@ -57,6 +62,8 @@ void CManager::Update(const GameTimer& GlobalTimer)
 
 	CFrameResourceManager::CycleFrameResources();
 
+	CImGuiManager::Update();
+
 	m_Scene->UpdateAll(GlobalTimer);
 }
 
@@ -65,6 +72,8 @@ void CManager::Draw(const GameTimer& GlobalTimer)
 	CRenderer::Begin();
 
 	m_Scene->Draw(GlobalTimer);
+
+	CImGuiManager::Draw();
 
 	CRenderer::End();
 }

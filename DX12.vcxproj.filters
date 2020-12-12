@@ -165,6 +165,9 @@
     <ClInclude Include="ImGui\imstb_truetype.h">
       <Filter>ソース ファイル\ImGui</Filter>
     </ClInclude>
+    <ClInclude Include="ImGuiManager.h">
+      <Filter>ソース ファイル\System\Manager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DX12App.cpp">
@@ -271,6 +274,9 @@
     </ClCompile>
     <ClCompile Include="ImGui\imgui_widgets.cpp">
       <Filter>ソース ファイル\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGuiManager.cpp">
+      <Filter>ソース ファイル\System\Manager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
