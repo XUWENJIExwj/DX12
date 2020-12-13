@@ -34,10 +34,10 @@ void CSphereDR::GlobalRotate(const GameTimer& GlobalTimer)
 	m_NumFramesDirty = gNumFrameResources;
 }
 
-void CSphereDR::DrawDynamicCubeMapScene(std::list<CGameObject*>* AllGameObjectsWithLayer)
+void CSphereDR::DrawDynamicCubeMapScene(std::list<CGameObject*>* AllRenderLayers)
 {
-	CRenderer::DrawGameObjectsWithLayer(AllGameObjectsWithLayer[(int)GameObjectsLayer::Layer_3D_Opaque]);
+	CRenderer::DrawGameObjectsWithLayer(AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque]);
 	CRenderer::SetPSO((int)PSOTypeIndex::PSO_02_Solid_Sky);
-	CRenderer::DrawGameObjectsWithLayer(AllGameObjectsWithLayer[(int)GameObjectsLayer::Layer_3D_Sky]);
+	CRenderer::DrawGameObjectsWithLayer(AllRenderLayers[(int)RenderLayers::Layer_3D_Sky]);
 	CRenderer::SetPSO((int)PSOTypeIndex::PSO_00_Solid_Opaque);
 }

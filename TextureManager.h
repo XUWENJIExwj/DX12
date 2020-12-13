@@ -5,6 +5,7 @@ enum class TextureIndex :int
 	Texture_Logo_00,
 	Texture_Bricks_00,
 	Texture_Tile_00,
+	Texture_Plane_00,
 	Texture_Glass_00,
 	Texture_Default_00,
 	Texture_SkyCube_00,
@@ -14,7 +15,7 @@ enum class TextureIndex :int
 class CTextureManager
 {
 private:
-	static std::vector<std::string>              m_TexturesName;
+	static std::vector<const char*>              m_TexturesName;
 	static std::vector<std::unique_ptr<Texture>> m_Textures;
 
 	static UINT m_SkyTextureIndex;

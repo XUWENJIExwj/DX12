@@ -1,10 +1,15 @@
 #include <iostream>
+#include "Manager.h"
+#include "InputManager.h"
 #include "Renderer.h"
+#include "Scene.h"
 #include "ImGui\imgui_impl_win32.h"
 #include "ImGui\imgui_impl_dx12.h"
 #include "ImGuiManager.h"
 
 using namespace std;
+using namespace InputManager;
+using namespace DirectX;
 
 void CImGuiManager::Init()
 {
@@ -57,7 +62,13 @@ void CImGuiManager::Update()
 
 void CImGuiManager::Draw()
 {
-	static bool show_demo_window = true;
+	static bool show_demo_window = false;
+
+	// "["‚ÅDemoWindow‚Ì•\¦‚ğØ‚è‘Ö‚¦‚é
+	if (CKeyboard::IsPressed(Keyboard::OemOpenBrackets))
+	{
+		show_demo_window = !show_demo_window;
+	}
 
 	if (show_demo_window)
 	{

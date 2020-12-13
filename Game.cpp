@@ -11,39 +11,40 @@
 #include "Sphere.h"
 #include "SphereDR.h"
 
+using namespace std;
 using namespace DirectX;
 
 void CGame::Init()
 {
-	m_MainCamera = AddGameObject<CCameraFP>((int)GameObjectsLayer::Layer_Camera);
+	m_MainCamera = AddGameObject<CCameraFP>((int)RenderLayers::Layer_Camera, "MainCamera");
 	CManager::SetMainCamera(m_MainCamera);
 
 	for (int i = 0; i < 6; ++i)
 	{
-		m_DCMCameras.push_back(AddGameObject<CCameraDCM>((int)GameObjectsLayer::Layer_Camera));
+		m_DCMCameras.push_back(AddGameObject<CCameraDCM>((int)RenderLayers::Layer_Camera, "DCMCamera0" + to_string(i)));
 	}
 	
-	CSky* sky = AddGameObject<CSky>((int)GameObjectsLayer::Layer_3D_Sky);
-	CMeshField* meshField= AddGameObject<CMeshField>((int)GameObjectsLayer::Layer_3D_Opaque);
-	CCube* cube = AddGameObject<CCube>((int)GameObjectsLayer::Layer_3D_Opaque);
-	CSphere* sphere = AddGameObject<CSphere>((int)GameObjectsLayer::Layer_3D_Opaque);
+	CSky* sky = AddGameObject<CSky>((int)RenderLayers::Layer_3D_Sky, "Sky");
+	CMeshField* meshField= AddGameObject<CMeshField>((int)RenderLayers::Layer_3D_Opaque, "MeshField");
+	CCube* cube = AddGameObject<CCube>((int)RenderLayers::Layer_3D_Opaque, "Brick");
+	CSphere* sphere = AddGameObject<CSphere>((int)RenderLayers::Layer_3D_Opaque, "Mirror");
 
 	// m_GameObjectsLayer[(int)GameObjectsLayer::Layer_3D_Opaque_DynamicReflectors] <= CTextureManager::m_DynamicTextureNum
 	// ãŽ®‚ðí‚É¬‚è—§‚½‚¹‚é•K—v‚ª‚ ‚é
-	CSphere* sphereDR = AddGameObject<CSphereDR>((int)GameObjectsLayer::Layer_3D_Opaque_DynamicReflectors);
+	CSphere* sphereDR0 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror00");
 	//CLogo* logo = AddGameObject<CLogo>((int)GameObjectsLayer::Layer_3D_Opaque);
 
-	CSphere* sphereDR2 = AddGameObject<CSphereDR>((int)GameObjectsLayer::Layer_3D_Opaque_DynamicReflectors);
-	sphereDR2->SetPosition(XMFLOAT3(-3.0f, 1.0f, 0.0f));
+	CSphere* sphereDR1 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror01");
+	sphereDR1->SetPosition(XMFLOAT3(-3.0f, 1.0f, 0.0f));
+	sphereDR1->SetWorldMatrix();
+
+	CSphere* sphereDR2 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror02");
+	sphereDR2->SetPosition(XMFLOAT3(0.0f, 2.0f, 3.0f));
 	sphereDR2->SetWorldMatrix();
 
-	CSphere* sphereDR3 = AddGameObject<CSphereDR>((int)GameObjectsLayer::Layer_3D_Opaque_DynamicReflectors);
-	sphereDR3->SetPosition(XMFLOAT3(0.0f, 2.0f, 3.0f));
+	CSphere* sphereDR3 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror03");
+	sphereDR3->SetPosition(XMFLOAT3(0.0f, 0.5f, 2.0f));
 	sphereDR3->SetWorldMatrix();
-
-	CSphere* sphereDR4 = AddGameObject<CSphereDR>((int)GameObjectsLayer::Layer_3D_Opaque_DynamicReflectors);
-	sphereDR4->SetPosition(XMFLOAT3(0.0f, 0.5f, 2.0f));
-	sphereDR4->SetWorldMatrix();
 
 	CFrameResourceManager::CreateFrameResources();
 }
@@ -56,25 +57,28 @@ void CGame::Uninit()
 
 void CGame::Update(const GameTimer& GlobalTimer)
 {
+	//DrawImGui(GlobalTimer); // UpdateImGui
 	CScene::Update(GlobalTimer);
 }
 
 void CGame::Draw(const GameTimer& GlobalTimer)
 {
+	DrawImGui(GlobalTimer);
+
 	CRenderer::SetUpCommonResources();
 	CRenderer::SetUpCubeMapResources();
 
 	// CreateDynamicCubeMap
-	CRenderer::CreateDynamicCubeMapResources(GlobalTimer, m_GameObjectsLayer[(int)GameObjectsLayer::Layer_3D_Opaque_DynamicReflectors]);
+	CRenderer::CreateDynamicCubeMapResources(GlobalTimer, m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque_DynamicReflectors]);
 
 	CRenderer::SetUpBeforeDrawScene();
-	CRenderer::DrawGameObjectsWithDynamicCubeMap(m_GameObjectsLayer[(int)GameObjectsLayer::Layer_3D_Opaque_DynamicReflectors]);
+	CRenderer::DrawGameObjectsWithDynamicCubeMap(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque_DynamicReflectors]);
 
 	CRenderer::SetUpCubeMapResources();
 	//CRenderer::SetPSO((int)PSOTypeIndex::PSO_01_WireFrame_Opaque);
-	CRenderer::DrawGameObjectsWithLayer(m_GameObjectsLayer[(int)GameObjectsLayer::Layer_3D_Opaque]);
+	CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque]);
 
 	CRenderer::SetPSO((int)PSOTypeIndex::PSO_02_Solid_Sky);
 	//CRenderer::SetPSO((int)PSOTypeIndex::PSO_03_WireFrame_Sky);
-	CRenderer::DrawGameObjectsWithLayer(m_GameObjectsLayer[(int)GameObjectsLayer::Layer_3D_Sky]);
+	CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Sky]);
 }

@@ -3,7 +3,7 @@
 
 using namespace std;
 
-vector<string>              CTextureManager::m_TexturesName((int)TextureIndex::Texture_Max);
+vector<const char*>         CTextureManager::m_TexturesName;
 vector<unique_ptr<Texture>> CTextureManager::m_Textures((int)TextureIndex::Texture_Max);
 
 UINT CTextureManager::m_SkyTextureIndex = (int)TextureIndex::Texture_SkyCube_00;
@@ -17,6 +17,7 @@ void CTextureManager::LoadTextures(ID3D12Device* Device, ID3D12GraphicsCommandLi
 		"Texture_Logo_00",
 		"Texture_Bricks_00",
 		"Texture_Tile_00",
+		"Texture_Plane_00",
 		"Texture_Glass_00",
 		"Texture_Default_00",
 		"Texture_SkyCube_00"
@@ -27,6 +28,7 @@ void CTextureManager::LoadTextures(ID3D12Device* Device, ID3D12GraphicsCommandLi
 		L"Asset\\Textures\\Logo_00.dds",
 		L"Asset\\Textures\\Bricks_00.dds",
 		L"Asset\\Textures\\Titles_00.dds",
+		L"Asset\\Textures\\Plane_00.dds",
 		L"Asset\\Textures\\Glass_00.dds",
 		L"Asset\\Textures\\Default_00.dds",
 		L"Asset\\Textures\\SkyCube_00.dds"

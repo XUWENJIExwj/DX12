@@ -17,7 +17,7 @@ void CGameObject::CreateDynamicCubeMapResources(const GameTimer & GlobalTimer, i
 	CManager::GetScene()->UpdateDynamicCubeMapPassCB(GlobalTimer, DCMResourcesIndex);
 
 	auto dcmCameras = CManager::GetScene()->GetDynamicCubeMapCameras();
-	auto allGameObjectsWithLayer = CManager::GetScene()->GetAllGameObjectsWithLayer();
+	auto allGameObjectsWithLayer = CManager::GetScene()->GetAllRenderLayers();
 
 	CRenderer::SetUpBeforeCreateAllDynamicCubeMapResources(DCMResourcesIndex);
 
@@ -183,7 +183,7 @@ bool CGameObject::Destroy()
 		listEmptyReference->objIteratorStore.push(iteratorAll);
 		listEmptyReference->objCBIndexStore.push(m_ObjCBIndex);
 
-		auto gameObjectsWithLayer = CManager::GetScene()->GetGameObjectsWithLayer(this->GetGameObjectLayer());
+		auto gameObjectsWithLayer = CManager::GetScene()->GetRenderLayer(this->GetGameObjectLayer());
 		auto iteratorLayer=find_if(
 			gameObjectsWithLayer.begin(), gameObjectsWithLayer.end(),
 			[objCBIndex](CGameObject* GameObject) { return GameObject->GetObjCBIndex() == objCBIndex; });

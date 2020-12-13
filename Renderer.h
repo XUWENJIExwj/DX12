@@ -124,12 +124,12 @@ public:
 	static void SetUpDynamicCubeMapResources(int DCMResourcesIndex);
 	static void SetUpBeforeCreateAllDynamicCubeMapResources(int DCMResourcesIndex);
 	static void SetUpBeforeCreateEachDynamicCubeMapResource(int DCMResourcesIndex, int FaceIndex);
-	static void CreateDynamicCubeMapResources(const GameTimer& GlobalTimer, std::list<CGameObject*>& GameObjectsWithLayer);
+	static void CreateDynamicCubeMapResources(const GameTimer& GlobalTimer, std::list<CGameObject*>& RenderLayer);
 	static void CompleteCreateDynamicCubeMapResources(int DCMResourcesIndex);
 	static void SetUpBeforeDrawScene();
 	static void SetPSO(int PSOType);
-	static void DrawGameObjectsWithLayer(std::list<CGameObject*>& GameObjectsWithLayer);
-	static void DrawGameObjectsWithDynamicCubeMap(std::list<CGameObject*>& GameObjectsWithLayer);
+	static void DrawGameObjectsWithLayer(std::list<CGameObject*>& RenderLayer);
+	static void DrawGameObjectsWithDynamicCubeMap(std::list<CGameObject*>& RenderLayer);
 	static void DrawSingleGameObject(CGameObject* GameObject, ID3D12Resource* ObjectCB);
 	static void End();
 };

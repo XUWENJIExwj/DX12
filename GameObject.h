@@ -7,8 +7,8 @@
 class CGameObject
 {
 protected:
+	int         m_RenderLayer;
 	std::string m_Name;
-	int         m_GameObjectLayer;
 	bool        m_Destroy = false;
 
 	DirectX::XMFLOAT3 m_Position = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
@@ -45,9 +45,13 @@ public:
 
 	// DynamicCubeMap•`‰æ—p
 	void CreateDynamicCubeMapResources(const GameTimer& GlobalTimer, int DCMResourcesIndex);
-	virtual void DrawDynamicCubeMapScene(std::list<CGameObject*>* AllGameObjectsWithLayer) {}
+	virtual void DrawDynamicCubeMapScene(std::list<CGameObject*>* AllRenderLayers) {}
 
-	void SetGameObjectLayer(int GameObjectLayer) { m_GameObjectLayer = GameObjectLayer; }
+	// ImGui—p
+	virtual void DrawImGui(const GameTimer& GlobalTimer) {}
+
+	void SetRenderLayer(int RenderLayer) { m_RenderLayer = RenderLayer; }
+	void SetName(std::string Name) { m_Name = Name; }
 	void SetPosition(DirectX::XMFLOAT3 Position) { m_Position = m_OldPosition = Position; }
 	void SetRotation(DirectX::XMFLOAT3 Rotation) { m_Rotation = Rotation; }
 	void SetScale(DirectX::XMFLOAT3 Scale) { m_Scale = Scale; }
@@ -56,7 +60,7 @@ public:
 	void SetNumFramesDirty(int NumFramesDirty) { m_NumFramesDirty = NumFramesDirty; }
 	void SetObjCBIndex(UINT ObjCBIndex) { m_ObjCBIndex = ObjCBIndex; }
 
-	int GetGameObjectLayer() { return m_GameObjectLayer; }
+	int GetGameObjectLayer() { return m_RenderLayer; }
 
 	DirectX::XMFLOAT3   GetPosition3f()const { return m_Position; }
 	DirectX::XMFLOAT3   GetRotation3f()const { return m_Rotation; }

@@ -9,5 +9,5 @@ public:
 	void Update(const GameTimer& GlobalTimer)override;
 
 	void GlobalRotate(const GameTimer& GlobalTimer);
-	void DrawDynamicCubeMapScene(std::list<CGameObject*>* AllGameObjectsWithLayer)override;
+	void DrawDynamicCubeMapScene(std::list<CGameObject*>* AllRenderLayers)override;
 };

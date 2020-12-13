@@ -839,10 +839,10 @@ void CRenderer::SetUpBeforeCreateEachDynamicCubeMapResource(int DCMResourcesInde
 	m_CommandList->SetGraphicsRootConstantBufferView(1, passCBAddress);
 }
 
-void CRenderer::CreateDynamicCubeMapResources(const GameTimer& GlobalTimer, std::list<CGameObject*>& GameObjectsWithLayer)
+void CRenderer::CreateDynamicCubeMapResources(const GameTimer& GlobalTimer, std::list<CGameObject*>& RenderLayer)
 {
 	int dcmResourcesIndex = 0;
-	for (CGameObject* gameObject : GameObjectsWithLayer)
+	for (CGameObject* gameObject : RenderLayer)
 	{
 		gameObject->CreateDynamicCubeMapResources(GlobalTimer, dcmResourcesIndex);
 		++dcmResourcesIndex;
@@ -885,22 +885,22 @@ void CRenderer::SetPSO(int PSOType)
 	}
 }
 
-void CRenderer::DrawGameObjectsWithLayer(std::list<CGameObject*>& GameObjectsWithLayer)
+void CRenderer::DrawGameObjectsWithLayer(std::list<CGameObject*>& RenderLayer)
 {
 	auto objectCB = CFrameResourceManager::GetCurrentFrameResource()->ObjectCB->Resource();
 
-	for (CGameObject* gameObject : GameObjectsWithLayer)
+	for (CGameObject* gameObject : RenderLayer)
 	{
 		DrawSingleGameObject(gameObject, objectCB);
 	}
 }
 
-void CRenderer::DrawGameObjectsWithDynamicCubeMap(std::list<CGameObject*>& GameObjectsWithLayer)
+void CRenderer::DrawGameObjectsWithDynamicCubeMap(std::list<CGameObject*>& RenderLayer)
 {
 	auto objectCB = CFrameResourceManager::GetCurrentFrameResource()->ObjectCB->Resource();
 	int dcmResourcesIndex = 0;
 
-	for (CGameObject* gameObject : GameObjectsWithLayer)
+	for (CGameObject* gameObject : RenderLayer)
 	{
 		CRenderer::SetUpDynamicCubeMapResources(dcmResourcesIndex);
 		CRenderer::DrawSingleGameObject(gameObject, objectCB);

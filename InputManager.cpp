@@ -49,7 +49,7 @@ void CMouse::Init()
 {
 	m_Mouse = make_unique<Mouse>();
 	m_Mouse->SetWindow(DX12App::GetApp()->GetMainWindowHandle());
-	m_Mouse->SetMode(Mouse::MODE_RELATIVE);
+	m_Mouse->SetMode(Mouse::MODE_ABSOLUTE);
 }
 
 void CMouse::Update()

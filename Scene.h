@@ -4,7 +4,7 @@
 #include "Common\\GameTimer.h"
 #include "FrameResource.h"
 
-enum class GameObjectsLayer :int
+enum class RenderLayers :int
 {
 	Layer_Camera,
 	Layer_Light,
@@ -30,7 +30,7 @@ class CScene
 {
 protected:
 	std::list<CGameObject*> m_AllGameObjects;
-	std::list<CGameObject*> m_GameObjectsLayer[(int)GameObjectsLayer::Layer_Max];
+	std::list<CGameObject*> m_AllRenderLayers[(int)RenderLayers::Layer_Max];
 	AllGameObjectsListEmptyReference m_ListEmptyReference;
 
 	UINT          m_ObjectCBCounts = 0;
@@ -50,6 +50,7 @@ public:
 	virtual void Update(const GameTimer& GlobalTimer);
 	virtual void LateUpdate(const GameTimer& GlobalTimer);
 	virtual void Draw(const GameTimer& GlobalTimer) = 0;
+	virtual void DrawImGui(const GameTimer& GlobalTimer);
 
 	virtual void UpdateGameObjectsCB(const GameTimer& GlobalTimer);
 	virtual void UpdateMaterialBuffer(const GameTimer& GlobalTimer);
@@ -60,12 +61,13 @@ public:
 	void CheckNecessaryCBBufferSize();
 
 	template<typename T>
-	T* AddGameObject(int Layer)
+	T* AddGameObject(int Layer, std::string Name = "")
 	{
 		T* gameObject = new T;
 
-		m_GameObjectsLayer[Layer].push_back(gameObject);
-		gameObject->SetGameObjectLayer(Layer);
+		m_AllRenderLayers[Layer].push_back(gameObject);
+		gameObject->SetRenderLayer(Layer);
+		gameObject->SetName(Name);
 		gameObject->Init();
 
 		if (m_ListEmptyReference.objIteratorStore.size() > 0)
@@ -88,7 +90,7 @@ public:
 	template<typename T>
 	T* GetGameObject(int Layer)
 	{
-		for (CGameObject* gameObject : m_GameObjectsLayer[Layer])
+		for (CGameObject* gameObject : m_AllRenderLayers[Layer])
 		{
 			// Œ^‚ð’²‚×‚é
 			if (typeid(*gameObject) == typeid(T))
@@ -104,7 +106,7 @@ public:
 	std::vector<T*>& GetGameObjects(int Layer)
 	{
 		std::vector<T*> gameObjects; // STL‚Ì”z—ñ
-		for (CGameObject* gameObject : m_GameObjectsLayer[Layer])
+		for (CGameObject* gameObject : m_AllRenderLayers[Layer])
 		{
 			if (typeid(*gameObject) == typeid(T))
 			{
@@ -116,8 +118,8 @@ public:
 	}
 
 	std::list<CGameObject*>& GetAllGameObjects() { return m_AllGameObjects; }
-	std::list<CGameObject*>& GetGameObjectsWithLayer(int Layer) { return m_GameObjectsLayer[Layer]; }
-	std::list<CGameObject*>* GetAllGameObjectsWithLayer() { return m_GameObjectsLayer; }
+	std::list<CGameObject*>& GetRenderLayer(int Layer) { return m_AllRenderLayers[Layer]; }
+	std::list<CGameObject*>* GetAllRenderLayers() { return m_AllRenderLayers; }
 	AllGameObjectsListEmptyReference* GetListEmptyReference() { return &m_ListEmptyReference; }
 	UINT GetAllGameObjectsCount() { return (UINT)m_AllGameObjects.size(); }
 	std::vector<CCamera*>& GetDynamicCubeMapCameras() { return m_DCMCameras; }

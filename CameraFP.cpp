@@ -26,6 +26,52 @@ void CCameraFP::Update(const GameTimer& GlobalTimer)
 	CameraRotate(GlobalTimer);
 }
 
+void CCameraFP::DrawImGui(const GameTimer& GlobalTimer)
+{
+	static bool showClose = true;
+	if (showClose)
+	{
+		m_ViewDirty = true;
+
+		ImGui::SetNextWindowPos(ImVec2(20, 20), ImGuiCond_Once);
+		ImGui::SetNextWindowSize(ImVec2(300, 150), ImGuiCond_Once);
+
+		ImGuiWindowFlags window_flags = 0;
+		ImGui::Begin(m_Name.c_str(), &showClose, window_flags);
+		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.18f);
+		ImGui::InputScalar("x##0", ImGuiDataType_Float, &m_Position.x, NULL, NULL, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue);
+		ImGui::SameLine();
+		ImGui::InputScalar("y##0", ImGuiDataType_Float, &m_Position.y, NULL, NULL, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue);
+		ImGui::SameLine();
+		ImGui::InputScalar("z##0", ImGuiDataType_Float, &m_Position.z, NULL, NULL, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue);
+		ImGui::SameLine();
+		ImGui::Text("Position");
+		ImGui::DragFloat("x##1", &m_Right.x, 0.01f, -1.0f, 1.0f);
+		ImGui::SameLine();
+		ImGui::DragFloat("y##1", &m_Right.y, 0.01f, -1.0f, 1.0f);
+		ImGui::SameLine();
+		ImGui::DragFloat("z##1", &m_Right.z, 0.01f, -1.0f, 1.0f);
+		ImGui::SameLine();
+		ImGui::Text("Right");
+		ImGui::DragFloat("x##2", &m_Up.x, 0.01f, -1.0f, 1.0f);
+		ImGui::SameLine();
+		ImGui::DragFloat("y##2", &m_Up.y, 0.01f, -1.0f, 1.0f);
+		ImGui::SameLine();
+		ImGui::DragFloat("z##2", &m_Up.z, 0.01f, -1.0f, 1.0f);
+		ImGui::SameLine();
+		ImGui::Text("Up");
+		ImGui::DragFloat("x##3", &m_Look.x, 0.01f, -1.0f, 1.0f);
+		ImGui::SameLine();
+		ImGui::DragFloat("y##3", &m_Look.y, 0.01f, -1.0f, 1.0f);
+		ImGui::SameLine();
+		ImGui::DragFloat("z##3", &m_Look.z, 0.01f, -1.0f, 1.0f);
+		ImGui::SameLine();
+		ImGui::Text("Look");
+		ImGui::PopItemWidth();
+		ImGui::End();
+	}
+}
+
 void CCameraFP::WalkDepth(float d)
 {
 	// mPosition += d * m_Look
@@ -120,5 +166,10 @@ void CCameraFP::CameraRotate(const GameTimer& GlobalTimer)
 	{
 		Pitch(CAMERA_ROTX);
 		RotateY(CAMERA_ROTY);
+	}
+	else if (CMouse::IsLeftButtonDown())
+	{
+		//Pitch(1.0f * (CMouse::GetMoveY() - CMouse::GetLastState().y) * GlobalTimer.DeltaTime());
+		//RotateY(1.0f * (CMouse::GetMoveX() - CMouse::GetLastState().x) * GlobalTimer.DeltaTime());
 	}
 }

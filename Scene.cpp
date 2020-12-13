@@ -32,14 +32,14 @@ void CScene::FixedUpdate(const GameTimer& GlobalTimer)
 {
 	if (GlobalTimer.GetFixed())
 	{
-		for (int i = 0; i < (int)GameObjectsLayer::Layer_Max - 1; ++i)
+		for (int i = 0; i < (int)RenderLayers::Layer_Max - 1; ++i)
 		{
-			for (CGameObject* gameObject : m_GameObjectsLayer[i])
+			for (CGameObject* gameObject : m_AllRenderLayers[i])
 			{
 				gameObject->FixedUpdate(GlobalTimer);
 			}
 
-			m_GameObjectsLayer[i].remove_if
+			m_AllRenderLayers[i].remove_if
 			(
 				[](CGameObject* GameObject)
 			{
@@ -52,14 +52,14 @@ void CScene::FixedUpdate(const GameTimer& GlobalTimer)
 
 void CScene::Update(const GameTimer& GlobalTimer)
 {
-	for (int i = 0; i < (int)GameObjectsLayer::Layer_Max - 1; ++i)
+	for (int i = 0; i < (int)RenderLayers::Layer_Max - 1; ++i)
 	{
-		for (CGameObject* gameObject : m_GameObjectsLayer[i])
+		for (CGameObject* gameObject : m_AllRenderLayers[i])
 		{
 			gameObject->Update(GlobalTimer);
 		}
 
-		m_GameObjectsLayer[i].remove_if
+		m_AllRenderLayers[i].remove_if
 		(
 			[](CGameObject* GameObject)
 		{
@@ -71,20 +71,31 @@ void CScene::Update(const GameTimer& GlobalTimer)
 
 void CScene::LateUpdate(const GameTimer& GlobalTimer)
 {
-	for (int i = 0; i < (int)GameObjectsLayer::Layer_Max - 1; ++i)
+	for (int i = 0; i < (int)RenderLayers::Layer_Max - 1; ++i)
 	{
-		for (CGameObject* object : m_GameObjectsLayer[i])
+		for (CGameObject* gameObject : m_AllRenderLayers[i])
 		{
-			object->LateUpdate(GlobalTimer);
+			gameObject->LateUpdate(GlobalTimer);
 		}
 
-		m_GameObjectsLayer[i].remove_if
+		m_AllRenderLayers[i].remove_if
 		(
 			[](CGameObject* GameObject)
 		{
 			return GameObject->Destroy();
 		}
 		); // ƒ‰ƒ€ƒ_Ž®
+	}
+}
+
+void CScene::DrawImGui(const GameTimer & GlobalTimer)
+{
+	for (int i = 0; i < (int)RenderLayers::Layer_Max; ++i)
+	{
+		for (CGameObject* gameObject : m_AllRenderLayers[i])
+		{
+			gameObject->DrawImGui(GlobalTimer);
+		}
 	}
 }
 
@@ -98,7 +109,7 @@ void CScene::UpdateGameObjectsCB(const GameTimer& GlobalTimer)
 			int numFramesDirty = gameObject->GetNumFramesDirty();
 			// Only update the cbuffer data if the constants have changed.  
 			// This needs to be tracked per frame resource.
-			if (numFramesDirty > 0 && gameObject->GetGameObjectLayer() != (int)GameObjectsLayer::Layer_Camera)
+			if (numFramesDirty > 0 && gameObject->GetGameObjectLayer() != (int)RenderLayers::Layer_Camera)
 			{
 				DirectX::XMMATRIX world = gameObject->GetWorldMatrix();
 				DirectX::XMMATRIX texTransform = gameObject->GetTexTransformMatrix();

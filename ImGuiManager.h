@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ImGui\\imgui.h"
+#include "Common\\GameTimer.h"
 
 class CImGuiManager
 {

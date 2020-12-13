@@ -10,6 +10,7 @@ public:
 
 	void Init()override;
 	void Update(const GameTimer& GlobalTimer)override;
+	void DrawImGui(const GameTimer& GlobalTimer)override;
 
 	// Move the camera
 	void WalkDepth(float d);
