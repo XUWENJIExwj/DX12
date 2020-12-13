@@ -19,6 +19,7 @@ void CScene::Uninit()
 
 void CScene::UpdateAll(const GameTimer& GlobalTimer)
 {
+	UpdateImGui(GlobalTimer);
 	FixedUpdate(GlobalTimer);
 	Update(GlobalTimer);
 	LateUpdate(GlobalTimer);
@@ -88,13 +89,13 @@ void CScene::LateUpdate(const GameTimer& GlobalTimer)
 	}
 }
 
-void CScene::DrawImGui(const GameTimer & GlobalTimer)
+void CScene::UpdateImGui(const GameTimer & GlobalTimer)
 {
 	for (int i = 0; i < (int)RenderLayers::Layer_Max; ++i)
 	{
 		for (CGameObject* gameObject : m_AllRenderLayers[i])
 		{
-			gameObject->DrawImGui(GlobalTimer);
+			gameObject->UpdateImGui(GlobalTimer);
 		}
 	}
 }

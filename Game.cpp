@@ -63,7 +63,7 @@ void CGame::Update(const GameTimer& GlobalTimer)
 
 void CGame::Draw(const GameTimer& GlobalTimer)
 {
-	DrawImGui(GlobalTimer);
+	//UpdateImGui(GlobalTimer);
 
 	CRenderer::SetUpCommonResources();
 	CRenderer::SetUpCubeMapResources();

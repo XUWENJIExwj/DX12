@@ -50,8 +50,8 @@ public:
 	virtual void Update(const GameTimer& GlobalTimer);
 	virtual void LateUpdate(const GameTimer& GlobalTimer);
 	virtual void Draw(const GameTimer& GlobalTimer) = 0;
-	virtual void DrawImGui(const GameTimer& GlobalTimer);
 
+	virtual void UpdateImGui(const GameTimer& GlobalTimer);
 	virtual void UpdateGameObjectsCB(const GameTimer& GlobalTimer);
 	virtual void UpdateMaterialBuffer(const GameTimer& GlobalTimer);
 	virtual void UpdateMainPassCB(const GameTimer& GlobalTimer);

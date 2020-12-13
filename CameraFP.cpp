@@ -26,7 +26,7 @@ void CCameraFP::Update(const GameTimer& GlobalTimer)
 	CameraRotate(GlobalTimer);
 }
 
-void CCameraFP::DrawImGui(const GameTimer& GlobalTimer)
+void CCameraFP::UpdateImGui(const GameTimer& GlobalTimer)
 {
 	static bool showClose = true;
 	if (showClose)

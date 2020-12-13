@@ -48,7 +48,7 @@ public:
 	virtual void DrawDynamicCubeMapScene(std::list<CGameObject*>* AllRenderLayers) {}
 
 	// ImGui—p
-	virtual void DrawImGui(const GameTimer& GlobalTimer) {}
+	virtual void UpdateImGui(const GameTimer& GlobalTimer) {}
 
 	void SetRenderLayer(int RenderLayer) { m_RenderLayer = RenderLayer; }
 	void SetName(std::string Name) { m_Name = Name; }

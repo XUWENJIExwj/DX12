@@ -20,8 +20,8 @@ private:
 	static DX12App* m_App;
 
 	// DX12èâä˙âª
-	static bool m_4xMsaaState;    // 4X MSAA enabled
-	static UINT m_4xMsaaQuality;      // quality level of 4X MSAA
+	static bool m_4xMsaaState;   // 4X MSAA enabled
+	static UINT m_4xMsaaQuality; // quality level of 4X MSAA
 
 	static Microsoft::WRL::ComPtr<IDXGIFactory4>  m_DxgiFactory;
 	static Microsoft::WRL::ComPtr<IDXGISwapChain> m_SwapChain;

@@ -23,20 +23,16 @@ void CMaterialManager::CreateMaterials()
 	for (int i = 0; i < (int)MaterialIndex::Material_Max; ++i)
 	{
 		auto material = make_unique<Material>();
-		material->Name = m_MaterialsName[i];// m_MaterialsName[i];
+		material->Name = m_MaterialsName[i];
 		material->MatCBIndex = i;
 		material->DiffuseSrvHeapIndex = i;
 		material->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 		material->FresnelR0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
-		material->Roughness = 1.0f;
+		material->Roughness = 0.99f;
 		m_Materials[i] = move(material);
 	}
 
 	// Customize
-	m_Materials[(int)MaterialIndex::Material_Logo_00]->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	m_Materials[(int)MaterialIndex::Material_Logo_00]->FresnelR0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
-	m_Materials[(int)MaterialIndex::Material_Logo_00]->Roughness = 1.0f;
-
 	m_Materials[(int)MaterialIndex::Material_Bricks_00]->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	m_Materials[(int)MaterialIndex::Material_Bricks_00]->FresnelR0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
 	m_Materials[(int)MaterialIndex::Material_Bricks_00]->Roughness = 0.3f;
@@ -48,6 +44,10 @@ void CMaterialManager::CreateMaterials()
 	m_Materials[(int)MaterialIndex::Material_Plane_00]->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	m_Materials[(int)MaterialIndex::Material_Plane_00]->FresnelR0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
 	m_Materials[(int)MaterialIndex::Material_Plane_00]->Roughness = 0.1f;
+
+	m_Materials[(int)MaterialIndex::Material_Logo_00]->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	m_Materials[(int)MaterialIndex::Material_Logo_00]->FresnelR0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
+	m_Materials[(int)MaterialIndex::Material_Logo_00]->Roughness = 1.0f;
 
 	m_Materials[(int)MaterialIndex::Material_Glass_00]->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	m_Materials[(int)MaterialIndex::Material_Glass_00]->FresnelR0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
@@ -80,7 +80,7 @@ void CMaterialManager::UpdateMaterial()
 
 	if (showClose)
 	{
-		ImGui::SetNextWindowPos(ImVec2(700, 20), ImGuiCond_Once);
+		ImGui::SetNextWindowPos(ImVec2(840, 20), ImGuiCond_Once);
 		ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_Once);
 
 		ImGuiWindowFlags window_flags = 0;

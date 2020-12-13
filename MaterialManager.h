@@ -22,6 +22,7 @@ public:
 	static void CreateMaterials();
 	static void UpdateMaterial();
 
+	static const char**                            GetMaterialsName() { return m_MaterialsName.data(); }
 	static std::vector<std::unique_ptr<Material>>& GetMaterials() { return m_Materials; }
 	static Material* GetMaterial(int MaterialIndex) { return m_Materials[MaterialIndex].get(); }
 	static int GetMaterialsCount() { return (int)m_Materials.size(); }
