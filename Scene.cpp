@@ -133,9 +133,9 @@ void CScene::UpdateGameObjectsCB(const GameTimer& GlobalTimer)
 void CScene::UpdateMaterialBuffer(const GameTimer& GlobalTimer)
 {
 	auto currMaterialBuffer = CFrameResourceManager::GetCurrentFrameResource()->MaterialBuffer.get();
-	auto materials = CMaterialManager::GetMaterials().data();
+	auto materials = CMaterialManager::GetAllMaterials();
 
-	for (int i = 0; i < CMaterialManager::GetMaterialsCount(); i++)
+	for (int i = 0; i < CMaterialManager::GetAllMaterialsCount(); ++i)
 	{
 		// Only update the cbuffer data if the constants have changed.  If the cbuffer
 		// data changes, it needs to be updated for each FrameResource.

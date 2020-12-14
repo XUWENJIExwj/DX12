@@ -48,7 +48,8 @@ vector<ComPtr<ID3D12PipelineState>> CRenderer::m_PSOs((int)PSOTypeIndex::PSO_MAX
 int                                 CRenderer::m_CurrentPSO = (int)PSOTypeIndex::PSO_00_Solid_Opaque;
 
 // CubeMap
-CD3DX12_GPU_DESCRIPTOR_HANDLE CRenderer::m_SkyTextureDescriptorHandle;
+vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> CRenderer::m_SkyTextureDescriptorHandles;
+int                                   CRenderer::m_CurrentSkyTextureIndex = 0;
 
 // DynamicCubeMap
 bool                          CRenderer::m_DynamicCubeMapOn = true;
@@ -379,8 +380,6 @@ void CRenderer::CreateCommonResources()
 	CreateDescriptorHeaps();
 	CreataPSOs();
 
-	m_SkyTextureDescriptorHandle = CreateCubeMapDescriptorHandle(CTextureManager::GetSkyTextureIndex());
-
 	ExecuteCommandLists();
 
 	// Wait until initialization is complete.
@@ -472,6 +471,7 @@ void CRenderer::CreateDescriptorHeaps()
 
 	for (unsigned int i = skyTextureIndex; i < dynamicTextureIndex; ++i)
 	{
+		m_SkyTextureDescriptorHandles.push_back(CreateCubeMapDescriptorHandle(i));
 		auto tex = textures[i]->Resource;
 		srvDesc.Format = tex->GetDesc().Format;
 		srvDesc.TextureCube.MipLevels = tex->GetDesc().MipLevels;
@@ -804,7 +804,7 @@ void CRenderer::SetUpCubeMapResources()
 	// from far away, so all objects will use the same cube map and we only need to set it once per-frame.  
 	// If we wanted to use "local" cube maps, we would have to change them per-object, or dynamically
 	// index into an array of cube maps.
-	m_CommandList->SetGraphicsRootDescriptorTable(3, m_SkyTextureDescriptorHandle);
+	m_CommandList->SetGraphicsRootDescriptorTable(3, m_SkyTextureDescriptorHandles[m_CurrentSkyTextureIndex]);
 }
 
 void CRenderer::SetUpDynamicCubeMapResources(int DCMResourcesIndex)

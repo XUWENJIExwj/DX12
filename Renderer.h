@@ -60,7 +60,8 @@ private:
 	static int                                                      m_CurrentPSO;
 
 	// CubeMap
-	static CD3DX12_GPU_DESCRIPTOR_HANDLE m_SkyTextureDescriptorHandle;
+	static std::vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> m_SkyTextureDescriptorHandles;
+	static int                                        m_CurrentSkyTextureIndex;
 
 	// DynamicCubeMap
 	static bool                                   m_DynamicCubeMapOn;
@@ -120,6 +121,7 @@ public:
 	// •`‰æ—p
 	static void Begin();
 	static void SetUpCommonResources();
+	static void SetCurrentCubeMapIndex(int CubeMapIndex) { m_CurrentSkyTextureIndex = CubeMapIndex; }
 	static void SetUpCubeMapResources();
 	static void SetUpDynamicCubeMapResources(int DCMResourcesIndex);
 	static void SetUpBeforeCreateAllDynamicCubeMapResources(int DCMResourcesIndex);

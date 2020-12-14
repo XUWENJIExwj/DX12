@@ -34,6 +34,10 @@ VertexOut VS(VertexIn vin)
 
 float4 PS(VertexOut pin) : SV_Target
 {
-	return gCubeMap.Sample(gsamLinearWrap, pin.PosLS);
+    MaterialData matData = gMaterialData[gMaterialIndex];
+    float4 diffuseAlbedo = gCubeMap.Sample(gsamLinearWrap, pin.PosLS);
+    float4 litColor = diffuseAlbedo * matData.DiffuseAlbedo;
+    litColor.a = diffuseAlbedo.a;
+	return litColor;
 }
 

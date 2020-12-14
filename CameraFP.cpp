@@ -167,9 +167,9 @@ void CCameraFP::CameraRotate(const GameTimer& GlobalTimer)
 		Pitch(CAMERA_ROTX);
 		RotateY(CAMERA_ROTY);
 	}
-	else if (CMouse::IsLeftButtonDown())
+	else if (CMouse::IsRightButtonDown())
 	{
-		//Pitch(1.0f * (CMouse::GetMoveY() - CMouse::GetLastState().y) * GlobalTimer.DeltaTime());
-		//RotateY(1.0f * (CMouse::GetMoveX() - CMouse::GetLastState().x) * GlobalTimer.DeltaTime());
+		Pitch(1.0f * (CMouse::GetMoveY() - CMouse::GetLastState().y) * GlobalTimer.DeltaTime());
+		RotateY(1.0f * (CMouse::GetMoveX() - CMouse::GetLastState().x) * GlobalTimer.DeltaTime());
 	}
 }
