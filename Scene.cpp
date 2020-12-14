@@ -145,6 +145,7 @@ void CScene::UpdateMaterialBuffer(const GameTimer& GlobalTimer)
 
 			MaterialData matData;
 			matData.DiffuseAlbedo = materials[i]->DiffuseAlbedo;
+			matData.CubeMapDiffuseAlbedo = materials[i]->CubeMapDiffuseAlbedo;
 			matData.FresnelR0 = materials[i]->FresnelR0;
 			matData.Roughness = materials[i]->Roughness;
 			XMStoreFloat4x4(&matData.MatTransform, XMMatrixTranspose(matTransform));

@@ -3,6 +3,7 @@
 enum class MaterialTexIndex :int
 {
 	Material_Mirror_00,
+	Material_Mirror_01,
 	Material_Logo_00,
 	Material_Bricks_00,
 	Material_Tile_00,

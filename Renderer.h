@@ -105,6 +105,9 @@ public:
 	static DXGI_FORMAT                 GetBackBufferFormat() { return m_BackBufferFormat; }
 	static ID3D12DescriptorHeap*       GetSrvHeap() { return m_SrvHeap.Get(); }
 
+	// CubeMap
+	static int GetCurrentCubeMapIndex() { return m_CurrentSkyTextureIndex; }
+
 	// DynamicCubeMap
 	static bool                          GetDynamicCubeOn() { return m_DynamicCubeMapOn; }
 	static CD3DX12_GPU_DESCRIPTOR_HANDLE CreateCubeMapDescriptorHandle(UINT Offset);

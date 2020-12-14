@@ -76,7 +76,7 @@ float4 PS(VertexOut pin) : SV_Target
 	//bumpedNormalWS = pin.NormalWS;
 
 	// Dynamically look up the texture in the array.
-    diffuseAlbedo *= gTextureMaps[diffuseTexIndex].Sample(gsamAnisotropicWrap, pin.TexC);
+    diffuseAlbedo *= gTextureMaps[diffuseTexIndex].Sample(gsamAnisotropicWrap, pin.TexC) * matData.CubeMapDiffuseAlbedo;
 
     // Vector from point being lit to eye. 
     float3 toEyeWS = normalize(gEyePosW - pin.PosWS);
@@ -94,7 +94,7 @@ float4 PS(VertexOut pin) : SV_Target
 
 	// Add in specular reflections.
     float3 r = reflect(-toEyeWS, bumpedNormalWS);
-	float4 reflectionColor = gCubeMap.Sample(gsamLinearWrap, r);
+    float4 reflectionColor = gCubeMap.Sample(gsamLinearWrap, r) * matData.CubeMapDiffuseAlbedo;
     float3 fresnelFactor = SchlickFresnel(fresnelR0, bumpedNormalWS, r);
 	litColor.rgb += shininess * fresnelFactor * reflectionColor.rgb;
 

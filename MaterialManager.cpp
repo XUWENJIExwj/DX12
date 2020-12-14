@@ -19,6 +19,7 @@ void CMaterialManager::CreateMaterials()
 	m_MaterialTexNames =
 	{
 		"Material_Mirror_00",
+		"Material_Mirror_01",
 		"Material_Logo_00",
 		"Material_Bricks_00",
 		"Material_Tile_00",
@@ -31,8 +32,8 @@ void CMaterialManager::CreateMaterials()
 		auto material = make_unique<Material>();
 		material->Name = m_MaterialTexNames[i];
 		material->MatCBIndex = i;
-		material->DiffuseSrvHeapIndex = i * 2;
-		material->NormalSrvHeapIndex = i * 2 + 1;
+		material->DiffuseSrvHeapIndex = i;
+		material->NormalSrvHeapIndex = i + (int)MaterialTexIndex::Material_Max;
 		material->TangentSign = 1;
 		material->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 		material->FresnelR0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
@@ -66,6 +67,10 @@ void CMaterialManager::CreateMaterials()
 	m_MaterialTex[(int)MaterialTexIndex::Material_Mirror_00]->DiffuseAlbedo = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 	m_MaterialTex[(int)MaterialTexIndex::Material_Mirror_00]->FresnelR0 = XMFLOAT3(0.98f, 0.97f, 0.95f);
 	m_MaterialTex[(int)MaterialTexIndex::Material_Mirror_00]->Roughness = 0.1f;
+
+	m_MaterialTex[(int)MaterialTexIndex::Material_Mirror_01]->DiffuseAlbedo = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	m_MaterialTex[(int)MaterialTexIndex::Material_Mirror_01]->FresnelR0 = XMFLOAT3(0.98f, 0.97f, 0.95f);
+	m_MaterialTex[(int)MaterialTexIndex::Material_Mirror_01]->Roughness = 0.1f;
 
 	m_MaterialTex[(int)MaterialTexIndex::Material_Bricks_00]->TangentSign = -1;
 	m_MaterialTex[(int)MaterialTexIndex::Material_Bricks_00]->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -115,17 +120,11 @@ void CMaterialManager::UpdateMaterial()
 
 		if (ImGui::ColorEdit4("DiffuseAlbedo##0", (float*)&m_MaterialTex[texIndex]->DiffuseAlbedo, ImGuiColorEditFlags_Float | misc_flags) ||
 			ImGui::ColorEdit3("FresnelR0##0", (float*)&m_MaterialTex[texIndex]->FresnelR0, ImGuiColorEditFlags_Float | misc_flags) ||
-			ImGui::DragFloat("Roughness##0", &m_MaterialTex[texIndex]->Roughness, 0.01f, 0.0f, 0.99f) ||
+			ImGui::DragFloat("Roughness##0", &m_MaterialTex[texIndex]->Roughness, 0.005f, 0.0f, 1.0f) ||
 			ImGui::Checkbox("ReverseTangent", &reverseTangent))
 		{
-			if (reverseTangent)
-			{
-				m_MaterialTex[texIndex]->TangentSign = -1;
-			}
-			else
-			{
-				m_MaterialTex[texIndex]->TangentSign = 1;
-			}
+			m_MaterialTex[texIndex]->TangentSign = reverseTangent ? -1 : 1;
+
 			m_MaterialTex[texIndex]->NumFramesDirty = gNumFrameResources;
 		}
 
@@ -135,9 +134,14 @@ void CMaterialManager::UpdateMaterial()
 		ImGui::Combo("MaterialCubeMapList", &cubeMapIndex, m_MaterialCubeMapNames.data(), GetMaterialCubeMapCount());
 		ImGui::PopItemWidth();
 
-		if (ImGui::ColorEdit4("DiffuseAlbedo##1", (float*)&m_MaterialCubeMap[cubeMapIndex]->DiffuseAlbedo, ImGuiColorEditFlags_Float | misc_flags))
+		if (ImGui::ColorEdit4("DiffuseAlbedo##1", (float*)&m_MaterialCubeMap[cubeMapIndex]->DiffuseAlbedo, ImGuiColorEditFlags_Float | misc_flags) &&
+			CRenderer::GetCurrentCubeMapIndex() == cubeMapIndex)
 		{
-			m_MaterialCubeMap[cubeMapIndex]->NumFramesDirty = gNumFrameResources;
+			for (int i = 1; i < (int)m_AllMaterials.size(); ++i)
+			{
+				m_AllMaterials[i]->CubeMapDiffuseAlbedo = m_MaterialCubeMap[cubeMapIndex]->DiffuseAlbedo;
+				m_AllMaterials[i]->NumFramesDirty = gNumFrameResources;
+			}
 		}
 		
 		ImGui::End();

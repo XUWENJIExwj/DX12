@@ -3,17 +3,20 @@
 enum class TextureIndex :int
 {
 	Texture_Default_00_Diffuse,
-	Texture_Default_00_Normal,
+	Texture_Default_01_Diffuse,
 	Texture_Logo_00_Diffuse,
-	Texture_Logo_00_Normal,
 	Texture_Bricks_00_Diffuse,
-	Texture_Bricks_00_Normal,
 	Texture_Tile_00_Diffuse,
-	Texture_Tile_00_Normal,
 	Texture_Plane_00_Diffuse,
-	Texture_Plane_00_Normal,
 	Texture_Glass_00_Diffuse,
+	Texture_Default_00_Normal,
+	Texture_Default_01_Normal,
+	Texture_Logo_00_Normal,
+	Texture_Bricks_00_Normal,
+	Texture_Tile_00_Normal,
+	Texture_Plane_00_Normal,
 	Texture_Glass_00_Normal,
+	//Texture_Plane_00_Height, // HeightMap
 	Texture_SkyCube_00_Diffuse, // CubeMap
 	Texture_SkyCube_01_Diffuse,
 	Texture_SkyCube_02_Diffuse,

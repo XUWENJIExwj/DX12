@@ -31,8 +31,13 @@ void CSky::UpdateImGui(const GameTimer & GlobalTimer)
 		if (ImGui::Combo("MaterialList", &index, CMaterialManager::GetMaterialCubeMapNames(), CMaterialManager::GetMaterialCubeMapCount()))
 		{
 			m_Material = CMaterialManager::GetMaterialCubeMap(index);
-			CRenderer::SetCurrentCubeMapIndex(index);
 			m_NumFramesDirty = gNumFrameResources;
+			CRenderer::SetCurrentCubeMapIndex(index);
+			for (int i = 0; i < CMaterialManager::GetAllMaterialsCount(); ++i)
+			{
+				CMaterialManager::GetMaterial(i)->CubeMapDiffuseAlbedo = CMaterialManager::GetMaterialCubeMap(index)->DiffuseAlbedo;
+				CMaterialManager::GetMaterial(i)->NumFramesDirty = gNumFrameResources;
+			}
 		}
 		ImGui::PopItemWidth();
 		ImGui::End();
