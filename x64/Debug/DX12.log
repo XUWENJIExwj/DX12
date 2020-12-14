@@ -1,15 +1,4 @@
-﻿  FrameResource.cpp
-  Game.cpp
-  GameObject.cpp
-  GeoShapeManager.cpp
-  ImGuiManager.cpp
-  Manager.cpp
-  MaterialManager.cpp
-  Renderer.cpp
-  Scene.cpp
-  ShaderManager.cpp
+﻿  Cube.cpp
   Sky.cpp
-  SphereDR.cpp
-  TextureManager.cpp
   コードを生成中...
   DX12.vcxproj -> D:\HAL\GM31\DX12\x64\Debug\DX12.exe

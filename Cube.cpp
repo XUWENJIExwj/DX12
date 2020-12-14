@@ -5,9 +5,9 @@ using namespace DirectX;
 
 void CCube::Init()
 {
-	m_Scale = XMFLOAT3(2.0f, 1.0f, 2.0f);
+	m_Scale = XMFLOAT3(1.0f, 1.0f, 1.0f);
 	m_World = ComputeWorldMatrix4x4();
-	m_Material = CMaterialManager::GetMaterialTex((int)MaterialTexIndex::Material_Bricks_00);
+	m_Material = CMaterialManager::GetMaterialTex((int)MaterialTexIndex::Material_Plane_00);
 	m_MeshGeometry = CGeoShapeManager::GetMeshGeometry((int)GeoShapeType::Type_00_GeoShapes);
 	m_IndexCount = m_MeshGeometry->DrawArgs["cube"].IndexCount;
 	m_StartIndexLocation = m_MeshGeometry->DrawArgs["cube"].StartIndexLocation;
@@ -26,12 +26,12 @@ void CCube::Update(const GameTimer& GlobalTimer)
 void CCube::UpdateImGui(const GameTimer & GlobalTimer)
 {
 	static bool showClose = true;
-	static int index = (int)MaterialTexIndex::Material_Bricks_00;
+	static int index = (int)MaterialTexIndex::Material_Plane_00;
 
 	if (showClose)
 	{
-		ImGui::SetNextWindowPos(ImVec2(400, 20), ImGuiCond_Once);
-		ImGui::SetNextWindowSize(ImVec2(300, 80), ImGuiCond_Once);
+		ImGui::SetNextWindowPos(ImVec2(20, 275), ImGuiCond_Once);
+		ImGui::SetNextWindowSize(ImVec2(300, 65), ImGuiCond_Once);
 
 		ImGuiWindowFlags window_flags = 0;
 		ImGui::Begin(m_Name.c_str(), &showClose, window_flags);

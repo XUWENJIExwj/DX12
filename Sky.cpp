@@ -21,8 +21,8 @@ void CSky::UpdateImGui(const GameTimer & GlobalTimer)
 
 	if (showClose)
 	{
-		ImGui::SetNextWindowPos(ImVec2(20, 420), ImGuiCond_Once);
-		ImGui::SetNextWindowSize(ImVec2(300, 80), ImGuiCond_Once);
+		ImGui::SetNextWindowPos(ImVec2(20, 190), ImGuiCond_Once);
+		ImGui::SetNextWindowSize(ImVec2(300, 65), ImGuiCond_Once);
 
 		ImGuiWindowFlags window_flags = 0;
 		ImGui::Begin(m_Name.c_str(), &showClose, window_flags);

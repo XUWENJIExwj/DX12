@@ -133,7 +133,7 @@ void CScene::UpdateGameObjectsCB(const GameTimer& GlobalTimer)
 void CScene::UpdateMaterialBuffer(const GameTimer& GlobalTimer)
 {
 	auto currMaterialBuffer = CFrameResourceManager::GetCurrentFrameResource()->MaterialBuffer.get();
-	auto materials = CMaterialManager::GetAllMaterials();
+	auto materials = CMaterialManager::GetAllMaterials().data();
 
 	for (int i = 0; i < CMaterialManager::GetAllMaterialsCount(); ++i)
 	{
@@ -149,6 +149,8 @@ void CScene::UpdateMaterialBuffer(const GameTimer& GlobalTimer)
 			matData.Roughness = materials[i]->Roughness;
 			XMStoreFloat4x4(&matData.MatTransform, XMMatrixTranspose(matTransform));
 			matData.DiffuseMapIndex = materials[i]->DiffuseSrvHeapIndex;
+			matData.NormalMapIndex = materials[i]->NormalSrvHeapIndex;
+			matData.TangentSign = materials[i]->TangentSign;
 
 			currMaterialBuffer->CopyData(materials[i]->MatCBIndex, matData);
 

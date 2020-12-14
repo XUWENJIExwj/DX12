@@ -21,16 +21,16 @@ struct MaterialData
 	float    Roughness;
 	float4x4 MatTransform;
 	uint     DiffuseMapIndex;
-	uint     MatPad0;
-	uint     MatPad1;
+    uint     NormalMapIndex;
 	uint     MatPad2;
+    int      TangentSign;
 };
 
 TextureCube gCubeMap : register(t0);
 
 // An array of textures, which is only supported in shader model 5.1+.  Unlike Texture2DArray, the textures
 // in this array can be different sizes and formats, making it more flexible than texture arrays.
-Texture2D gDiffuseMap[14] : register(t1);
+Texture2D gTextureMaps[16] : register(t1);
 
 // Put in space1, so the texture array does not overlap with these resources.  
 // The texture array will occupy registers t0, t1, ..., t3 in space0. 
@@ -79,5 +79,29 @@ cbuffer cbPass : register(b1)
     // are spot lights for a maximum of MaxLights per object.
     Light gLights[MaxLights];
 };
+
+//---------------------------------------------------------------------------------------
+// Transforms a normal map sample to world space.
+//---------------------------------------------------------------------------------------
+float3 NormalSampleToWorldSpace(float3 NormalMapSample, float3 NormalWS, float3 TangentWS)
+{
+	// Uncompress each component from [0,1] to [-1,1].
+    float3 normalTS = 2.0f * NormalMapSample - 1.0f;
+
+	// Build orthonormal basis.
+    float3 N = NormalWS;
+    float3 T = normalize(TangentWS - dot(TangentWS, N) * N);
+    // Textureによって、Tangentの符号が異なる。
+    // 赤いPixelが右側にあるTextureを多用しているので、-にしておく。
+    // MaterialのTangentSignと合わせて使う
+    float3 B = cross(N, -T); 
+
+    float3x3 TBN = float3x3(T, B, N);
+
+	// Transform from tangent space to world space.
+    float3 bumpedNormalWS = mul(normalTS, TBN);
+
+    return bumpedNormalWS;
+}
 
 

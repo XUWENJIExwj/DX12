@@ -68,6 +68,7 @@ void CGeoShapeManager::CreateGeoShapes(ID3D12Device* Device, ID3D12GraphicsComma
 	{
 		vertices[k].Pos = cube.Vertices[i].Position;
 		vertices[k].Normal = cube.Vertices[i].Normal;
+		vertices[k].Tangent = cube.Vertices[i].TangentU;
 		vertices[k].TexC = cube.Vertices[i].TexC;
 	}
 
@@ -75,6 +76,7 @@ void CGeoShapeManager::CreateGeoShapes(ID3D12Device* Device, ID3D12GraphicsComma
 	{
 		vertices[k].Pos = grid.Vertices[i].Position;
 		vertices[k].Normal = grid.Vertices[i].Normal;
+		vertices[k].Tangent = grid.Vertices[i].TangentU;
 		vertices[k].TexC = grid.Vertices[i].TexC;
 	}
 
@@ -82,6 +84,7 @@ void CGeoShapeManager::CreateGeoShapes(ID3D12Device* Device, ID3D12GraphicsComma
 	{
 		vertices[k].Pos = sphere.Vertices[i].Position;
 		vertices[k].Normal = sphere.Vertices[i].Normal;
+		vertices[k].Tangent = sphere.Vertices[i].TangentU;
 		vertices[k].TexC = sphere.Vertices[i].TexC;
 	}
 
@@ -89,6 +92,7 @@ void CGeoShapeManager::CreateGeoShapes(ID3D12Device* Device, ID3D12GraphicsComma
 	{
 		vertices[k].Pos = cylinder.Vertices[i].Position;
 		vertices[k].Normal = cylinder.Vertices[i].Normal;
+		vertices[k].Tangent = cylinder.Vertices[i].TangentU;
 		vertices[k].TexC = cylinder.Vertices[i].TexC;
 	}
 
