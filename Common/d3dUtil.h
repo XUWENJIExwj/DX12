@@ -253,12 +253,11 @@ struct Material
 	// Index into SRV heap for height texture.
 	int HeightSrvHeapIndex = -1;
 
-	int UseACForPOM = 0;
+	int TangentSign = 1; // Tangentの符号（反転用）
 
+	int UseACForPOM = 0;
 	int MaxSampleCount = 512; // HeightMap最大サンプル数
 	int MinSampleCount = 8; // HeightMap最小サンプル数
-
-	int TangentSign = 1; // Tangentの符号（反転用）
 	int MaterialPad0;
 
 	bool ShowSelfShadow = true;

@@ -53,11 +53,15 @@ struct MaterialData
 	UINT DiffuseMapIndex = 0;
 	UINT NormalMapIndex = 0;
 	UINT HeightMapIndex = 0;
+	int  TangentSign = 1; // Tangentの符号（反転用）
+};
+
+struct MaterialDataEx
+{
 	UINT UseACForPOM = 0;
 	UINT MaxSampleCount = 512; // HeightMap最大サンプル数
 	UINT MinSampleCount = 8;   // HeightMap最小サンプル数
-	int  TangentSign = 1; // Tangentの符号（反転用）
-	int  MaterialPad0 = 0;
+	UINT MaterialPad0 = 0;
 	bool ShowSelfShadow = true;
 	bool MaterialPad1 = true;
 	bool MaterialPad2 = true;
@@ -87,6 +91,7 @@ public:
 	std::unique_ptr<UploadBuffer<ObjectConstants>> ObjectCB = nullptr;
 
 	std::unique_ptr<UploadBuffer<MaterialData>> MaterialBuffer = nullptr;
+	std::unique_ptr<UploadBuffer<MaterialDataEx>> MaterialExBuffer = nullptr;
 
 	// Fence value to mark commands up to this fence point.  This lets us
 	// check if these frame resources are still in use by the GPU.

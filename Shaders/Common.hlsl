@@ -24,15 +24,19 @@ struct MaterialData
 	uint     DiffuseMapIndex;
     uint     NormalMapIndex;
 	uint     HeightMapIndex;
-    uint     UseACForPOM;
-    uint     MaxSampleCount;
-    uint     MinSampleCount;
     int      TangentSign;
-    int      MaterialPad0;
-    bool     ShowSelfShadow;
-    //bool MaterialPad1;
-    //bool MaterialPad2;
-    //bool MaterialPad3;
+};
+
+struct MaterialExData
+{
+    uint UseACForPOM;
+    uint MaxSampleCount;
+    uint MinSampleCount;
+    int  MaterialPad0;
+    bool ShowSelfShadow;
+    bool MaterialPad1;
+    bool MaterialPad2;
+    bool MaterialPad3;
 };
 
 TextureCube gCubeMap : register(t0);
@@ -45,6 +49,7 @@ Texture2D gTextureMaps[19] : register(t1);
 // Put in space1, so the texture array does not overlap with these resources.  
 // The texture array will occupy registers t0, t1, ..., t3 in space0. 
 StructuredBuffer<MaterialData> gMaterialData : register(t0, space1);
+StructuredBuffer<MaterialExData> gMaterialExData : register(t1, space1);
 
 SamplerState gsamPointWrap        : register(s0);
 SamplerState gsamPointClamp       : register(s1);

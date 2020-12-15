@@ -133,6 +133,7 @@ void CScene::UpdateGameObjectsCB(const GameTimer& GlobalTimer)
 void CScene::UpdateMaterialBuffer(const GameTimer& GlobalTimer)
 {
 	auto currMaterialBuffer = CFrameResourceManager::GetCurrentFrameResource()->MaterialBuffer.get();
+	auto currMaterialExBuffer = CFrameResourceManager::GetCurrentFrameResource()->MaterialExBuffer.get();
 	auto materials = CMaterialManager::GetAllMaterials().data();
 
 	for (int i = 0; i < CMaterialManager::GetAllMaterialsCount(); ++i)
@@ -152,17 +153,15 @@ void CScene::UpdateMaterialBuffer(const GameTimer& GlobalTimer)
 			matData.DiffuseMapIndex = materials[i]->DiffuseSrvHeapIndex;
 			matData.NormalMapIndex = materials[i]->NormalSrvHeapIndex;
 			matData.HeightMapIndex = materials[i]->HeightSrvHeapIndex;
-			matData.UseACForPOM = materials[i]->UseACForPOM;
-			matData.MaxSampleCount = materials[i]->MaxSampleCount;
-			matData.MinSampleCount = materials[i]->MinSampleCount;
 			matData.TangentSign = materials[i]->TangentSign;
-			matData.MaterialPad0 = materials[i]->MaterialPad0;
-			matData.ShowSelfShadow = materials[i]->ShowSelfShadow;
-			matData.MaterialPad1 = materials[i]->MaterialPad1;
-			matData.MaterialPad2 = materials[i]->MaterialPad2;
-			matData.MaterialPad3 = materials[i]->MaterialPad3;
-
 			currMaterialBuffer->CopyData(materials[i]->MatCBIndex, matData);
+
+			MaterialDataEx matExData;
+			matExData.UseACForPOM = materials[i]->UseACForPOM;
+			matExData.MaxSampleCount = materials[i]->MaxSampleCount;
+			matExData.MinSampleCount = materials[i]->MinSampleCount;
+			matExData.ShowSelfShadow = materials[i]->ShowSelfShadow;
+			currMaterialExBuffer->CopyData(materials[i]->MatCBIndex, matExData);
 
 			// Next FrameResource need to be updated too.
 			materials[i]->NumFramesDirty--;

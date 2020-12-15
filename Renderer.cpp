@@ -395,19 +395,20 @@ void CRenderer::CreateRootSignature()
 	texTable1.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, CTextureManager::GetTextureNum() + CTextureManager::GetDynamicTextureNum(), 1, 0);
 
 	// Root parameter can be a table, root descriptor or root constants.
-	CD3DX12_ROOT_PARAMETER slotRootParameter[5];
+	CD3DX12_ROOT_PARAMETER slotRootParameter[6];
 
 	// Perfomance TIP: Order from most frequent to least frequent.
 	slotRootParameter[0].InitAsConstantBufferView(0);
 	slotRootParameter[1].InitAsConstantBufferView(1);
 	slotRootParameter[2].InitAsShaderResourceView(0, 1);
-	slotRootParameter[3].InitAsDescriptorTable(1, &texTable0, D3D12_SHADER_VISIBILITY_PIXEL);
-	slotRootParameter[4].InitAsDescriptorTable(1, &texTable1, D3D12_SHADER_VISIBILITY_PIXEL);
+	slotRootParameter[3].InitAsShaderResourceView(1, 1);
+	slotRootParameter[4].InitAsDescriptorTable(1, &texTable0, D3D12_SHADER_VISIBILITY_PIXEL);
+	slotRootParameter[5].InitAsDescriptorTable(1, &texTable1, D3D12_SHADER_VISIBILITY_PIXEL);
 
 	auto staticSamplers = GetStaticSamplers();
 
 	// A root signature is an array of root parameters.
-	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(5, slotRootParameter,
+	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(6, slotRootParameter,
 		(UINT)staticSamplers.size(), staticSamplers.data(),
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
@@ -792,10 +793,13 @@ void CRenderer::SetUpCommonResources()
 	auto matBuffer = CFrameResourceManager::GetCurrentFrameResource()->MaterialBuffer->Resource();
 	m_CommandList->SetGraphicsRootShaderResourceView(2, matBuffer->GetGPUVirtualAddress());
 
+	auto matExBuffer = CFrameResourceManager::GetCurrentFrameResource()->MaterialExBuffer->Resource();
+	m_CommandList->SetGraphicsRootShaderResourceView(3, matExBuffer->GetGPUVirtualAddress());
+
 	// Bind all the textures used in this scene.  Observe
 	// that we only have to specify the first descriptor in the table.  
 	// The root signature knows how many descriptors are expected in the table.
-	m_CommandList->SetGraphicsRootDescriptorTable(4, m_SrvHeap->GetGPUDescriptorHandleForHeapStart());
+	m_CommandList->SetGraphicsRootDescriptorTable(5, m_SrvHeap->GetGPUDescriptorHandleForHeapStart());
 }
 
 void CRenderer::SetUpCubeMapResources()
@@ -804,13 +808,13 @@ void CRenderer::SetUpCubeMapResources()
 	// from far away, so all objects will use the same cube map and we only need to set it once per-frame.  
 	// If we wanted to use "local" cube maps, we would have to change them per-object, or dynamically
 	// index into an array of cube maps.
-	m_CommandList->SetGraphicsRootDescriptorTable(3, m_SkyTextureDescriptorHandles[m_CurrentSkyTextureIndex]);
+	m_CommandList->SetGraphicsRootDescriptorTable(4, m_SkyTextureDescriptorHandles[m_CurrentSkyTextureIndex]);
 }
 
 void CRenderer::SetUpDynamicCubeMapResources(int DCMResourcesIndex)
 {
 	// Use the dynamic cube map for the dynamic reflectors layer.
-	m_CommandList->SetGraphicsRootDescriptorTable(3, m_DynamicCubeMap->GetSrvHandle(DCMResourcesIndex));
+	m_CommandList->SetGraphicsRootDescriptorTable(4, m_DynamicCubeMap->GetSrvHandle(DCMResourcesIndex));
 }
 
 void CRenderer::SetUpBeforeCreateAllDynamicCubeMapResources(int DCMResourcesIndex)
