@@ -25,7 +25,7 @@ void CGame::Init()
 	}
 	
 	CSky* sky = AddGameObject<CSky>((int)RenderLayers::Layer_3D_Sky, "Sky");
-	CMeshField* meshField= AddGameObject<CMeshField>((int)RenderLayers::Layer_3D_Opaque, "MeshField");
+	CMeshField* meshField= AddGameObject<CMeshField>((int)RenderLayers::Layer_3D_Opaque_POM, "MeshField");
 	CCube* cube = AddGameObject<CCube>((int)RenderLayers::Layer_3D_Opaque, "Brick");
 	CSphere* sphere = AddGameObject<CSphere>((int)RenderLayers::Layer_3D_Opaque, "Mirror");
 
@@ -75,7 +75,10 @@ void CGame::Draw(const GameTimer& GlobalTimer)
 	//CRenderer::SetPSO((int)PSOTypeIndex::PSO_01_WireFrame_Opaque);
 	CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque]);
 
-	CRenderer::SetPSO((int)PSOTypeIndex::PSO_02_Solid_Sky);
+	CRenderer::SetPSO((int)PSOTypeIndex::PSO_Solid_Opaque_POM);
+	CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque_POM]);
+
+	CRenderer::SetPSO((int)PSOTypeIndex::PSO_Solid_Sky);
 	//CRenderer::SetPSO((int)PSOTypeIndex::PSO_03_WireFrame_Sky);
 	CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Sky]);
 }

@@ -33,7 +33,7 @@ void CSky::UpdateImGui(const GameTimer & GlobalTimer)
 			m_Material = CMaterialManager::GetMaterialCubeMap(index);
 			m_NumFramesDirty = gNumFrameResources;
 			CRenderer::SetCurrentCubeMapIndex(index);
-			for (int i = 0; i < CMaterialManager::GetAllMaterialsCount(); ++i)
+			for (int i = 1; i < CMaterialManager::GetAllMaterialsCount(); ++i)
 			{
 				CMaterialManager::GetMaterial(i)->CubeMapDiffuseAlbedo = CMaterialManager::GetMaterialCubeMap(index)->DiffuseAlbedo;
 				CMaterialManager::GetMaterial(i)->NumFramesDirty = gNumFrameResources;

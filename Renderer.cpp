@@ -45,7 +45,7 @@ DXGI_FORMAT     CRenderer::m_DepthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 ComPtr<ID3D12RootSignature>         CRenderer::m_RootSignature = nullptr;
 ComPtr<ID3D12DescriptorHeap>        CRenderer::m_SrvHeap = nullptr;
 vector<ComPtr<ID3D12PipelineState>> CRenderer::m_PSOs((int)PSOTypeIndex::PSO_MAX);
-int                                 CRenderer::m_CurrentPSO = (int)PSOTypeIndex::PSO_00_Solid_Opaque;
+int                                 CRenderer::m_CurrentPSO = (int)PSOTypeIndex::PSO_Solid_Opaque;
 
 // CubeMap
 vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> CRenderer::m_SkyTextureDescriptorHandles;
@@ -401,7 +401,7 @@ void CRenderer::CreateRootSignature()
 	slotRootParameter[0].InitAsConstantBufferView(0);
 	slotRootParameter[1].InitAsConstantBufferView(1);
 	slotRootParameter[2].InitAsShaderResourceView(0, 1);
-	slotRootParameter[3].InitAsShaderResourceView(1, 1);
+	slotRootParameter[3].InitAsShaderResourceView(0, 2);
 	slotRootParameter[4].InitAsDescriptorTable(1, &texTable0, D3D12_SHADER_VISIBILITY_PIXEL);
 	slotRootParameter[5].InitAsDescriptorTable(1, &texTable1, D3D12_SHADER_VISIBILITY_PIXEL);
 
@@ -555,19 +555,19 @@ void CRenderer::CreataPSOs()
 	ZeroMemory(&opaquePsoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
 	opaquePsoDesc.InputLayout =
 	{
-		shaderTypes[(int)ShaderTypeIndex::Shader_Type_00_Opaque].inputLayout->data(),
-		(UINT)shaderTypes[(int)ShaderTypeIndex::Shader_Type_00_Opaque].inputLayout->size()
+		shaderTypes[(int)ShaderTypeIndex::Shader_Type_Opaque].inputLayout->data(),
+		(UINT)shaderTypes[(int)ShaderTypeIndex::Shader_Type_Opaque].inputLayout->size()
 	};
 	opaquePsoDesc.pRootSignature = m_RootSignature.Get();
 	opaquePsoDesc.VS =
 	{
-		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_00_Opaque].vertexShader->GetBufferPointer()),
-		shaderTypes[(int)ShaderTypeIndex::Shader_Type_00_Opaque].vertexShader->GetBufferSize()
+		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_Opaque].vertexShader->GetBufferPointer()),
+		shaderTypes[(int)ShaderTypeIndex::Shader_Type_Opaque].vertexShader->GetBufferSize()
 	};
 	opaquePsoDesc.PS =
 	{
-		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_00_Opaque].pixelShader->GetBufferPointer()),
-		shaderTypes[(int)ShaderTypeIndex::Shader_Type_00_Opaque].pixelShader->GetBufferSize()
+		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_Opaque].pixelShader->GetBufferPointer()),
+		shaderTypes[(int)ShaderTypeIndex::Shader_Type_Opaque].pixelShader->GetBufferSize()
 	};
 	opaquePsoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
 	opaquePsoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
@@ -579,12 +579,27 @@ void CRenderer::CreataPSOs()
 	opaquePsoDesc.SampleDesc.Count = m_4xMsaaState ? 4 : 1;
 	opaquePsoDesc.SampleDesc.Quality = m_4xMsaaState ? (m_4xMsaaQuality - 1) : 0;
 	opaquePsoDesc.DSVFormat = m_DepthStencilFormat;
-	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_00_Solid_Opaque])));
+	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_Solid_Opaque])));
 
 	// PSO for wireframe opaque objects.
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC wireframeOpaquePsoDesc = opaquePsoDesc;
 	wireframeOpaquePsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
-	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&wireframeOpaquePsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_01_WireFrame_Opaque])));
+	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&wireframeOpaquePsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_WireFrame_Opaque])));
+
+	// PSO for POM
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC pomOpaquePsoDesc = opaquePsoDesc;
+	pomOpaquePsoDesc.pRootSignature = m_RootSignature.Get();
+	pomOpaquePsoDesc.VS =
+	{
+		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_Opaque_POM].vertexShader->GetBufferPointer()),
+		shaderTypes[(int)ShaderTypeIndex::Shader_Type_Opaque_POM].vertexShader->GetBufferSize()
+	};
+	pomOpaquePsoDesc.PS =
+	{
+		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_Opaque_POM].pixelShader->GetBufferPointer()),
+		shaderTypes[(int)ShaderTypeIndex::Shader_Type_Opaque_POM].pixelShader->GetBufferSize()
+	};
+	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&pomOpaquePsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_Solid_Opaque_POM])));
 
 	// PSO for sky.
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC skyPsoDesc = opaquePsoDesc;
@@ -599,20 +614,20 @@ void CRenderer::CreataPSOs()
 	skyPsoDesc.pRootSignature = m_RootSignature.Get();
 	skyPsoDesc.VS =
 	{
-		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_01_Sky].vertexShader->GetBufferPointer()),
-		shaderTypes[(int)ShaderTypeIndex::Shader_Type_01_Sky].vertexShader->GetBufferSize()
+		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_Sky].vertexShader->GetBufferPointer()),
+		shaderTypes[(int)ShaderTypeIndex::Shader_Type_Sky].vertexShader->GetBufferSize()
 	};
 	skyPsoDesc.PS =
 	{
-		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_01_Sky].pixelShader->GetBufferPointer()),
-		shaderTypes[(int)ShaderTypeIndex::Shader_Type_01_Sky].pixelShader->GetBufferSize()
+		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_Sky].pixelShader->GetBufferPointer()),
+		shaderTypes[(int)ShaderTypeIndex::Shader_Type_Sky].pixelShader->GetBufferSize()
 	};
-	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&skyPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_02_Solid_Sky])));
+	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&skyPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_Solid_Sky])));
 
 	// PSO for wireframe sky.
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC wireframeSkyPsoDesc = skyPsoDesc;
 	wireframeSkyPsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
-	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&wireframeSkyPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_03_WireFrame_Sky])));
+	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&wireframeSkyPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_WireFrame_Sky])));
 }
 
 // ƒQƒbƒ^[
@@ -777,8 +792,8 @@ void CRenderer::Begin()
 
 	// A command list can be reset after it has been added to the command queue via ExecuteCommandList.
 	// Reusing the command list reuses memory.
-	ThrowIfFailed(m_CommandList->Reset(cmdListAlloc.Get(), m_PSOs[(int)PSOTypeIndex::PSO_00_Solid_Opaque].Get()));
-	m_CurrentPSO = (int)PSOTypeIndex::PSO_00_Solid_Opaque;
+	ThrowIfFailed(m_CommandList->Reset(cmdListAlloc.Get(), m_PSOs[(int)PSOTypeIndex::PSO_Solid_Opaque].Get()));
+	m_CurrentPSO = (int)PSOTypeIndex::PSO_Solid_Opaque;
 
 	ID3D12DescriptorHeap* descriptorHeaps[] = { m_SrvHeap.Get() };
 	m_CommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);

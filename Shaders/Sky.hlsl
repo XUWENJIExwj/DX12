@@ -24,7 +24,7 @@ VertexOut VS(VertexIn vin)
 	float4 posWS = mul(float4(vin.PosLS, 1.0f), gWorld);
 
 	// Always center sky about camera.
-	posWS.xyz += gEyePosW;
+	posWS.xyz += gEyePosWS;
 
 	// Set z = w so that z/w = 1 (i.e., skydome always on far plane).
 	vout.PosHS = mul(posWS, gViewProj).xyww;

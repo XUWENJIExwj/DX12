@@ -9,6 +9,7 @@ enum class RenderLayers :int
 	Layer_Camera,
 	Layer_Light,
 	Layer_3D_Opaque,
+	Layer_3D_Opaque_POM,
 	Layer_3D_Sky,
 	Layer_3D_BillBoard,
 	Layer_3D_Opaque_DynamicReflectors,

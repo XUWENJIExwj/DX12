@@ -1,6 +1,6 @@
 // Defaults for number of lights.
 #ifndef NUM_DIR_LIGHTS
-    #define NUM_DIR_LIGHTS 3
+    #define NUM_DIR_LIGHTS 2
 #endif
 
 #ifndef NUM_POINT_LIGHTS
@@ -44,7 +44,7 @@ VertexOut VS(VertexIn vin)
     // Assumes nonuniform scaling; otherwise, need to use inverse-transpose of world matrix.
     vout.NormalWS = mul(vin.NormalLS, (float3x3) gWorld);
     
-    vout.TangentWS = mul(vin.TangentLS, (float3x3) gWorld) * matData.TangentSign;
+    vout.TangentWS = mul(vin.TangentLS, (float3x3) gWorld);
 
     // Transform to homogeneous clip space.
     vout.PosHS = mul(posWS, gViewProj);
@@ -66,12 +66,13 @@ float4 PS(VertexOut pin) : SV_Target
 	float roughness = matData.Roughness;
 	uint diffuseTexIndex = matData.DiffuseMapIndex;
     uint normalMapIndex = matData.NormalMapIndex;
+    int bitangentSign = matData.BitangentSign;
     
     // Interpolating normal can unnormalize it, so renormalize it.
     float3 normalWS = normalize(pin.NormalWS);
     
     float4 normalMapSample = gTextureMaps[normalMapIndex].Sample(gsamAnisotropicWrap, pin.TexC);
-    float3 bumpedNormalWS = NormalSampleToWorldSpace(normalMapSample.rgb, normalWS, pin.TangentWS);
+    float3 bumpedNormalWS = NormalSampleToWorldSpace(normalMapSample.rgb, normalWS, pin.TangentWS, bitangentSign);
     
     // Uncomment to turn off normal mapping.
 	//bumpedNormalWS = pin.NormalWS;
@@ -80,12 +81,12 @@ float4 PS(VertexOut pin) : SV_Target
     diffuseAlbedo *= gTextureMaps[diffuseTexIndex].Sample(gsamAnisotropicWrap, pin.TexC) * cubeMapDiffuseAlbedo;
 
     // Vector from point being lit to eye. 
-    float3 toEyeWS = normalize(gEyePosW - pin.PosWS);
+    float3 toEyeWS = normalize(gEyePosWS - pin.PosWS);
 
     // Light terms.
     float4 ambient = gAmbientLight * diffuseAlbedo;
 
-    const float shininess = 1.0f - roughness;
+    const float shininess = max(1.0f - roughness, 0.01);
     Material mat = { diffuseAlbedo, fresnelR0, shininess };
     float3 shadowFactor = 1.0f;
     float4 directLight = ComputeLighting(gLights, mat, pin.PosWS,

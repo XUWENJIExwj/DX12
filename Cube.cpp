@@ -7,7 +7,7 @@ void CCube::Init()
 {
 	m_Scale = XMFLOAT3(1.0f, 1.0f, 1.0f);
 	m_World = ComputeWorldMatrix4x4();
-	m_Material = CMaterialManager::GetMaterialTex((int)MaterialTexIndex::Material_Plane_00);
+	m_Material = CMaterialManager::GetMaterialTex((int)MaterialTexIndex::Material_Tile_00);
 	m_MeshGeometry = CGeoShapeManager::GetMeshGeometry((int)GeoShapeType::Type_00_GeoShapes);
 	m_IndexCount = m_MeshGeometry->DrawArgs["cube"].IndexCount;
 	m_StartIndexLocation = m_MeshGeometry->DrawArgs["cube"].StartIndexLocation;
@@ -16,17 +16,17 @@ void CCube::Init()
 
 void CCube::Update(const GameTimer& GlobalTimer)
 {
-	m_Rotation.y += 1.0f * GlobalTimer.DeltaTime();
-	XMMATRIX rot = XMMatrixRotationRollPitchYawFromVector(GetRotation());
-	m_World = ComputeWorldMatrix4x4();
+	//m_Rotation.y += 1.0f * GlobalTimer.DeltaTime();
+	//XMMATRIX rot = XMMatrixRotationRollPitchYawFromVector(GetRotation());
+	//m_World = ComputeWorldMatrix4x4();
 
-	m_NumFramesDirty = gNumFrameResources;
+	//m_NumFramesDirty = gNumFrameResources;
 }
 
 void CCube::UpdateImGui(const GameTimer & GlobalTimer)
 {
 	static bool showClose = true;
-	static int index = (int)MaterialTexIndex::Material_Plane_00;
+	static int index = (int)MaterialTexIndex::Material_Tile_00;
 
 	if (showClose)
 	{

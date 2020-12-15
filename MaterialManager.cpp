@@ -34,7 +34,7 @@ void CMaterialManager::CreateMaterials()
 		material->MatCBIndex = i;
 		material->DiffuseSrvHeapIndex = i;
 		material->NormalSrvHeapIndex = i + (int)MaterialTexIndex::Material_Max;
-		material->TangentSign = 1;
+		material->BitangentSign = 1;
 		material->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 		material->FresnelR0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
 		material->Roughness = 0.99f;
@@ -64,30 +64,31 @@ void CMaterialManager::CreateMaterials()
 	}
 
 	// Customize
+	m_MaterialTex[(int)MaterialTexIndex::Material_Mirror_Dynamic_00]->DiffuseAlbedo = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	m_MaterialTex[(int)MaterialTexIndex::Material_Mirror_Dynamic_00]->FresnelR0 = XMFLOAT3(0.98f, 0.97f, 0.95f);
+	m_MaterialTex[(int)MaterialTexIndex::Material_Mirror_Dynamic_00]->Roughness = 0.1f;
+
 	m_MaterialTex[(int)MaterialTexIndex::Material_Mirror_00]->DiffuseAlbedo = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 	m_MaterialTex[(int)MaterialTexIndex::Material_Mirror_00]->FresnelR0 = XMFLOAT3(0.98f, 0.97f, 0.95f);
 	m_MaterialTex[(int)MaterialTexIndex::Material_Mirror_00]->Roughness = 0.1f;
 
-	m_MaterialTex[(int)MaterialTexIndex::Material_Mirror_01]->DiffuseAlbedo = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-	m_MaterialTex[(int)MaterialTexIndex::Material_Mirror_01]->FresnelR0 = XMFLOAT3(0.98f, 0.97f, 0.95f);
-	m_MaterialTex[(int)MaterialTexIndex::Material_Mirror_01]->Roughness = 0.1f;
-
-	m_MaterialTex[(int)MaterialTexIndex::Material_Bricks_00]->TangentSign = -1;
+	m_MaterialTex[(int)MaterialTexIndex::Material_Bricks_00]->BitangentSign = 1;
 	m_MaterialTex[(int)MaterialTexIndex::Material_Bricks_00]->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	m_MaterialTex[(int)MaterialTexIndex::Material_Bricks_00]->FresnelR0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
 	m_MaterialTex[(int)MaterialTexIndex::Material_Bricks_00]->Roughness = 0.3f;
 
-	m_MaterialTex[(int)MaterialTexIndex::Material_Tile_00]->TangentSign = -1;
+	m_MaterialTex[(int)MaterialTexIndex::Material_Tile_00]->BitangentSign = -1;
 	m_MaterialTex[(int)MaterialTexIndex::Material_Tile_00]->DiffuseAlbedo = XMFLOAT4(0.9f, 0.9f, 0.9f, 1.0f);
 	m_MaterialTex[(int)MaterialTexIndex::Material_Tile_00]->FresnelR0 = XMFLOAT3(0.2f, 0.2f, 0.2f);
 	m_MaterialTex[(int)MaterialTexIndex::Material_Tile_00]->Roughness = 0.1f;
 
 	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->HeightSrvHeapIndex = (int)TextureIndex::Texture_Plane_00_Height;
 	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->UseACForPOM = 0;
-	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->MaxSampleCount = 512;
+	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->MaxSampleCount = 16;
 	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->MinSampleCount = 8;
-	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->TangentSign = 1;
-	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->ShowSelfShadow = true;
+	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->BitangentSign = 1;
+	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->HeightScale = 0.1f;
+	// m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->ShowSelfShadow = true; // boolŒ^‚ÍƒoƒO‚é
 	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->FresnelR0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
 	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->Roughness = 0.1f;
@@ -110,7 +111,7 @@ void CMaterialManager::UpdateMaterial()
 		(alpha_half_preview ? ImGuiColorEditFlags_AlphaPreviewHalf : (alpha_preview ? ImGuiColorEditFlags_AlphaPreview : 0)) |
 		(options_menu ? 0 : ImGuiColorEditFlags_NoOptions);
 
-	static bool reverseTangent = false;
+	static bool reverseBitangent;
 
 	if (showClose)
 	{
@@ -123,12 +124,15 @@ void CMaterialManager::UpdateMaterial()
 		ImGui::Combo("MaterialTexList", &texIndex, m_MaterialTexNames.data(), GetMaterialTexCount());
 		ImGui::PopItemWidth();
 
+		reverseBitangent = m_MaterialTex[texIndex]->BitangentSign > 0 ? false : true;
+
 		if (ImGui::ColorEdit4("DiffuseAlbedo##0", (float*)&m_MaterialTex[texIndex]->DiffuseAlbedo, ImGuiColorEditFlags_Float | misc_flags) ||
 			ImGui::ColorEdit3("FresnelR0##0", (float*)&m_MaterialTex[texIndex]->FresnelR0, ImGuiColorEditFlags_Float | misc_flags) ||
-			ImGui::DragFloat("Roughness##0", &m_MaterialTex[texIndex]->Roughness, 0.005f, 0.0f, 1.0f) ||
-			ImGui::Checkbox("ReverseTangent", &reverseTangent))
+			ImGui::SliderFloat("Roughness##0", &m_MaterialTex[texIndex]->Roughness, 0.0f, 1.0f) ||
+			ImGui::Checkbox("ReverseBitangent##0", &reverseBitangent) ||
+			ImGui::SliderFloat("Height##0", &m_MaterialTex[texIndex]->HeightScale, 0.0f, 0.3f))
 		{
-			m_MaterialTex[texIndex]->TangentSign = reverseTangent ? -1 : 1;
+			m_MaterialTex[texIndex]->BitangentSign = reverseBitangent ? -1 : 1;
 
 			m_MaterialTex[texIndex]->NumFramesDirty = gNumFrameResources;
 		}

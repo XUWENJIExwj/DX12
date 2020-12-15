@@ -9,7 +9,7 @@ void CSphereDR::Init()
 {
 	m_Position = XMFLOAT3(3.0f, 0.0f, 0.0f);
 	m_World = ComputeWorldMatrix4x4();
-	m_Material = CMaterialManager::GetMaterialTex((int)MaterialTexIndex::Material_Mirror_00);
+	m_Material = CMaterialManager::GetMaterialTex((int)MaterialTexIndex::Material_Mirror_Dynamic_00);
 	m_MeshGeometry = CGeoShapeManager::GetMeshGeometry((int)GeoShapeType::Type_00_GeoShapes);
 	m_IndexCount = m_MeshGeometry->DrawArgs["sphere"].IndexCount;
 	m_StartIndexLocation = m_MeshGeometry->DrawArgs["sphere"].StartIndexLocation;
@@ -37,7 +37,9 @@ void CSphereDR::GlobalRotate(const GameTimer& GlobalTimer)
 void CSphereDR::DrawDynamicCubeMapScene(std::list<CGameObject*>* AllRenderLayers)
 {
 	CRenderer::DrawGameObjectsWithLayer(AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque]);
-	CRenderer::SetPSO((int)PSOTypeIndex::PSO_02_Solid_Sky);
+	CRenderer::SetPSO((int)PSOTypeIndex::PSO_Solid_Opaque_POM);
+	CRenderer::DrawGameObjectsWithLayer(AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque_POM]);
+	CRenderer::SetPSO((int)PSOTypeIndex::PSO_Solid_Sky);
 	CRenderer::DrawGameObjectsWithLayer(AllRenderLayers[(int)RenderLayers::Layer_3D_Sky]);
-	CRenderer::SetPSO((int)PSOTypeIndex::PSO_00_Solid_Opaque);
+	CRenderer::SetPSO((int)PSOTypeIndex::PSO_Solid_Opaque);
 }

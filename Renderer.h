@@ -7,10 +7,11 @@
 
 enum class PSOTypeIndex :int
 {
-	PSO_00_Solid_Opaque,
-	PSO_01_WireFrame_Opaque,
-	PSO_02_Solid_Sky,
-	PSO_03_WireFrame_Sky,
+	PSO_Solid_Opaque,
+	PSO_Solid_Opaque_POM,
+	PSO_Solid_Sky,
+	PSO_WireFrame_Opaque,
+	PSO_WireFrame_Sky,
 	PSO_MAX
 };
 

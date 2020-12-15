@@ -2,22 +2,25 @@
 
 enum class VertexShaderIndex :int
 {
-	VS_00_Opaque,
-	VS_01_Sky,
+	VS_Opaque,
+	VS_Opaque_POM,
+	VS_Sky,
 	VS_MAX
 };
 
 enum class PixelShaderIndex :int
 {
-	PS_00_Opaque,
-	PS_01_Sky,
+	PS_Opaque,
+	PS_Opaque_POM,
+	PS_Sky,
 	PS_MAX
 };
 
 enum class ShaderTypeIndex :int
 {
-	Shader_Type_00_Opaque,
-	Shader_Type_01_Sky,
+	Shader_Type_Opaque,
+	Shader_Type_Opaque_POM,
+	Shader_Type_Sky,
 	Shader_Type_MAX
 };
 

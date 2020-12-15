@@ -53,19 +53,24 @@ struct MaterialData
 	UINT DiffuseMapIndex = 0;
 	UINT NormalMapIndex = 0;
 	UINT HeightMapIndex = 0;
-	int  TangentSign = 1; // Tangentの符号（反転用）
+	int  BitangentSign = 1; // Bitangentの符号（反転用）
 };
 
-struct MaterialDataEx
+struct MaterialOfHeightData
 {
 	UINT UseACForPOM = 0;
 	UINT MaxSampleCount = 512; // HeightMap最大サンプル数
 	UINT MinSampleCount = 8;   // HeightMap最小サンプル数
-	UINT MaterialPad0 = 0;
-	bool ShowSelfShadow = true;
-	bool MaterialPad1 = true;
-	bool MaterialPad2 = true;
-	bool MaterialPad3 = true;
+	int  IntPad0 = 1;
+	float HeightScale = 0.5f;
+	float ShadowSoftening = 0.9f;
+	float floatPad0 = 0.0f;
+	float floatPad1 = 0.0f;
+	// bool型はバグる
+	//bool ShowSelfShadow = true;
+	//bool boolPad0;
+	//bool boolPad1;
+	//bool boolPad2;
 };
 
 struct Vertex
@@ -91,7 +96,7 @@ public:
 	std::unique_ptr<UploadBuffer<ObjectConstants>> ObjectCB = nullptr;
 
 	std::unique_ptr<UploadBuffer<MaterialData>> MaterialBuffer = nullptr;
-	std::unique_ptr<UploadBuffer<MaterialDataEx>> MaterialExBuffer = nullptr;
+	std::unique_ptr<UploadBuffer<MaterialOfHeightData>> MaterialExBuffer = nullptr;
 
 	// Fence value to mark commands up to this fence point.  This lets us
 	// check if these frame resources are still in use by the GPU.

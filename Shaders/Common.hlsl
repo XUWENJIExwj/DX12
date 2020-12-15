@@ -1,6 +1,6 @@
 // Defaults for number of lights.
 #ifndef NUM_DIR_LIGHTS
-    #define NUM_DIR_LIGHTS 3
+    #define NUM_DIR_LIGHTS 1
 #endif
 
 #ifndef NUM_POINT_LIGHTS
@@ -24,19 +24,24 @@ struct MaterialData
 	uint     DiffuseMapIndex;
     uint     NormalMapIndex;
 	uint     HeightMapIndex;
-    int      TangentSign;
+    int      BitangentSign;
 };
 
-struct MaterialExData
+struct MaterialOfHeightData
 {
-    uint UseACForPOM;
-    uint MaxSampleCount;
-    uint MinSampleCount;
-    int  MaterialPad0;
-    bool ShowSelfShadow;
-    bool MaterialPad1;
-    bool MaterialPad2;
-    bool MaterialPad3;
+    uint  UseACForPOM;
+    uint  MaxSampleCount;
+    uint  MinSampleCount;
+    int   IntPad0;
+    float HeightScale;
+    float ShadowSoftening;
+    float floatPad0;
+    float floatPad1;
+    // bool型はバグる
+    //bool ShowSelfShadow;
+    //bool boolPad0;
+    //bool boolPad1;
+    //bool boolPad2;
 };
 
 TextureCube gCubeMap : register(t0);
@@ -49,7 +54,7 @@ Texture2D gTextureMaps[19] : register(t1);
 // Put in space1, so the texture array does not overlap with these resources.  
 // The texture array will occupy registers t0, t1, ..., t3 in space0. 
 StructuredBuffer<MaterialData> gMaterialData : register(t0, space1);
-StructuredBuffer<MaterialExData> gMaterialExData : register(t1, space1);
+StructuredBuffer<MaterialOfHeightData> gMaterialOfHeightData : register(t0, space2);
 
 SamplerState gsamPointWrap        : register(s0);
 SamplerState gsamPointClamp       : register(s1);
@@ -78,7 +83,7 @@ cbuffer cbPass : register(b1)
     float4x4 gInvProj;
     float4x4 gViewProj;
     float4x4 gInvViewProj;
-    float3   gEyePosW;
+    float3   gEyePosWS;
     float    cbPerObjectPad1;
     float2   gRenderTargetSize;
     float2   gInvRenderTargetSize;
@@ -95,28 +100,29 @@ cbuffer cbPass : register(b1)
     Light gLights[MaxLights];
 };
 
+float3x3 ComputeTBN(float3 NormalWS, float3 TangentWS, int BitangentSign = 1)
+{
+    // Build orthonormal basis.
+    float3 N = NormalWS;
+    float3 T = normalize(TangentWS - dot(TangentWS, N) * N);
+    // Textureによって、Bitangentの符号が異なって、反転する必要なことがある
+    // 反転する必要があるTextureが多いので、先に-しておいて、
+    // MaterialのBitangentSignと合わせて使う
+    float3 B = -cross(N, T) * BitangentSign;
+    
+    return float3x3(T, B, N);
+}
+
 //---------------------------------------------------------------------------------------
 // Transforms a normal map sample to world space.
 //---------------------------------------------------------------------------------------
-float3 NormalSampleToWorldSpace(float3 NormalMapSample, float3 NormalWS, float3 TangentWS)
+float3 NormalSampleToWorldSpace(float3 NormalMapSample, float3 NormalWS, float3 TangentWS, int BitangentSign = 1)
 {
 	// Uncompress each component from [0,1] to [-1,1].
     float3 normalTS = 2.0f * NormalMapSample - 1.0f;
 
-	// Build orthonormal basis.
-    float3 N = NormalWS;
-    float3 T = normalize(TangentWS - dot(TangentWS, N) * N);
-    // Textureによって、Tangentの符号が異なって、反転する必要がある
-    // 赤いPixelが右側にあるTextureを多用しているので、-にしておく。
-    // MaterialのTangentSignと合わせて使う
-    float3 B = cross(N, -T); 
-
-    float3x3 TBN = float3x3(T, B, N);
-
-	// Transform from tangent space to world space.
-    float3 bumpedNormalWS = mul(normalTS, TBN);
+    float3 bumpedNormalWS = mul(normalTS, ComputeTBN(NormalWS, TangentWS, BitangentSign));
 
     return bumpedNormalWS;
 }
-
 
