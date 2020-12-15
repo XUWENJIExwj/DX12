@@ -151,7 +151,16 @@ void CScene::UpdateMaterialBuffer(const GameTimer& GlobalTimer)
 			XMStoreFloat4x4(&matData.MatTransform, XMMatrixTranspose(matTransform));
 			matData.DiffuseMapIndex = materials[i]->DiffuseSrvHeapIndex;
 			matData.NormalMapIndex = materials[i]->NormalSrvHeapIndex;
+			matData.HeightMapIndex = materials[i]->HeightSrvHeapIndex;
+			matData.UseACForPOM = materials[i]->UseACForPOM;
+			matData.MaxSampleCount = materials[i]->MaxSampleCount;
+			matData.MinSampleCount = materials[i]->MinSampleCount;
 			matData.TangentSign = materials[i]->TangentSign;
+			matData.MaterialPad0 = materials[i]->MaterialPad0;
+			matData.ShowSelfShadow = materials[i]->ShowSelfShadow;
+			matData.MaterialPad1 = materials[i]->MaterialPad1;
+			matData.MaterialPad2 = materials[i]->MaterialPad2;
+			matData.MaterialPad3 = materials[i]->MaterialPad3;
 
 			currMaterialBuffer->CopyData(materials[i]->MatCBIndex, matData);
 

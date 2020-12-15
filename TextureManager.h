@@ -16,7 +16,7 @@ enum class TextureIndex :int
 	Texture_Tile_00_Normal,
 	Texture_Plane_00_Normal,
 	Texture_Glass_00_Normal,
-	//Texture_Plane_00_Height, // HeightMap
+	Texture_Plane_00_Height, // HeightMap
 	Texture_SkyCube_00_Diffuse, // CubeMap
 	Texture_SkyCube_01_Diffuse,
 	Texture_SkyCube_02_Diffuse,

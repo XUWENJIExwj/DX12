@@ -15,19 +15,19 @@
 
 struct VertexIn
 {
-    float3 PosLS : POSITION;
-    float3 NormalLS : NORMAL;
+    float3 PosLS     : POSITION;
+    float3 NormalLS  : NORMAL;
     float3 TangentLS : TANGENT;
-    float2 TexC : TEXCOORD;
+    float2 TexC      : TEXCOORD;
 };
 
 struct VertexOut
 {
-    float4 PosHS : SV_POSITION;
-    float3 PosWS : POSITION;
-    float3 NormalWS : NORMAL;
+    float4 PosHS     : SV_POSITION;
+    float3 PosWS     : POSITION;
+    float3 NormalWS  : NORMAL;
     float3 TangentWS : TANGENT;
-    float2 TexC : TEXCOORD;
+    float2 TexC      : TEXCOORD;
 };
 
 VertexOut VS(VertexIn vin)
@@ -44,7 +44,7 @@ VertexOut VS(VertexIn vin)
     // Assumes nonuniform scaling; otherwise, need to use inverse-transpose of world matrix.
     vout.NormalWS = mul(vin.NormalLS, (float3x3) gWorld);
     
-    vout.TangentWS = mul(vin.TangentLS, (float3x3) gWorld);
+    vout.TangentWS = mul(vin.TangentLS, (float3x3) gWorld) * matData.TangentSign;
 
     // Transform to homogeneous clip space.
     vout.PosHS = mul(posWS, gViewProj);
@@ -54,4 +54,12 @@ VertexOut VS(VertexIn vin)
     vout.TexC = mul(texC, matData.MatTransform).xy;
 	
     return vout;
+}
+
+float4 PS(VertexOut pin) : SV_Target
+{
+    
+    
+    float4 litColor;
+    return litColor;
 }

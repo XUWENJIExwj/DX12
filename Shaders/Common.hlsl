@@ -23,15 +23,24 @@ struct MaterialData
 	float4x4 MatTransform;
 	uint     DiffuseMapIndex;
     uint     NormalMapIndex;
-	uint     MatPad2;
+	uint     HeightMapIndex;
+    uint     UseACForPOM;
+    uint     MaxSampleCount;
+    uint     MinSampleCount;
     int      TangentSign;
+    int      MaterialPad0;
+    bool     ShowSelfShadow;
+    //bool MaterialPad1;
+    //bool MaterialPad2;
+    //bool MaterialPad3;
 };
 
 TextureCube gCubeMap : register(t0);
 
 // An array of textures, which is only supported in shader model 5.1+.  Unlike Texture2DArray, the textures
 // in this array can be different sizes and formats, making it more flexible than texture arrays.
-Texture2D gTextureMaps[16] : register(t1);
+// Textureの数によって、配列要素数を増やしていく
+Texture2D gTextureMaps[19] : register(t1);
 
 // Put in space1, so the texture array does not overlap with these resources.  
 // The texture array will occupy registers t0, t1, ..., t3 in space0. 
@@ -92,7 +101,7 @@ float3 NormalSampleToWorldSpace(float3 NormalMapSample, float3 NormalWS, float3 
 	// Build orthonormal basis.
     float3 N = NormalWS;
     float3 T = normalize(TangentWS - dot(TangentWS, N) * N);
-    // Textureによって、Tangentの符号が異なる。
+    // Textureによって、Tangentの符号が異なって、反転する必要がある
     // 赤いPixelが右側にあるTextureを多用しているので、-にしておく。
     // MaterialのTangentSignと合わせて使う
     float3 B = cross(N, -T); 

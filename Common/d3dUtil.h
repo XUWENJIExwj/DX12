@@ -249,7 +249,22 @@ struct Material
 
 	// Index into SRV heap for normal texture.
 	int NormalSrvHeapIndex = -1;
-	int TangentSign = 1;
+
+	// Index into SRV heap for height texture.
+	int HeightSrvHeapIndex = -1;
+
+	int UseACForPOM = 0;
+
+	int MaxSampleCount = 512; // HeightMap最大サンプル数
+	int MinSampleCount = 8; // HeightMap最小サンプル数
+
+	int TangentSign = 1; // Tangentの符号（反転用）
+	int MaterialPad0;
+
+	bool ShowSelfShadow = true;
+	bool MaterialPad1 = true;
+	bool MaterialPad2 = true;
+	bool MaterialPad3 = true;
 
 	// Dirty flag indicating the material has changed and we need to update the constant buffer.
 	// Because we have a material constant buffer for each FrameResource, we have to apply the

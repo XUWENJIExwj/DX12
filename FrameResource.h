@@ -52,8 +52,16 @@ struct MaterialData
 
 	UINT DiffuseMapIndex = 0;
 	UINT NormalMapIndex = 0;
-	UINT MaterialPad2;
-	int  TangentSign = 1;
+	UINT HeightMapIndex = 0;
+	UINT UseACForPOM = 0;
+	UINT MaxSampleCount = 512; // HeightMap最大サンプル数
+	UINT MinSampleCount = 8;   // HeightMap最小サンプル数
+	int  TangentSign = 1; // Tangentの符号（反転用）
+	int  MaterialPad0 = 0;
+	bool ShowSelfShadow = true;
+	bool MaterialPad1 = true;
+	bool MaterialPad2 = true;
+	bool MaterialPad3 = true;
 };
 
 struct Vertex

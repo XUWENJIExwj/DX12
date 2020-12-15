@@ -82,7 +82,12 @@ void CMaterialManager::CreateMaterials()
 	m_MaterialTex[(int)MaterialTexIndex::Material_Tile_00]->FresnelR0 = XMFLOAT3(0.2f, 0.2f, 0.2f);
 	m_MaterialTex[(int)MaterialTexIndex::Material_Tile_00]->Roughness = 0.1f;
 
+	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->HeightSrvHeapIndex = (int)TextureIndex::Texture_Plane_00_Height;
+	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->UseACForPOM = 0;
+	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->MaxSampleCount = 512;
+	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->MinSampleCount = 8;
 	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->TangentSign = 1;
+	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->ShowSelfShadow = true;
 	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->FresnelR0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
 	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->Roughness = 0.1f;
