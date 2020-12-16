@@ -5,16 +5,28 @@ enum class MaterialNormalIndex :int
 	Material_Mirror_Dynamic_00, // NormalMap(With No Height)
 	Material_Mirror_00,
 	Material_Logo_00,
-	Material_Bricks_00,
 	Material_Tile_00,
 	Material_Glass_00,
-	Material_Plane_00, // NormalMap(With Height)
+
+	Material_Bricks_00, // NormalMap(With Height)
+	Material_Rocks_00,
+	Material_Wall_00,
+	Material_Plane_00,
+	Material_Plane_01,
+	Material_Plane_02,
+	Material_Plane_03,
 	Material_Max
 };
 
 enum class MaterialHeightIndex :int
 {
+	Material_Bricks_00,
+	Material_Rocks_00,
+	Material_Wall_00,
 	Material_Plane_00,
+	Material_Plane_01,
+	Material_Plane_02,
+	Material_Plane_03,
 	Material_Max
 };
 

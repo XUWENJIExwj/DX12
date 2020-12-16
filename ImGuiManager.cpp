@@ -85,7 +85,7 @@ void CImGuiManager::Draw()
 	if (showClose)
 	{
 		ImGui::Begin(u8"操作方法", &showClose, window_flags);
-		ImGui::Text(u8"移動：W・S・A・D");
+		ImGui::Text(u8"移動：W（前）・S（後）・A（左）・D（右）・R（上）・F（下）");
 		ImGui::Text(u8"Mouseの表示/非表示：LeftAlt");
 		ImGui::Text(u8"Camera操作：Mouse/ImGuiのWindow");
 		ImGui::Text(u8"　Mouse表示時：Mouseを右クリックしたまま、Mouseを移動");

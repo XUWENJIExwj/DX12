@@ -27,13 +27,19 @@ void CMaterialManager::CreateMaterialNormal()
 {
 	m_MaterialNormalNames =
 	{
-		"Material_Mirror_00",
+		"Material_Mirror_00", // NormalMap(With No Height)
 		"Material_Mirror_01",
 		"Material_Logo_00",
-		"Material_Bricks_00",
 		"Material_Tile_00",
 		"Material_Glass_00",
+
+		"Material_Bricks_00", // NormalMap(With Height)
+		"Material_Rocks_00",
+		"Material_Wall_00",
 		"Material_Plane_00",
+		"Material_Plane_01",
+		"Material_Plane_02",
+		"Material_Plane_03",
 	};
 
 	for (int i = 0; i < (int)MaterialNormalIndex::Material_Max; ++i)
@@ -60,15 +66,15 @@ void CMaterialManager::CreateMaterialNormal()
 	m_MaterialNormal[(int)MaterialNormalIndex::Material_Mirror_00]->FresnelR0 = XMFLOAT3(0.98f, 0.97f, 0.95f);
 	m_MaterialNormal[(int)MaterialNormalIndex::Material_Mirror_00]->Roughness = 0.1f;
 
-	m_MaterialNormal[(int)MaterialNormalIndex::Material_Bricks_00]->BitangentSign = 1;
-	m_MaterialNormal[(int)MaterialNormalIndex::Material_Bricks_00]->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	m_MaterialNormal[(int)MaterialNormalIndex::Material_Bricks_00]->FresnelR0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
-	m_MaterialNormal[(int)MaterialNormalIndex::Material_Bricks_00]->Roughness = 0.3f;
-
 	m_MaterialNormal[(int)MaterialNormalIndex::Material_Tile_00]->BitangentSign = -1;
 	m_MaterialNormal[(int)MaterialNormalIndex::Material_Tile_00]->DiffuseAlbedo = XMFLOAT4(0.9f, 0.9f, 0.9f, 1.0f);
 	m_MaterialNormal[(int)MaterialNormalIndex::Material_Tile_00]->FresnelR0 = XMFLOAT3(0.2f, 0.2f, 0.2f);
 	m_MaterialNormal[(int)MaterialNormalIndex::Material_Tile_00]->Roughness = 0.1f;
+
+	m_MaterialNormal[(int)MaterialNormalIndex::Material_Bricks_00]->BitangentSign = 1;
+	m_MaterialNormal[(int)MaterialNormalIndex::Material_Bricks_00]->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	m_MaterialNormal[(int)MaterialNormalIndex::Material_Bricks_00]->FresnelR0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
+	m_MaterialNormal[(int)MaterialNormalIndex::Material_Bricks_00]->Roughness = 0.3f;
 
 	m_MaterialNormal[(int)MaterialNormalIndex::Material_Plane_00]->BitangentSign = 1;
 	m_MaterialNormal[(int)MaterialNormalIndex::Material_Plane_00]->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -80,7 +86,13 @@ void CMaterialManager::CreateMaterialHeight()
 {
 	m_MaterialHeightNames =
 	{
+		"Material_Bricks_00",
+		"Material_Rocks_00",
+		"Material_Wall_00",
 		"Material_Plane_00",
+		"Material_Plane_01",
+		"Material_Plane_02",
+		"Material_Plane_03",
 	};
 
 	int materialCountBeforeThis = (int)MaterialNormalIndex::Material_Max;
@@ -90,9 +102,9 @@ void CMaterialManager::CreateMaterialHeight()
 		auto material = make_unique<Material>();
 		material->Name = m_MaterialHeightNames[i];
 		material->MatCBIndex = i + materialCountBeforeThis;
-		material->DiffuseSrvHeapIndex = i + (int)TextureIndex::Texture_Plane_00_Diffuse;
-		material->NormalSrvHeapIndex = i + (int)TextureIndex::Texture_Plane_00_Normal;
-		material->HeightSrvHeapIndex = i + (int)TextureIndex::Texture_Plane_00_Height;
+		material->DiffuseSrvHeapIndex = i + (int)TextureIndex::Texture_Bricks_00_Diffuse;
+		material->NormalSrvHeapIndex = i + (int)TextureIndex::Texture_Bricks_00_Normal;
+		material->HeightSrvHeapIndex = i + (int)TextureIndex::Texture_Bricks_00_Height;
 		material->BitangentSign = 1;
 		material->UseACForPOM = 0;
 		material->MaxSampleCount = 128;
@@ -108,7 +120,20 @@ void CMaterialManager::CreateMaterialHeight()
 	}
 
 	// Customize
+	m_MaterialHeight[(int)MaterialHeightIndex::Material_Bricks_00]->UseACForPOM = 1;
+	m_MaterialHeight[(int)MaterialHeightIndex::Material_Bricks_00]->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	m_MaterialHeight[(int)MaterialHeightIndex::Material_Bricks_00]->FresnelR0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
+	m_MaterialHeight[(int)MaterialHeightIndex::Material_Bricks_00]->Roughness = 0.3f;
 
+	m_MaterialHeight[(int)MaterialHeightIndex::Material_Rocks_00]->UseACForPOM = 1;
+	m_MaterialHeight[(int)MaterialHeightIndex::Material_Rocks_00]->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	m_MaterialHeight[(int)MaterialHeightIndex::Material_Rocks_00]->FresnelR0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
+	m_MaterialHeight[(int)MaterialHeightIndex::Material_Rocks_00]->Roughness = 0.3f;
+
+	m_MaterialHeight[(int)MaterialHeightIndex::Material_Wall_00]->UseACForPOM = 1;
+	m_MaterialHeight[(int)MaterialHeightIndex::Material_Wall_00]->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	m_MaterialHeight[(int)MaterialHeightIndex::Material_Wall_00]->FresnelR0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
+	m_MaterialHeight[(int)MaterialHeightIndex::Material_Wall_00]->Roughness = 0.3f;
 }
 
 void CMaterialManager::CreateMaterialCubeMap()

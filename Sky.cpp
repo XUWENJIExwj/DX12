@@ -26,7 +26,7 @@ void CSky::UpdateImGui(const GameTimer & GlobalTimer)
 
 		ImGuiWindowFlags window_flags = 0;
 		ImGui::Begin(u8"ObjMaterialList", &showClose, window_flags);
-		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.55f);
+		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.6f);
 
 		if (ImGui::Combo(m_Name.c_str(), &index, CMaterialManager::GetMaterialCubeMapNames(), CMaterialManager::GetMaterialCubeMapCount()))
 		{
