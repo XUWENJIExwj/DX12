@@ -22,13 +22,13 @@ void CSky::UpdateImGui(const GameTimer & GlobalTimer)
 	if (showClose)
 	{
 		ImGui::SetNextWindowPos(ImVec2(20, 190), ImGuiCond_Once);
-		ImGui::SetNextWindowSize(ImVec2(300, 65), ImGuiCond_Once);
+		ImGui::SetNextWindowSize(ImVec2(300, 150), ImGuiCond_Once);
 
 		ImGuiWindowFlags window_flags = 0;
-		ImGui::Begin(m_Name.c_str(), &showClose, window_flags);
+		ImGui::Begin(u8"ObjMaterialList", &showClose, window_flags);
 		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.55f);
 
-		if (ImGui::Combo("MaterialList", &index, CMaterialManager::GetMaterialCubeMapNames(), CMaterialManager::GetMaterialCubeMapCount()))
+		if (ImGui::Combo(m_Name.c_str(), &index, CMaterialManager::GetMaterialCubeMapNames(), CMaterialManager::GetMaterialCubeMapCount()))
 		{
 			m_Material = CMaterialManager::GetMaterialCubeMap(index);
 			m_NumFramesDirty = gNumFrameResources;

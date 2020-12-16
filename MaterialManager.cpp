@@ -84,11 +84,11 @@ void CMaterialManager::CreateMaterials()
 
 	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->HeightSrvHeapIndex = (int)TextureIndex::Texture_Plane_00_Height;
 	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->UseACForPOM = 0;
-	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->MaxSampleCount = 16;
+	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->MaxSampleCount = 128;
 	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->MinSampleCount = 8;
 	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->BitangentSign = 1;
-	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->HeightScale = 0.1f;
-	// m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->ShowSelfShadow = true; // boolŒ^‚ÍƒoƒO‚é
+	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->HeightScale = 0.05f;
+	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->ShowSelfShadow = true;
 	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->FresnelR0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
 	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->Roughness = 0.1f;
@@ -96,6 +96,7 @@ void CMaterialManager::CreateMaterials()
 
 void CMaterialManager::UpdateMaterial()
 {
+	static DX12App* app = DX12App::GetApp();
 	static bool showClose = true;
 	static int texIndex = (int)MaterialTexIndex::Material_Plane_00;
 	static int cubeMapIndex = (int)MaterialCubeMapIndex::Material_SkyCube_00;
@@ -115,35 +116,42 @@ void CMaterialManager::UpdateMaterial()
 
 	if (showClose)
 	{
-		ImGui::SetNextWindowPos(ImVec2(840, 20), ImGuiCond_Once);
+		ImGui::SetNextWindowPos(ImVec2((float)app->GetWindowWidth() - 420, (float)app->GetWindowHeight() - 320), ImGuiCond_Once);
 		ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_Once);
 
 		ImGuiWindowFlags window_flags = 0;
-		ImGui::Begin("MaterialManager", &showClose, window_flags);
+		ImGui::Begin(u8"MaterialManager", &showClose, window_flags);
 		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.4f);
-		ImGui::Combo("MaterialTexList", &texIndex, m_MaterialTexNames.data(), GetMaterialTexCount());
+		ImGui::Combo(u8"MaterialTexList", &texIndex, m_MaterialTexNames.data(), GetMaterialTexCount());
 		ImGui::PopItemWidth();
 
 		reverseBitangent = m_MaterialTex[texIndex]->BitangentSign > 0 ? false : true;
 
-		if (ImGui::ColorEdit4("DiffuseAlbedo##0", (float*)&m_MaterialTex[texIndex]->DiffuseAlbedo, ImGuiColorEditFlags_Float | misc_flags) ||
-			ImGui::ColorEdit3("FresnelR0##0", (float*)&m_MaterialTex[texIndex]->FresnelR0, ImGuiColorEditFlags_Float | misc_flags) ||
-			ImGui::SliderFloat("Roughness##0", &m_MaterialTex[texIndex]->Roughness, 0.0f, 1.0f) ||
-			ImGui::Checkbox("ReverseBitangent##0", &reverseBitangent) ||
-			ImGui::SliderFloat("Height##0", &m_MaterialTex[texIndex]->HeightScale, 0.0f, 0.3f))
+		if (ImGui::ColorEdit4(u8"DiffuseAlbedo##0", (float*)&m_MaterialTex[texIndex]->DiffuseAlbedo, ImGuiColorEditFlags_Float | misc_flags) ||
+			ImGui::ColorEdit3(u8"FresnelR0##0", (float*)&m_MaterialTex[texIndex]->FresnelR0, ImGuiColorEditFlags_Float | misc_flags) ||
+			ImGui::SliderFloat(u8"Roughness##0", &m_MaterialTex[texIndex]->Roughness, 0.0f, 1.0f) ||
+			ImGui::Checkbox(u8"ReverseBitangent##0", &reverseBitangent))
 		{
 			m_MaterialTex[texIndex]->BitangentSign = reverseBitangent ? -1 : 1;
 
 			m_MaterialTex[texIndex]->NumFramesDirty = gNumFrameResources;
 		}
-
+		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.2f);
+		if (ImGui::SliderInt(u8"MinSampleCount##0", &m_MaterialTex[texIndex]->MinSampleCount, 8, 64)) m_MaterialTex[texIndex]->NumFramesDirty = gNumFrameResources;
+		ImGui::SameLine();
+		if	(ImGui::SliderInt(u8"MaxSampleCount##0", &m_MaterialTex[texIndex]->MaxSampleCount, 64, 256) ||
+			ImGui::SliderFloat(u8"Height##0", &m_MaterialTex[texIndex]->HeightScale, 0.0f, 0.1f))
+		{
+			m_MaterialTex[texIndex]->NumFramesDirty = gNumFrameResources;
+		}
+		ImGui::PopItemWidth();
 		ImGui::Separator();
 
 		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.5f);
-		ImGui::Combo("MaterialCubeMapList", &cubeMapIndex, m_MaterialCubeMapNames.data(), GetMaterialCubeMapCount());
+		ImGui::Combo(u8"MaterialCubeMapList", &cubeMapIndex, m_MaterialCubeMapNames.data(), GetMaterialCubeMapCount());
 		ImGui::PopItemWidth();
 
-		if (ImGui::ColorEdit4("DiffuseAlbedo##1", (float*)&m_MaterialCubeMap[cubeMapIndex]->DiffuseAlbedo, ImGuiColorEditFlags_Float | misc_flags) &&
+		if (ImGui::ColorEdit4(u8"DiffuseAlbedo##1", (float*)&m_MaterialCubeMap[cubeMapIndex]->DiffuseAlbedo, ImGuiColorEditFlags_Float | misc_flags) &&
 			CRenderer::GetCurrentCubeMapIndex() == cubeMapIndex)
 		{
 			for (int i = 1; i < (int)m_AllMaterials.size(); ++i)

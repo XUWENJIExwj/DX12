@@ -75,6 +75,25 @@ void CImGuiManager::Draw()
 		ImGui::ShowDemoWindow(&show_demo_window);
 	}
 
+	static bool showClose = true;
+	ImGuiWindowFlags window_flags = 0;
+	DX12App* app = DX12App::GetApp();
+
+	ImGui::SetNextWindowPos(ImVec2((float)app->GetWindowWidth() - 420, 20), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(400, 200), ImGuiCond_Once);
+
+	if (showClose)
+	{
+		ImGui::Begin(u8"操作方法", &showClose, window_flags);
+		ImGui::Text(u8"移動：W・S・A・D");
+		ImGui::Text(u8"Mouseの表示/非表示：LeftAlt");
+		ImGui::Text(u8"Camera操作：Mouse/ImGuiのWindow");
+		ImGui::Text(u8"　Mouse表示時：MouseのRightButtonを押したまま、Mouseを移動");
+		ImGui::Text(u8"　Mouse非表示時：Mouseを移動");
+		ImGui::Text(u8"その他：ImGuiのWindowでオブジェクトのプロパティを変更");
+		ImGui::End();
+	}
+
 	ImGui::Render();
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), CRenderer::GetCommondList());
 }

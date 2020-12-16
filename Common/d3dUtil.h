@@ -265,11 +265,10 @@ struct Material
 	float floatPad0 = 0.0f;
 	float floatPad1 = 0.0f;
 
-	// boolŒ^‚ÍƒoƒO‚é
-	//bool ShowSelfShadow = true;
-	//bool boolPad0;
-	//bool boolPad1;
-	//bool boolPad2;
+	BOOL ShowSelfShadow = true;
+	BOOL boolPad0;
+	BOOL boolPad1;
+	BOOL boolPad2;
 
 	// Dirty flag indicating the material has changed and we need to update the constant buffer.
 	// Because we have a material constant buffer for each FrameResource, we have to apply the

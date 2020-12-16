@@ -163,7 +163,7 @@ void CScene::UpdateMaterialBuffer(const GameTimer& GlobalTimer)
 			matExData.MinSampleCount = materials[i]->MinSampleCount;
 			matExData.IntPad0 = materials[i]->BitangentSign;
 			matExData.HeightScale = materials[i]->HeightScale;
-			//matExData.ShowSelfShadow = materials[i]->ShowSelfShadow; // boolŒ^‚ÍƒoƒO‚é
+			matExData.ShowSelfShadow = materials[i]->ShowSelfShadow;
 			currMaterialExBuffer->CopyData(materials[i]->MatCBIndex, matExData);
 
 			// Next FrameResource need to be updated too.

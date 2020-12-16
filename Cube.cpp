@@ -16,11 +16,11 @@ void CCube::Init()
 
 void CCube::Update(const GameTimer& GlobalTimer)
 {
-	//m_Rotation.y += 1.0f * GlobalTimer.DeltaTime();
-	//XMMATRIX rot = XMMatrixRotationRollPitchYawFromVector(GetRotation());
-	//m_World = ComputeWorldMatrix4x4();
+	m_Rotation.y += 1.0f * GlobalTimer.DeltaTime();
+	XMMATRIX rot = XMMatrixRotationRollPitchYawFromVector(GetRotation());
+	m_World = ComputeWorldMatrix4x4();
 
-	//m_NumFramesDirty = gNumFrameResources;
+	m_NumFramesDirty = gNumFrameResources;
 }
 
 void CCube::UpdateImGui(const GameTimer & GlobalTimer)
@@ -30,13 +30,10 @@ void CCube::UpdateImGui(const GameTimer & GlobalTimer)
 
 	if (showClose)
 	{
-		ImGui::SetNextWindowPos(ImVec2(20, 275), ImGuiCond_Once);
-		ImGui::SetNextWindowSize(ImVec2(300, 65), ImGuiCond_Once);
-
 		ImGuiWindowFlags window_flags = 0;
-		ImGui::Begin(m_Name.c_str(), &showClose, window_flags);
+		ImGui::Begin(u8"ObjMaterialList", &showClose, window_flags);
 		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.55f);
-		if (ImGui::Combo("MaterialList", &index, CMaterialManager::GetMaterialTexNames(), CMaterialManager::GetMaterialTexCount()))
+		if (ImGui::Combo(m_Name.c_str(), &index, CMaterialManager::GetMaterialTexNames(), CMaterialManager::GetMaterialTexCount()))
 		{
 			m_Material = CMaterialManager::GetMaterialTex(index);
 			m_NumFramesDirty = gNumFrameResources;

@@ -1,6 +1,6 @@
 // Defaults for number of lights.
 #ifndef NUM_DIR_LIGHTS
-    #define NUM_DIR_LIGHTS 1
+    #define NUM_DIR_LIGHTS 3
 #endif
 
 #ifndef NUM_POINT_LIGHTS
@@ -37,11 +37,10 @@ struct MaterialOfHeightData
     float ShadowSoftening;
     float floatPad0;
     float floatPad1;
-    // boolŒ^‚ÍƒoƒO‚é
-    //bool ShowSelfShadow;
-    //bool boolPad0;
-    //bool boolPad1;
-    //bool boolPad2;
+    bool  ShowSelfShadow;
+    bool  boolPad0;
+    bool  boolPad1;
+    bool  boolPad2;
 };
 
 TextureCube gCubeMap : register(t0);
@@ -100,7 +99,7 @@ cbuffer cbPass : register(b1)
     Light gLights[MaxLights];
 };
 
-float3x3 ComputeTBN(float3 NormalWS, float3 TangentWS, int BitangentSign = 1)
+float3x3 ComputeTBN(float3 NormalWS, float3 TangentWS, int BitangentSign)
 {
     // Build orthonormal basis.
     float3 N = NormalWS;
@@ -116,7 +115,7 @@ float3x3 ComputeTBN(float3 NormalWS, float3 TangentWS, int BitangentSign = 1)
 //---------------------------------------------------------------------------------------
 // Transforms a normal map sample to world space.
 //---------------------------------------------------------------------------------------
-float3 NormalSampleToWorldSpace(float3 NormalMapSample, float3 NormalWS, float3 TangentWS, int BitangentSign = 1)
+float3 NormalSampleToWorldSpace(float3 NormalMapSample, float3 NormalWS, float3 TangentWS, int BitangentSign)
 {
 	// Uncompress each component from [0,1] to [-1,1].
     float3 normalTS = 2.0f * NormalMapSample - 1.0f;

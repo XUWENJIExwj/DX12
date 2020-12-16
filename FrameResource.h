@@ -66,11 +66,10 @@ struct MaterialOfHeightData
 	float ShadowSoftening = 0.9f;
 	float floatPad0 = 0.0f;
 	float floatPad1 = 0.0f;
-	// boolŒ^‚ÍƒoƒO‚é
-	//bool ShowSelfShadow = true;
-	//bool boolPad0;
-	//bool boolPad1;
-	//bool boolPad2;
+	BOOL ShowSelfShadow = true;
+	BOOL boolPad0;
+	BOOL boolPad1;
+	BOOL boolPad2;
 };
 
 struct Vertex
