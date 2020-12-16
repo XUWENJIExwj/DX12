@@ -2,7 +2,7 @@
 
 enum class GeoShapeType :int
 {
-	Type_00_GeoShapes,
+	Type_GeoShapes,
 	Type_Max
 };
 
@@ -12,6 +12,6 @@ private:
 	static std::vector<std::unique_ptr<MeshGeometry>> m_Geometries;
 
 public:
-	static void CreateGeoShapes(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList);
+	static void CreateGeoShapes();
 	static MeshGeometry* GetMeshGeometry(int GeoType) { return m_Geometries[GeoType].get(); }
 };

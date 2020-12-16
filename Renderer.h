@@ -46,9 +46,9 @@ private:
 	static D3D12_VIEWPORT m_ScreenViewport;
 	static D3D12_RECT     m_ScissorRect;
 
-	static UINT m_RtvDescriptorSize;
-	static UINT m_DsvDescriptorSize;
-	static UINT m_CbvSrvUavDescriptorSize;
+	static UINT m_RtvDescSize;
+	static UINT m_DsvDescSize;
+	static UINT m_CbvSrvUavDescSize;
 
 	static D3D_DRIVER_TYPE m_D3DDriverType;
 	static DXGI_FORMAT     m_BackBufferFormat;
@@ -61,8 +61,8 @@ private:
 	static int                                                      m_CurrentPSO;
 
 	// CubeMap
-	static std::vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> m_SkyTextureDescriptorHandles;
-	static int                                        m_CurrentSkyTextureIndex;
+	static std::vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> m_SkyCubeMapDescHandles;
+	static int                                        m_CurrentSkyCubeMapIndex;
 
 	// DynamicCubeMap
 	static bool                                   m_DynamicCubeMapOn;
@@ -99,7 +99,7 @@ public:
 
 	static ID3D12Device*               GetDevice() { return m_D3DDevice.Get(); }
 	static ID3D12Fence*                GetFence() { return m_Fence.Get(); }
-	static ID3D12GraphicsCommandList*  GetCommondList() { return m_CommandList.Get(); }
+	static ID3D12GraphicsCommandList*  GetCommandList() { return m_CommandList.Get(); }
 	static ID3D12Resource*             GetCurrentBackBuffer() { return m_SwapChainBuffer[m_CurrentBackBuffer].Get(); }
 	static D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentBackBufferView();
 	static D3D12_CPU_DESCRIPTOR_HANDLE GetDepthStencilView() { return m_DsvHeap->GetCPUDescriptorHandleForHeapStart(); }
@@ -107,11 +107,11 @@ public:
 	static ID3D12DescriptorHeap*       GetSrvHeap() { return m_SrvHeap.Get(); }
 
 	// CubeMap
-	static int GetCurrentCubeMapIndex() { return m_CurrentSkyTextureIndex; }
+	static int GetCurrentSkyCubeMapIndex() { return m_CurrentSkyCubeMapIndex; }
 
 	// DynamicCubeMap
 	static bool                          GetDynamicCubeOn() { return m_DynamicCubeMapOn; }
-	static CD3DX12_GPU_DESCRIPTOR_HANDLE CreateCubeMapDescriptorHandle(UINT Offset);
+	static CD3DX12_GPU_DESCRIPTOR_HANDLE ComputeCubeMapDescHandle(UINT Offset);
 	static UINT                          GetDynamicCubeMapSize() { return m_DynamicCubeMapSize; }
 
 	// デバッガ―
@@ -125,8 +125,8 @@ public:
 	// 描画用
 	static void Begin();
 	static void SetUpCommonResources();
-	static void SetCurrentCubeMapIndex(int CubeMapIndex) { m_CurrentSkyTextureIndex = CubeMapIndex; }
-	static void SetUpCubeMapResources();
+	static void SetCurrentSkyCubeMapIndex(int CubeMapIndex) { m_CurrentSkyCubeMapIndex = CubeMapIndex; }
+	static void SetUpSkyCubeMapResources();
 	static void SetUpDynamicCubeMapResources(int DCMResourcesIndex);
 	static void SetUpBeforeCreateAllDynamicCubeMapResources(int DCMResourcesIndex);
 	static void SetUpBeforeCreateEachDynamicCubeMapResource(int DCMResourcesIndex, int FaceIndex);

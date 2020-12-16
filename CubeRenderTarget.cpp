@@ -13,16 +13,16 @@ CCubeRenderTarget::CCubeRenderTarget(ID3D12Device* Device, UINT Width, UINT Heig
 }
 
 void CCubeRenderTarget::CreateDescriptors(
-	D3D12_CPU_DESCRIPTOR_HANDLE SrvCPUStartHandle,
-	D3D12_GPU_DESCRIPTOR_HANDLE SrvGPUStartHandle,
+	D3D12_CPU_DESCRIPTOR_HANDLE CpuSrvStartHandle,
+	D3D12_GPU_DESCRIPTOR_HANDLE GpuSrvStartHandle,
 	std::vector<std::vector<CD3DX12_CPU_DESCRIPTOR_HANDLE>>& RtvCpuHandles,
 	UINT Offset, UINT CbvSrvUavDescriptorSize)
 {
 	// Save references to the descriptors.
 	for (int i = 0; i < (int)RtvCpuHandles.size(); ++i)
 	{
-		m_CpuSrvHandles.push_back(CD3DX12_CPU_DESCRIPTOR_HANDLE(SrvCPUStartHandle, Offset + i, CbvSrvUavDescriptorSize));
-		m_GpuSrvHandles.push_back(CD3DX12_GPU_DESCRIPTOR_HANDLE(SrvGPUStartHandle, Offset + i, CbvSrvUavDescriptorSize));
+		m_CpuSrvHandles.push_back(CD3DX12_CPU_DESCRIPTOR_HANDLE(CpuSrvStartHandle, Offset + i, CbvSrvUavDescriptorSize));
+		m_GpuSrvHandles.push_back(CD3DX12_GPU_DESCRIPTOR_HANDLE(GpuSrvStartHandle, Offset + i, CbvSrvUavDescriptorSize));
 		m_CpuRtvHandles.push_back(RtvCpuHandles[i]);
 	}
 

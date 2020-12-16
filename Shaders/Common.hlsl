@@ -25,22 +25,18 @@ struct MaterialData
     uint     NormalMapIndex;
 	uint     HeightMapIndex;
     int      BitangentSign;
-};
-
-struct MaterialOfHeightData
-{
-    uint  UseACForPOM;
-    uint  MaxSampleCount;
-    uint  MinSampleCount;
-    int   IntPad0;
-    float HeightScale;
-    float ShadowSoftening;
-    float floatPad0;
-    float floatPad1;
-    bool  ShowSelfShadow;
-    bool  boolPad0;
-    bool  boolPad1;
-    bool  boolPad2;
+    uint     UseACForPOM;
+    uint     MaxSampleCount;
+    uint     MinSampleCount;
+    int      IntPad0;
+    float    HeightScale;
+    float    ShadowSoftening;
+    float    floatPad0;
+    float    floatPad1;
+    bool     ShowSelfShadow;
+    bool     boolPad0;
+    bool     boolPad1;
+    bool     boolPad2;
 };
 
 TextureCube gCubeMap : register(t0);
@@ -53,7 +49,6 @@ Texture2D gTextureMaps[19] : register(t1);
 // Put in space1, so the texture array does not overlap with these resources.  
 // The texture array will occupy registers t0, t1, ..., t3 in space0. 
 StructuredBuffer<MaterialData> gMaterialData : register(t0, space1);
-StructuredBuffer<MaterialOfHeightData> gMaterialOfHeightData : register(t0, space2);
 
 SamplerState gsamPointWrap        : register(s0);
 SamplerState gsamPointClamp       : register(s1);

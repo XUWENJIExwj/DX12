@@ -21,7 +21,6 @@ FrameResource::FrameResource(ID3D12Device* device, UINT passCount, UINT objectCo
 
     PassCB = make_unique<UploadBuffer<PassConstants>>(device, passCount, true);
 	MaterialBuffer = make_unique<UploadBuffer<MaterialData>>(device, materialCount, false);
-	MaterialExBuffer = make_unique<UploadBuffer<MaterialOfHeightData>>(device, materialCount, false);
     ObjectCB = make_unique<UploadBuffer<ObjectConstants>>(device, objectCount, true);
 }
 
@@ -45,7 +44,7 @@ bool CFrameResourceManager::CreateFrameResources()
 		for (int i = 0; i < gNumFrameResources; ++i)
 		{
 			m_FrameResources.push_back(make_unique<FrameResource>(CRenderer::GetDevice(),
-				CRenderer::GetDynamicCubeOn() ? 1 + CTextureManager::GetDynamicTextureNum() * 6 : 1, m_ObjectCBCount, CMaterialManager::GetAllMaterialsCount()));
+				CRenderer::GetDynamicCubeOn() ? 1 + CTextureManager::GetDynamicCubeMapsNum() * 6 : 1, m_ObjectCBCount, CMaterialManager::GetAllMaterialsCount()));
 		}
 		return true;
 	}

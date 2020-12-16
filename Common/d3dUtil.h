@@ -256,11 +256,11 @@ struct Material
 	int BitangentSign = 1; // Bitangentの符号（反転用）
 
 	int UseACForPOM = 0;
-	int MaxSampleCount = 512; // HeightMap最大サンプル数
+	int MaxSampleCount = 256; // HeightMap最大サンプル数
 	int MinSampleCount = 8; // HeightMap最小サンプル数
 	int IntPad0 = 1;
 
-	float HeightScale = 0.5f;
+	float HeightScale = 0.0f;
 	float ShadowSoftening = 0.9f;
 	float floatPad0 = 0.0f;
 	float floatPad1 = 0.0f;

@@ -1,5 +1,2 @@
-﻿  Cube.cpp
-  MeshField.cpp
-  Sky.cpp
-  コードを生成中...
+﻿  MaterialManager.cpp
   DX12.vcxproj -> D:\HAL\GM31\DX12\x64\Debug\DX12.exe

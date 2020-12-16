@@ -134,7 +134,6 @@ void CScene::UpdateMaterialBuffer(const GameTimer& GlobalTimer)
 {
 	static int firstInit = gNumFrameResources;
 	auto currMaterialBuffer = CFrameResourceManager::GetCurrentFrameResource()->MaterialBuffer.get();
-	auto currMaterialExBuffer = CFrameResourceManager::GetCurrentFrameResource()->MaterialExBuffer.get();
 	auto materials = CMaterialManager::GetAllMaterials().data();
 
 	for (int i = 0; i < CMaterialManager::GetAllMaterialsCount(); ++i)
@@ -155,16 +154,14 @@ void CScene::UpdateMaterialBuffer(const GameTimer& GlobalTimer)
 			matData.NormalMapIndex = materials[i]->NormalSrvHeapIndex;
 			matData.HeightMapIndex = materials[i]->HeightSrvHeapIndex;
 			matData.BitangentSign = materials[i]->BitangentSign;
+			matData.UseACForPOM = materials[i]->UseACForPOM;
+			matData.MaxSampleCount = materials[i]->MaxSampleCount;
+			matData.MinSampleCount = materials[i]->MinSampleCount;
+			//matData.IntPad0 = materials[i]->BitangentSign;
+			matData.HeightScale = materials[i]->HeightScale;
+			matData.ShadowSoftening = materials[i]->ShadowSoftening;
+			matData.ShowSelfShadow = materials[i]->ShowSelfShadow;
 			currMaterialBuffer->CopyData(materials[i]->MatCBIndex, matData);
-
-			MaterialOfHeightData matExData;
-			matExData.UseACForPOM = materials[i]->UseACForPOM;
-			matExData.MaxSampleCount = materials[i]->MaxSampleCount;
-			matExData.MinSampleCount = materials[i]->MinSampleCount;
-			matExData.IntPad0 = materials[i]->BitangentSign;
-			matExData.HeightScale = materials[i]->HeightScale;
-			matExData.ShowSelfShadow = materials[i]->ShowSelfShadow;
-			currMaterialExBuffer->CopyData(materials[i]->MatCBIndex, matExData);
 
 			// Next FrameResource need to be updated too.
 			materials[i]->NumFramesDirty--;

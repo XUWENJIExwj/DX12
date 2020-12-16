@@ -34,7 +34,7 @@ struct ShaderType
 class CShaderManager
 {
 private:
-	static std::vector<ShaderType> m_ShaderTypes;
+	static std::vector<ShaderType>               m_ShaderTypes;
 	static std::vector<D3D12_INPUT_ELEMENT_DESC> m_InputLayout;
 
 public:

@@ -5,7 +5,7 @@ using namespace std;
 
 vector<unique_ptr<MeshGeometry>> CGeoShapeManager::m_Geometries;
 
-void CGeoShapeManager::CreateGeoShapes(ID3D12Device* Device, ID3D12GraphicsCommandList* CommandList)
+void CGeoShapeManager::CreateGeoShapes()
 {
 	GeometryGenerator geoGen;
 	GeometryGenerator::MeshData cube = geoGen.CreateCube(1.0f, 1.0f, 1.0f, 3);
@@ -114,11 +114,11 @@ void CGeoShapeManager::CreateGeoShapes(ID3D12Device* Device, ID3D12GraphicsComma
 	ThrowIfFailed(D3DCreateBlob(ibByteSize, &geo->IndexBufferCPU));
 	CopyMemory(geo->IndexBufferCPU->GetBufferPointer(), indices.data(), ibByteSize);
 
-	geo->VertexBufferGPU = d3dUtil::CreateDefaultBuffer(Device,
-		CommandList, vertices.data(), vbByteSize, geo->VertexBufferUploader);
+	geo->VertexBufferGPU = d3dUtil::CreateDefaultBuffer(CRenderer::GetDevice(),
+		CRenderer::GetCommandList(), vertices.data(), vbByteSize, geo->VertexBufferUploader);
 
-	geo->IndexBufferGPU = d3dUtil::CreateDefaultBuffer(Device,
-		CommandList, indices.data(), ibByteSize, geo->IndexBufferUploader);
+	geo->IndexBufferGPU = d3dUtil::CreateDefaultBuffer(CRenderer::GetDevice(),
+		CRenderer::GetCommandList(), indices.data(), ibByteSize, geo->IndexBufferUploader);
 
 	geo->VertexByteStride = sizeof(Vertex);
 	geo->VertexBufferByteSize = vbByteSize;

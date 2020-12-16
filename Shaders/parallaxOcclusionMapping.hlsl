@@ -68,12 +68,12 @@ float4 PS(VertexOut pin) : SV_Target
     uint normalMapIndex = matData.NormalMapIndex;
     uint heightMapIndex = matData.HeightMapIndex;
     int bitangentSign = matData.BitangentSign;
-    
-    MaterialOfHeightData matExData = gMaterialOfHeightData[gMaterialIndex];
-    float heightScale = matExData.HeightScale;
-    int maxSampleCount = matExData.MaxSampleCount;
-    int minSampleCount = matExData.MinSampleCount;
-    int useACForPOM = matExData.UseACForPOM;
+    int maxSampleCount = matData.MaxSampleCount;
+    int minSampleCount = matData.MinSampleCount;
+    int useACForPOM = matData.UseACForPOM;
+    float heightScale = matData.HeightScale;
+    float shadowSoftening = matData.ShadowSoftening;
+    bool showSelfShadow = matData.ShowSelfShadow;
     
     // Interpolating normal can unnormalize it, so renormalize it.
     float3 normalWS = normalize(pin.NormalWS);
@@ -164,7 +164,68 @@ float4 PS(VertexOut pin) : SV_Target
 
     const float shininess = max(1.0f - roughness, 0.01);
     Material mat = { diffuseAlbedo, fresnelR0, shininess };
+
+    // SelfShadow
     float3 shadowFactor = 1.0f;
+    if(showSelfShadow)
+    {
+        // 最初の平行光源だけでSelfShadowを計算（処理コストを下げるため）
+        float3 lightDirWS = normalize(-gLights[0].Direction);
+        float3 lightDirTS = mul(lightDirWS, toTangent);
+        
+        sampleCount = (int)lerp(maxSampleCount, minSampleCount, dot(lightDirWS, normalWS));
+        maxParallaxOffset = float2(lightDirTS.x, lightDirTS.y) * heightScale / lightDirTS.z;
+        
+        float4 rayZ = gTextureMaps[heightMapIndex].Sample(gsamAnisotropicWrap, parallaxTex);
+        prevRayZ = useACForPOM * rayZ.a + (1 - useACForPOM) * rayZ.r;
+        prevHeight = prevRayZ;
+        
+        zStep = (1.0 - prevRayZ) / (float) sampleCount;
+        
+        currRayZ = prevRayZ + zStep;
+        
+        texStep = maxParallaxOffset * zStep;
+        
+        dx = ddx(parallaxTex);
+        dy = ddy(parallaxTex);
+        
+        sampleIndex = 0;
+        currTexOffset = texStep;
+        prevTexOffset = 0;
+        
+        bool checkShadow = false;
+        
+        while (sampleIndex < sampleCount + 1)
+        {
+            currHeight = gTextureMaps[heightMapIndex].SampleGrad(gsamAnisotropicWrap, parallaxTex + currTexOffset, dx, dy).r;
+            
+            if (currHeight > currRayZ)
+            {
+                sampleIndex = sampleCount + 1;
+                checkShadow = true;
+                float t = (prevHeight - prevRayZ) / (prevHeight - currHeight + currRayZ - prevRayZ);
+                finalTexOffset = prevTexOffset + t * texStep;
+            }
+            else
+            {
+                ++sampleIndex;
+                
+                prevTexOffset = currTexOffset;
+                prevHeight = currHeight;
+                prevRayZ = currRayZ;
+                currTexOffset += texStep;
+                currRayZ += zStep;
+            }
+        }
+        
+        if (checkShadow)
+        {
+            float4 shadow = gTextureMaps[heightMapIndex].Sample(gsamAnisotropicWrap, parallaxTex + finalTexOffset) - gTextureMaps[heightMapIndex].Sample(gsamAnisotropicWrap, parallaxTex);
+            float finalShadow = useACForPOM * shadow.a + (1 - useACForPOM) * shadow.r;
+            shadowFactor[0] = 1 - saturate((1 - finalShadow) * shadowSoftening);
+        }
+    }
+    
     float4 directLight = ComputeLighting(gLights, mat, pin.PosWS,
         bumpedNormalWS, toEyeWS, shadowFactor);
 
@@ -180,10 +241,4 @@ float4 PS(VertexOut pin) : SV_Target
     litColor.a = diffuseAlbedo.a;
 
     return litColor;
-}
-
-float3 ComputeTexCoordFromHeightMap(float3 ViewDirTS)
-{
-    
-    return float3(0, 0, 0);
 }

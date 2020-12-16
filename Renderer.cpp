@@ -33,9 +33,9 @@ ComPtr<ID3D12DescriptorHeap> CRenderer::m_DsvHeap = nullptr;
 D3D12_VIEWPORT CRenderer::m_ScreenViewport;
 D3D12_RECT     CRenderer::m_ScissorRect;
 
-UINT CRenderer::m_RtvDescriptorSize = 0;
-UINT CRenderer::m_DsvDescriptorSize = 0;
-UINT CRenderer::m_CbvSrvUavDescriptorSize = 0;
+UINT CRenderer::m_RtvDescSize = 0;
+UINT CRenderer::m_DsvDescSize = 0;
+UINT CRenderer::m_CbvSrvUavDescSize = 0;
 
 D3D_DRIVER_TYPE CRenderer::m_D3DDriverType = D3D_DRIVER_TYPE_HARDWARE;
 DXGI_FORMAT     CRenderer::m_BackBufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -48,8 +48,8 @@ vector<ComPtr<ID3D12PipelineState>> CRenderer::m_PSOs((int)PSOTypeIndex::PSO_MAX
 int                                 CRenderer::m_CurrentPSO = (int)PSOTypeIndex::PSO_Solid_Opaque;
 
 // CubeMap
-vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> CRenderer::m_SkyTextureDescriptorHandles;
-int                                   CRenderer::m_CurrentSkyTextureIndex = 0;
+vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> CRenderer::m_SkyCubeMapDescHandles;
+int                                   CRenderer::m_CurrentSkyCubeMapIndex = 0;
 
 // DynamicCubeMap
 bool                          CRenderer::m_DynamicCubeMapOn = true;
@@ -95,9 +95,9 @@ bool CRenderer::Init()
 	ThrowIfFailed(m_D3DDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE,
 		IID_PPV_ARGS(&m_Fence)));
 
-	m_RtvDescriptorSize = m_D3DDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-	m_DsvDescriptorSize = m_D3DDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
-	m_CbvSrvUavDescriptorSize = m_D3DDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	m_RtvDescSize = m_D3DDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	m_DsvDescSize = m_D3DDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+	m_CbvSrvUavDescSize = m_D3DDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	// Check 4X MSAA quality support for our back buffer format.
 	// All Direct3D 11 capable devices support 4X MSAA for all render 
@@ -203,7 +203,7 @@ void CRenderer::CreateSwapChain()
 void CRenderer::CreateRtvAndDsvDescriptorHeaps()
 {
 	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc;
-	rtvHeapDesc.NumDescriptors = m_DynamicCubeMapOn ? m_SwapChainBufferCount + CTextureManager::GetDynamicTextureNum() * 6 : m_SwapChainBufferCount;
+	rtvHeapDesc.NumDescriptors = m_DynamicCubeMapOn ? m_SwapChainBufferCount + CTextureManager::GetDynamicCubeMapsNum() * 6 : m_SwapChainBufferCount;
 	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	rtvHeapDesc.NodeMask = 0;
@@ -225,7 +225,7 @@ void CRenderer::CreateRtvAndDsvDescriptorHeaps()
 		m_DynamicCubeMapDsvHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
 			m_DsvHeap->GetCPUDescriptorHandleForHeapStart(),
 			1,
-			m_DsvDescriptorSize);
+			m_DsvDescSize);
 	}
 }
 
@@ -259,7 +259,7 @@ void CRenderer::OnResize()
 	{
 		ThrowIfFailed(m_SwapChain->GetBuffer(i, IID_PPV_ARGS(&m_SwapChainBuffer[i])));
 		m_D3DDevice->CreateRenderTargetView(m_SwapChainBuffer[i].Get(), nullptr, rtvHeapHandle);
-		rtvHeapHandle.Offset(1, m_RtvDescriptorSize);
+		rtvHeapHandle.Offset(1, m_RtvDescSize);
 	}
 
 	// Create the depth/stencil buffer and view.
@@ -373,9 +373,9 @@ void CRenderer::CreateCommonResources()
 	RestDirectCmdListAlloc();
 
 	CShaderManager::LoadShaders();
-	CTextureManager::LoadTextures(m_D3DDevice.Get(), m_CommandList.Get());
+	CTextureManager::LoadTextures();
 	CMaterialManager::CreateMaterials();
-	CGeoShapeManager::CreateGeoShapes(m_D3DDevice.Get(), m_CommandList.Get());
+	CGeoShapeManager::CreateGeoShapes();
 	CreateRootSignature();
 	CreateDescriptorHeaps();
 	CreataPSOs();
@@ -388,27 +388,26 @@ void CRenderer::CreateCommonResources()
 
 void CRenderer::CreateRootSignature()
 {
-	CD3DX12_DESCRIPTOR_RANGE texTable0;
-	texTable0.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
+	CD3DX12_DESCRIPTOR_RANGE cubeMapTable;
+	cubeMapTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
 
-	CD3DX12_DESCRIPTOR_RANGE texTable1;
-	texTable1.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, CTextureManager::GetTextureNum() + CTextureManager::GetDynamicTextureNum(), 1, 0);
+	CD3DX12_DESCRIPTOR_RANGE texturesTable;
+	texturesTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, CTextureManager::GetTexturesNum() + CTextureManager::GetDynamicCubeMapsNum(), 1, 0);
 
 	// Root parameter can be a table, root descriptor or root constants.
-	CD3DX12_ROOT_PARAMETER slotRootParameter[6];
+	CD3DX12_ROOT_PARAMETER slotRootParameter[5];
 
 	// Perfomance TIP: Order from most frequent to least frequent.
 	slotRootParameter[0].InitAsConstantBufferView(0);
 	slotRootParameter[1].InitAsConstantBufferView(1);
 	slotRootParameter[2].InitAsShaderResourceView(0, 1);
-	slotRootParameter[3].InitAsShaderResourceView(0, 2);
-	slotRootParameter[4].InitAsDescriptorTable(1, &texTable0, D3D12_SHADER_VISIBILITY_PIXEL);
-	slotRootParameter[5].InitAsDescriptorTable(1, &texTable1, D3D12_SHADER_VISIBILITY_PIXEL);
+	slotRootParameter[3].InitAsDescriptorTable(1, &cubeMapTable, D3D12_SHADER_VISIBILITY_PIXEL);
+	slotRootParameter[4].InitAsDescriptorTable(1, &texturesTable, D3D12_SHADER_VISIBILITY_PIXEL);
 
 	auto staticSamplers = GetStaticSamplers();
 
 	// A root signature is an array of root parameters.
-	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(6, slotRootParameter,
+	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(5, slotRootParameter,
 		(UINT)staticSamplers.size(), staticSamplers.data(),
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
@@ -435,7 +434,7 @@ void CRenderer::CreateDescriptorHeaps()
 {
 	// Create the SRV heap.
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
-	srvHeapDesc.NumDescriptors = CTextureManager::GetTextureNum() + CTextureManager::GetDynamicTextureNum();
+	srvHeapDesc.NumDescriptors = CTextureManager::GetTexturesNum() + CTextureManager::GetDynamicCubeMapsNum();
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	ThrowIfFailed(m_D3DDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_SrvHeap)));
@@ -450,19 +449,19 @@ void CRenderer::CreateDescriptorHeaps()
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
 
-	UINT skyTextureIndex = CTextureManager::GetSkyTextureIndex();
-	UINT dynamicTextureIndex = CTextureManager::GetDynamicTextureIndex();
+	UINT skyCubeMap = CTextureManager::GetSkyCubeMapIndex();
+	UINT dynamicCubeMapIndex = CTextureManager::GetDynamicCubeMapIndex();
 	auto textures = CTextureManager::GetTextures().data();
 
-	for (unsigned int i = 0; i < skyTextureIndex; ++i)
+	for (unsigned int i = 0; i < skyCubeMap; ++i)
 	{
-		auto tex = textures[i]->Resource;
-		srvDesc.Format = tex->GetDesc().Format;
-		srvDesc.Texture2D.MipLevels = tex->GetDesc().MipLevels;
-		m_D3DDevice->CreateShaderResourceView(tex.Get(), &srvDesc, hDescriptor);
+		auto texture = textures[i]->Resource;
+		srvDesc.Format = texture->GetDesc().Format;
+		srvDesc.Texture2D.MipLevels = texture->GetDesc().MipLevels;
+		m_D3DDevice->CreateShaderResourceView(texture.Get(), &srvDesc, hDescriptor);
 
 		// next descriptor
-		hDescriptor.Offset(1, m_CbvSrvUavDescriptorSize);
+		hDescriptor.Offset(1, m_CbvSrvUavDescSize);
 	}
 
 	// TextureCube
@@ -470,41 +469,41 @@ void CRenderer::CreateDescriptorHeaps()
 	srvDesc.TextureCube.MostDetailedMip = 0;
 	srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
 
-	for (unsigned int i = skyTextureIndex; i < dynamicTextureIndex; ++i)
+	for (unsigned int i = skyCubeMap; i < dynamicCubeMapIndex; ++i)
 	{
-		m_SkyTextureDescriptorHandles.push_back(CreateCubeMapDescriptorHandle(i));
-		auto tex = textures[i]->Resource;
-		srvDesc.Format = tex->GetDesc().Format;
-		srvDesc.TextureCube.MipLevels = tex->GetDesc().MipLevels;
-		m_D3DDevice->CreateShaderResourceView(tex.Get(), &srvDesc, hDescriptor);
+		m_SkyCubeMapDescHandles.push_back(ComputeCubeMapDescHandle(i));
+		auto texture = textures[i]->Resource;
+		srvDesc.Format = texture->GetDesc().Format;
+		srvDesc.TextureCube.MipLevels = texture->GetDesc().MipLevels;
+		m_D3DDevice->CreateShaderResourceView(texture.Get(), &srvDesc, hDescriptor);
 		// next descriptor
-		hDescriptor.Offset(1, m_CbvSrvUavDescriptorSize);
+		hDescriptor.Offset(1, m_CbvSrvUavDescSize);
 	}
 
 	// DynamicCube
 	if (m_DynamicCubeMapOn)
 	{
-		auto srvCpuStart = m_SrvHeap->GetCPUDescriptorHandleForHeapStart();
-		auto srvGpuStart = m_SrvHeap->GetGPUDescriptorHandleForHeapStart();
-		auto rtvCpuStart = m_RtvHeap->GetCPUDescriptorHandleForHeapStart();
+		auto cpuSrvStart = m_SrvHeap->GetCPUDescriptorHandleForHeapStart();
+		auto gpuSrvStart = m_SrvHeap->GetGPUDescriptorHandleForHeapStart();
+		auto cpuRtvStart = m_RtvHeap->GetCPUDescriptorHandleForHeapStart();
 
 		// Cubemap RTV goes after the swap chain descriptors.
 		int rtvOffset = m_SwapChainBufferCount;
 
 		vector<vector<CD3DX12_CPU_DESCRIPTOR_HANDLE>> allCubeRtvHandles;
-		for (int i = 0; i < (int)CTextureManager::GetDynamicTextureNum(); ++i)
+		for (int i = 0; i < (int)CTextureManager::GetDynamicCubeMapsNum(); ++i)
 		{
 			vector<CD3DX12_CPU_DESCRIPTOR_HANDLE> cubeRtvHandles;
 			for (int j = 0; j < 6; ++j)
 			{
-				cubeRtvHandles.push_back(CD3DX12_CPU_DESCRIPTOR_HANDLE(rtvCpuStart, rtvOffset, m_RtvDescriptorSize));
+				cubeRtvHandles.push_back(CD3DX12_CPU_DESCRIPTOR_HANDLE(cpuRtvStart, rtvOffset, m_RtvDescSize));
 				rtvOffset++;
 			}
 			allCubeRtvHandles.push_back(cubeRtvHandles);
 		}
 
 		// Dynamic cubemap SRV is after the sky SRV.
-		m_DynamicCubeMap->CreateDescriptors(srvCpuStart, srvGpuStart, allCubeRtvHandles, dynamicTextureIndex, m_CbvSrvUavDescriptorSize);
+		m_DynamicCubeMap->CreateDescriptors(cpuSrvStart, gpuSrvStart, allCubeRtvHandles, dynamicCubeMapIndex, m_CbvSrvUavDescSize);
 
 		CreateCubeDepthStencil();
 	}
@@ -587,19 +586,18 @@ void CRenderer::CreataPSOs()
 	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&wireframeOpaquePsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_WireFrame_Opaque])));
 
 	// PSO for POM
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC pomOpaquePsoDesc = opaquePsoDesc;
-	pomOpaquePsoDesc.pRootSignature = m_RootSignature.Get();
-	pomOpaquePsoDesc.VS =
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC opaquePOMPsoDesc = opaquePsoDesc;
+	opaquePOMPsoDesc.VS =
 	{
 		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_Opaque_POM].vertexShader->GetBufferPointer()),
 		shaderTypes[(int)ShaderTypeIndex::Shader_Type_Opaque_POM].vertexShader->GetBufferSize()
 	};
-	pomOpaquePsoDesc.PS =
+	opaquePOMPsoDesc.PS =
 	{
 		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_Opaque_POM].pixelShader->GetBufferPointer()),
 		shaderTypes[(int)ShaderTypeIndex::Shader_Type_Opaque_POM].pixelShader->GetBufferSize()
 	};
-	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&pomOpaquePsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_Solid_Opaque_POM])));
+	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&opaquePOMPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_Solid_Opaque_POM])));
 
 	// PSO for sky.
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC skyPsoDesc = opaquePsoDesc;
@@ -611,7 +609,6 @@ void CRenderer::CreataPSOs()
 	// Otherwise, the normalized depth values at z = 1 (NDC) will 
 	// fail the depth test if the depth buffer was cleared to 1.
 	skyPsoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
-	skyPsoDesc.pRootSignature = m_RootSignature.Get();
 	skyPsoDesc.VS =
 	{
 		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_Sky].vertexShader->GetBufferPointer()),
@@ -636,14 +633,14 @@ D3D12_CPU_DESCRIPTOR_HANDLE CRenderer::GetCurrentBackBufferView()
 	return CD3DX12_CPU_DESCRIPTOR_HANDLE(
 		m_RtvHeap->GetCPUDescriptorHandleForHeapStart(),
 		m_CurrentBackBuffer,
-		m_RtvDescriptorSize);
+		m_RtvDescSize);
 }
 
-CD3DX12_GPU_DESCRIPTOR_HANDLE CRenderer::CreateCubeMapDescriptorHandle(UINT Offset)
+CD3DX12_GPU_DESCRIPTOR_HANDLE CRenderer::ComputeCubeMapDescHandle(UINT Offset)
 {
-	CD3DX12_GPU_DESCRIPTOR_HANDLE cubeMapDescriptor(m_SrvHeap->GetGPUDescriptorHandleForHeapStart());
-	cubeMapDescriptor.Offset(Offset, m_CbvSrvUavDescriptorSize);
-	return cubeMapDescriptor;
+	CD3DX12_GPU_DESCRIPTOR_HANDLE cubeMapDesc(m_SrvHeap->GetGPUDescriptorHandleForHeapStart());
+	cubeMapDesc.Offset(Offset, m_CbvSrvUavDescSize);
+	return cubeMapDesc;
 }
 
 // デバッガ―
@@ -795,8 +792,8 @@ void CRenderer::Begin()
 	ThrowIfFailed(m_CommandList->Reset(cmdListAlloc.Get(), m_PSOs[(int)PSOTypeIndex::PSO_Solid_Opaque].Get()));
 	m_CurrentPSO = (int)PSOTypeIndex::PSO_Solid_Opaque;
 
-	ID3D12DescriptorHeap* descriptorHeaps[] = { m_SrvHeap.Get() };
-	m_CommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+	ID3D12DescriptorHeap* descHeaps[] = { m_SrvHeap.Get() };
+	m_CommandList->SetDescriptorHeaps(_countof(descHeaps), descHeaps);
 
 	m_CommandList->SetGraphicsRootSignature(m_RootSignature.Get());
 }
@@ -808,28 +805,25 @@ void CRenderer::SetUpCommonResources()
 	auto matBuffer = CFrameResourceManager::GetCurrentFrameResource()->MaterialBuffer->Resource();
 	m_CommandList->SetGraphicsRootShaderResourceView(2, matBuffer->GetGPUVirtualAddress());
 
-	auto matExBuffer = CFrameResourceManager::GetCurrentFrameResource()->MaterialExBuffer->Resource();
-	m_CommandList->SetGraphicsRootShaderResourceView(3, matExBuffer->GetGPUVirtualAddress());
-
 	// Bind all the textures used in this scene.  Observe
 	// that we only have to specify the first descriptor in the table.  
 	// The root signature knows how many descriptors are expected in the table.
-	m_CommandList->SetGraphicsRootDescriptorTable(5, m_SrvHeap->GetGPUDescriptorHandleForHeapStart());
+	m_CommandList->SetGraphicsRootDescriptorTable(4, m_SrvHeap->GetGPUDescriptorHandleForHeapStart());
 }
 
-void CRenderer::SetUpCubeMapResources()
+void CRenderer::SetUpSkyCubeMapResources()
 {
 	// Bind the sky cube map.  For our demos, we just use one "world" cube map representing the environment
 	// from far away, so all objects will use the same cube map and we only need to set it once per-frame.  
 	// If we wanted to use "local" cube maps, we would have to change them per-object, or dynamically
 	// index into an array of cube maps.
-	m_CommandList->SetGraphicsRootDescriptorTable(4, m_SkyTextureDescriptorHandles[m_CurrentSkyTextureIndex]);
+	m_CommandList->SetGraphicsRootDescriptorTable(3, m_SkyCubeMapDescHandles[m_CurrentSkyCubeMapIndex]);
 }
 
 void CRenderer::SetUpDynamicCubeMapResources(int DCMResourcesIndex)
 {
 	// Use the dynamic cube map for the dynamic reflectors layer.
-	m_CommandList->SetGraphicsRootDescriptorTable(4, m_DynamicCubeMap->GetSrvHandle(DCMResourcesIndex));
+	m_CommandList->SetGraphicsRootDescriptorTable(3, m_DynamicCubeMap->GetSrvHandle(DCMResourcesIndex));
 }
 
 void CRenderer::SetUpBeforeCreateAllDynamicCubeMapResources(int DCMResourcesIndex)

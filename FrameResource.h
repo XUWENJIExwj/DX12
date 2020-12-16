@@ -54,15 +54,11 @@ struct MaterialData
 	UINT NormalMapIndex = 0;
 	UINT HeightMapIndex = 0;
 	int  BitangentSign = 1; // Bitangentの符号（反転用）
-};
-
-struct MaterialOfHeightData
-{
 	UINT UseACForPOM = 0;
-	UINT MaxSampleCount = 512; // HeightMap最大サンプル数
+	UINT MaxSampleCount = 256; // HeightMap最大サンプル数
 	UINT MinSampleCount = 8;   // HeightMap最小サンプル数
 	int  IntPad0 = 1;
-	float HeightScale = 0.5f;
+	float HeightScale = 0.01f;
 	float ShadowSoftening = 0.9f;
 	float floatPad0 = 0.0f;
 	float floatPad1 = 0.0f;
@@ -95,7 +91,6 @@ public:
 	std::unique_ptr<UploadBuffer<ObjectConstants>> ObjectCB = nullptr;
 
 	std::unique_ptr<UploadBuffer<MaterialData>> MaterialBuffer = nullptr;
-	std::unique_ptr<UploadBuffer<MaterialOfHeightData>> MaterialExBuffer = nullptr;
 
 	// Fence value to mark commands up to this fence point.  This lets us
 	// check if these frame resources are still in use by the GPU.

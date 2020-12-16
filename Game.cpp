@@ -63,7 +63,7 @@ void CGame::Update(const GameTimer& GlobalTimer)
 void CGame::Draw(const GameTimer& GlobalTimer)
 {
 	CRenderer::SetUpCommonResources();
-	CRenderer::SetUpCubeMapResources();
+	CRenderer::SetUpSkyCubeMapResources();
 
 	// CreateDynamicCubeMap
 	CRenderer::CreateDynamicCubeMapResources(GlobalTimer, m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque_DynamicReflectors]);
@@ -71,7 +71,7 @@ void CGame::Draw(const GameTimer& GlobalTimer)
 	CRenderer::SetUpBeforeDrawScene();
 	CRenderer::DrawGameObjectsWithDynamicCubeMap(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque_DynamicReflectors]);
 
-	CRenderer::SetUpCubeMapResources();
+	CRenderer::SetUpSkyCubeMapResources();
 	//CRenderer::SetPSO((int)PSOTypeIndex::PSO_01_WireFrame_Opaque);
 	CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque]);
 

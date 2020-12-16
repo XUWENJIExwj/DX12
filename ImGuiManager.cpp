@@ -88,12 +88,26 @@ void CImGuiManager::Draw()
 		ImGui::Text(u8"移動：W・S・A・D");
 		ImGui::Text(u8"Mouseの表示/非表示：LeftAlt");
 		ImGui::Text(u8"Camera操作：Mouse/ImGuiのWindow");
-		ImGui::Text(u8"　Mouse表示時：MouseのRightButtonを押したまま、Mouseを移動");
+		ImGui::Text(u8"　Mouse表示時：Mouseを右クリックしたまま、Mouseを移動");
 		ImGui::Text(u8"　Mouse非表示時：Mouseを移動");
 		ImGui::Text(u8"その他：ImGuiのWindowでオブジェクトのプロパティを変更");
 		ImGui::End();
 	}
 
+	static bool showCloseb = true;
+
+	ImGui::SetNextWindowPos(ImVec2((app->GetWindowWidth() - 500) * 0.5f, 20), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(420, 110), ImGuiCond_Once);
+
+	if (showClose)
+	{
+		ImGui::Begin(u8"アピールポイント", &showCloseb, window_flags);
+		ImGui::Text(u8"・DX12で複数のオブジェクトに動的環境マッピングの実装");
+		ImGui::Text(u8"・MaterialManagerを作って、それぞれのMaterialを管理する機能の実装");
+		ImGui::Text(u8"・ParallaxOcclusionMappingの実装");
+		ImGui::End();
+	}
+
 	ImGui::Render();
-	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), CRenderer::GetCommondList());
+	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), CRenderer::GetCommandList());
 }

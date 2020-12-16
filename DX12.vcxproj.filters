@@ -292,12 +292,6 @@
     <FxCompile Include="Shaders\Sky.hlsl">
       <Filter>ソース ファイル\Shader</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\parallaxOcclusionMappingWithACPS.hlsl">
-      <Filter>ソース ファイル\Shader</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\parallaxOcclusionMappingWithRCPS.hlsl">
-      <Filter>ソース ファイル\Shader</Filter>
-    </FxCompile>
     <FxCompile Include="Shaders\parallaxOcclusionMapping.hlsl">
       <Filter>ソース ファイル\Shader</Filter>
     </FxCompile>

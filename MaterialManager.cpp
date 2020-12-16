@@ -4,8 +4,11 @@
 using namespace std;
 using namespace DirectX;
 
-vector<const char*> CMaterialManager::m_MaterialTexNames;
-vector<Material*>   CMaterialManager::m_MaterialTex((int)MaterialTexIndex::Material_Max);
+vector<const char*> CMaterialManager::m_MaterialNormalNames;
+vector<Material*>   CMaterialManager::m_MaterialNormal((int)MaterialNormalIndex::Material_Max);
+
+vector<const char*> CMaterialManager::m_MaterialHeightNames;
+vector<Material*>   CMaterialManager::m_MaterialHeight((int)MaterialHeightIndex::Material_Max);
 
 vector<const char*> CMaterialManager::m_MaterialCubeMapNames;
 vector<Material*>   CMaterialManager::m_MaterialCubeMap((int)MaterialCubeMapIndex::Material_Max);
@@ -14,34 +17,102 @@ vector<unique_ptr<Material>> CMaterialManager::m_AllMaterials;
 
 void CMaterialManager::CreateMaterials()
 {
-	m_AllMaterials.reserve((int)MaterialTexIndex::Material_Max + (int)MaterialCubeMapIndex::Material_Max);
+	m_AllMaterials.reserve((int)MaterialNormalIndex::Material_Max + (int)MaterialCubeMapIndex::Material_Max);
+	CreateMaterialNormal();
+	CreateMaterialHeight();
+	CreateMaterialCubeMap();
+}
 
-	m_MaterialTexNames =
+void CMaterialManager::CreateMaterialNormal()
+{
+	m_MaterialNormalNames =
 	{
 		"Material_Mirror_00",
 		"Material_Mirror_01",
 		"Material_Logo_00",
 		"Material_Bricks_00",
 		"Material_Tile_00",
-		"Material_Plane_00",
 		"Material_Glass_00",
+		"Material_Plane_00",
 	};
 
-	for (int i = 0; i < (int)MaterialTexIndex::Material_Max; ++i)
+	for (int i = 0; i < (int)MaterialNormalIndex::Material_Max; ++i)
 	{
 		auto material = make_unique<Material>();
-		material->Name = m_MaterialTexNames[i];
+		material->Name = m_MaterialNormalNames[i];
 		material->MatCBIndex = i;
-		material->DiffuseSrvHeapIndex = i;
-		material->NormalSrvHeapIndex = i + (int)MaterialTexIndex::Material_Max;
+		material->DiffuseSrvHeapIndex = i + (int)TextureIndex::Texture_Default_00_Diffuse;
+		material->NormalSrvHeapIndex = i + (int)TextureIndex::Texture_Default_00_Normal;
 		material->BitangentSign = 1;
 		material->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 		material->FresnelR0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
 		material->Roughness = 0.99f;
-		m_MaterialTex[i] = material.get();
+		m_MaterialNormal[i] = material.get();
 		m_AllMaterials.push_back(move(material));
 	}
 
+	// Customize
+	m_MaterialNormal[(int)MaterialNormalIndex::Material_Mirror_Dynamic_00]->DiffuseAlbedo = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	m_MaterialNormal[(int)MaterialNormalIndex::Material_Mirror_Dynamic_00]->FresnelR0 = XMFLOAT3(0.98f, 0.97f, 0.95f);
+	m_MaterialNormal[(int)MaterialNormalIndex::Material_Mirror_Dynamic_00]->Roughness = 0.1f;
+
+	m_MaterialNormal[(int)MaterialNormalIndex::Material_Mirror_00]->DiffuseAlbedo = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	m_MaterialNormal[(int)MaterialNormalIndex::Material_Mirror_00]->FresnelR0 = XMFLOAT3(0.98f, 0.97f, 0.95f);
+	m_MaterialNormal[(int)MaterialNormalIndex::Material_Mirror_00]->Roughness = 0.1f;
+
+	m_MaterialNormal[(int)MaterialNormalIndex::Material_Bricks_00]->BitangentSign = 1;
+	m_MaterialNormal[(int)MaterialNormalIndex::Material_Bricks_00]->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	m_MaterialNormal[(int)MaterialNormalIndex::Material_Bricks_00]->FresnelR0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
+	m_MaterialNormal[(int)MaterialNormalIndex::Material_Bricks_00]->Roughness = 0.3f;
+
+	m_MaterialNormal[(int)MaterialNormalIndex::Material_Tile_00]->BitangentSign = -1;
+	m_MaterialNormal[(int)MaterialNormalIndex::Material_Tile_00]->DiffuseAlbedo = XMFLOAT4(0.9f, 0.9f, 0.9f, 1.0f);
+	m_MaterialNormal[(int)MaterialNormalIndex::Material_Tile_00]->FresnelR0 = XMFLOAT3(0.2f, 0.2f, 0.2f);
+	m_MaterialNormal[(int)MaterialNormalIndex::Material_Tile_00]->Roughness = 0.1f;
+
+	m_MaterialNormal[(int)MaterialNormalIndex::Material_Plane_00]->BitangentSign = 1;
+	m_MaterialNormal[(int)MaterialNormalIndex::Material_Plane_00]->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	m_MaterialNormal[(int)MaterialNormalIndex::Material_Plane_00]->FresnelR0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
+	m_MaterialNormal[(int)MaterialNormalIndex::Material_Plane_00]->Roughness = 0.1f;
+}
+
+void CMaterialManager::CreateMaterialHeight()
+{
+	m_MaterialHeightNames =
+	{
+		"Material_Plane_00",
+	};
+
+	int materialCountBeforeThis = (int)MaterialNormalIndex::Material_Max;
+
+	for (int i = 0; i < (int)MaterialHeightIndex::Material_Max; ++i)
+	{
+		auto material = make_unique<Material>();
+		material->Name = m_MaterialHeightNames[i];
+		material->MatCBIndex = i + materialCountBeforeThis;
+		material->DiffuseSrvHeapIndex = i + (int)TextureIndex::Texture_Plane_00_Diffuse;
+		material->NormalSrvHeapIndex = i + (int)TextureIndex::Texture_Plane_00_Normal;
+		material->HeightSrvHeapIndex = i + (int)TextureIndex::Texture_Plane_00_Height;
+		material->BitangentSign = 1;
+		material->UseACForPOM = 0;
+		material->MaxSampleCount = 128;
+		material->MinSampleCount = 8;
+		material->HeightScale = 0.01f;
+		material->ShadowSoftening = 0.9f;
+		material->ShowSelfShadow = true;
+		material->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		material->FresnelR0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
+		material->Roughness = 0.1f;
+		m_MaterialHeight[i] = material.get();
+		m_AllMaterials.push_back(move(material));
+	}
+
+	// Customize
+
+}
+
+void CMaterialManager::CreateMaterialCubeMap()
+{
 	m_MaterialCubeMapNames =
 	{
 		"Material_SkyCube_00",
@@ -50,55 +121,28 @@ void CMaterialManager::CreateMaterials()
 		"Material_IndoorCube_00",
 	};
 
+	int materialCountBeforeThis = (int)MaterialNormalIndex::Material_Max + (int)MaterialHeightIndex::Material_Max;
+
 	for (int i = 0; i < (int)MaterialCubeMapIndex::Material_Max; ++i)
 	{
 		auto material = make_unique<Material>();
 		material->Name = m_MaterialCubeMapNames[i];
-		material->MatCBIndex = i + (int)MaterialTexIndex::Material_Max;
-		material->DiffuseSrvHeapIndex = (int)TextureIndex::Texture_SkyCube_00_Diffuse + i;
+		material->MatCBIndex = i + materialCountBeforeThis;
+		material->DiffuseSrvHeapIndex = i + (int)TextureIndex::Texture_SkyCube_00_Diffuse;
 		material->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 		material->FresnelR0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
 		material->Roughness = 0.99f;
 		m_MaterialCubeMap[i] = material.get();
 		m_AllMaterials.push_back(move(material));
 	}
-
-	// Customize
-	m_MaterialTex[(int)MaterialTexIndex::Material_Mirror_Dynamic_00]->DiffuseAlbedo = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-	m_MaterialTex[(int)MaterialTexIndex::Material_Mirror_Dynamic_00]->FresnelR0 = XMFLOAT3(0.98f, 0.97f, 0.95f);
-	m_MaterialTex[(int)MaterialTexIndex::Material_Mirror_Dynamic_00]->Roughness = 0.1f;
-
-	m_MaterialTex[(int)MaterialTexIndex::Material_Mirror_00]->DiffuseAlbedo = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-	m_MaterialTex[(int)MaterialTexIndex::Material_Mirror_00]->FresnelR0 = XMFLOAT3(0.98f, 0.97f, 0.95f);
-	m_MaterialTex[(int)MaterialTexIndex::Material_Mirror_00]->Roughness = 0.1f;
-
-	m_MaterialTex[(int)MaterialTexIndex::Material_Bricks_00]->BitangentSign = 1;
-	m_MaterialTex[(int)MaterialTexIndex::Material_Bricks_00]->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	m_MaterialTex[(int)MaterialTexIndex::Material_Bricks_00]->FresnelR0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
-	m_MaterialTex[(int)MaterialTexIndex::Material_Bricks_00]->Roughness = 0.3f;
-
-	m_MaterialTex[(int)MaterialTexIndex::Material_Tile_00]->BitangentSign = -1;
-	m_MaterialTex[(int)MaterialTexIndex::Material_Tile_00]->DiffuseAlbedo = XMFLOAT4(0.9f, 0.9f, 0.9f, 1.0f);
-	m_MaterialTex[(int)MaterialTexIndex::Material_Tile_00]->FresnelR0 = XMFLOAT3(0.2f, 0.2f, 0.2f);
-	m_MaterialTex[(int)MaterialTexIndex::Material_Tile_00]->Roughness = 0.1f;
-
-	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->HeightSrvHeapIndex = (int)TextureIndex::Texture_Plane_00_Height;
-	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->UseACForPOM = 0;
-	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->MaxSampleCount = 128;
-	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->MinSampleCount = 8;
-	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->BitangentSign = 1;
-	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->HeightScale = 0.05f;
-	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->ShowSelfShadow = true;
-	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->FresnelR0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
-	m_MaterialTex[(int)MaterialTexIndex::Material_Plane_00]->Roughness = 0.1f;
 }
 
 void CMaterialManager::UpdateMaterial()
 {
 	static DX12App* app = DX12App::GetApp();
 	static bool showClose = true;
-	static int texIndex = (int)MaterialTexIndex::Material_Plane_00;
+	static int normalMapIndex = (int)MaterialNormalIndex::Material_Tile_00;
+	static int heightMapIndex = (int)MaterialHeightIndex::Material_Plane_00;
 	static int cubeMapIndex = (int)MaterialCubeMapIndex::Material_SkyCube_00;
 
 	static bool alpha_preview = true;
@@ -112,47 +156,74 @@ void CMaterialManager::UpdateMaterial()
 		(alpha_half_preview ? ImGuiColorEditFlags_AlphaPreviewHalf : (alpha_preview ? ImGuiColorEditFlags_AlphaPreview : 0)) |
 		(options_menu ? 0 : ImGuiColorEditFlags_NoOptions);
 
-	static bool reverseBitangent;
+	static bool reverseBitangentNormalMap;
+	static bool reverseBitangentHeightMap;
+	static bool showSelfShadow;
 
 	if (showClose)
 	{
-		ImGui::SetNextWindowPos(ImVec2((float)app->GetWindowWidth() - 420, (float)app->GetWindowHeight() - 320), ImGuiCond_Once);
-		ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_Once);
+		ImGui::SetNextWindowPos(ImVec2((float)app->GetWindowWidth() - 420, (float)app->GetWindowHeight() - 440), ImGuiCond_Once);
+		ImGui::SetNextWindowSize(ImVec2(400, 420), ImGuiCond_Once);
 
 		ImGuiWindowFlags window_flags = 0;
 		ImGui::Begin(u8"MaterialManager", &showClose, window_flags);
-		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.4f);
-		ImGui::Combo(u8"MaterialTexList", &texIndex, m_MaterialTexNames.data(), GetMaterialTexCount());
+
+		// MaterialNormal
+		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.5f);
+		ImGui::Combo(u8"MaterialNormalList", &normalMapIndex, m_MaterialNormalNames.data(), GetMaterialNormalCount());
 		ImGui::PopItemWidth();
-
-		reverseBitangent = m_MaterialTex[texIndex]->BitangentSign > 0 ? false : true;
-
-		if (ImGui::ColorEdit4(u8"DiffuseAlbedo##0", (float*)&m_MaterialTex[texIndex]->DiffuseAlbedo, ImGuiColorEditFlags_Float | misc_flags) ||
-			ImGui::ColorEdit3(u8"FresnelR0##0", (float*)&m_MaterialTex[texIndex]->FresnelR0, ImGuiColorEditFlags_Float | misc_flags) ||
-			ImGui::SliderFloat(u8"Roughness##0", &m_MaterialTex[texIndex]->Roughness, 0.0f, 1.0f) ||
-			ImGui::Checkbox(u8"ReverseBitangent##0", &reverseBitangent))
+		reverseBitangentNormalMap = m_MaterialNormal[normalMapIndex]->BitangentSign > 0 ? false : true;
+		if (ImGui::ColorEdit4(u8"DiffuseAlbedo##0", (float*)&m_MaterialNormal[normalMapIndex]->DiffuseAlbedo, ImGuiColorEditFlags_Float | misc_flags)) m_MaterialNormal[normalMapIndex]->NumFramesDirty = gNumFrameResources;
+		if (ImGui::ColorEdit3(u8"FresnelR0##0", (float*)&m_MaterialNormal[normalMapIndex]->FresnelR0, ImGuiColorEditFlags_Float | misc_flags)) m_MaterialNormal[normalMapIndex]->NumFramesDirty = gNumFrameResources;
+		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.2f);
+		if (ImGui::SliderFloat(u8"Roughness##0", &m_MaterialNormal[normalMapIndex]->Roughness, 0.0f, 1.0f)) m_MaterialNormal[normalMapIndex]->NumFramesDirty = gNumFrameResources;
+		ImGui::PopItemWidth();
+		ImGui::SameLine();
+		if (ImGui::Checkbox(u8"ReverseBitangent##0", &reverseBitangentNormalMap))
 		{
-			m_MaterialTex[texIndex]->BitangentSign = reverseBitangent ? -1 : 1;
+			m_MaterialNormal[normalMapIndex]->BitangentSign = reverseBitangentNormalMap ? -1 : 1;
+			m_MaterialNormal[normalMapIndex]->NumFramesDirty = gNumFrameResources;
+		}
+		ImGui::Separator();
 
-			m_MaterialTex[texIndex]->NumFramesDirty = gNumFrameResources;
+		// MaterialHeight
+		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.5f);
+		ImGui::Combo(u8"MaterialHeightList", &heightMapIndex, m_MaterialHeightNames.data(), GetMaterialHeightCount());
+		ImGui::PopItemWidth();
+		reverseBitangentHeightMap = m_MaterialHeight[heightMapIndex]->BitangentSign > 0 ? false : true;
+		if (ImGui::ColorEdit4(u8"DiffuseAlbedo##1", (float*)&m_MaterialHeight[heightMapIndex]->DiffuseAlbedo, ImGuiColorEditFlags_Float | misc_flags)) m_MaterialHeight[heightMapIndex]->NumFramesDirty = gNumFrameResources;
+		if (ImGui::ColorEdit3(u8"FresnelR0##1", (float*)&m_MaterialHeight[heightMapIndex]->FresnelR0, ImGuiColorEditFlags_Float | misc_flags)) m_MaterialHeight[heightMapIndex]->NumFramesDirty = gNumFrameResources;
+		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.2f);
+		if (ImGui::SliderFloat(u8"Roughness##1", &m_MaterialHeight[heightMapIndex]->Roughness, 0.0f, 1.0f)) m_MaterialHeight[heightMapIndex]->NumFramesDirty = gNumFrameResources;
+		ImGui::PopItemWidth();
+		ImGui::SameLine();
+		if (ImGui::Checkbox(u8"ReverseBitangent##1", &reverseBitangentHeightMap))
+		{
+			m_MaterialHeight[heightMapIndex]->BitangentSign = reverseBitangentHeightMap ? -1 : 1;
+			m_MaterialHeight[heightMapIndex]->NumFramesDirty = gNumFrameResources;
 		}
 		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.2f);
-		if (ImGui::SliderInt(u8"MinSampleCount##0", &m_MaterialTex[texIndex]->MinSampleCount, 8, 64)) m_MaterialTex[texIndex]->NumFramesDirty = gNumFrameResources;
+		if (ImGui::SliderInt(u8"MinSampleCount##1", &m_MaterialHeight[heightMapIndex]->MinSampleCount, 8, 64)) m_MaterialHeight[heightMapIndex]->NumFramesDirty = gNumFrameResources;
 		ImGui::SameLine();
-		if	(ImGui::SliderInt(u8"MaxSampleCount##0", &m_MaterialTex[texIndex]->MaxSampleCount, 64, 256) ||
-			ImGui::SliderFloat(u8"Height##0", &m_MaterialTex[texIndex]->HeightScale, 0.0f, 0.1f))
+		if (ImGui::SliderInt(u8"MaxSampleCount##1", &m_MaterialHeight[heightMapIndex]->MaxSampleCount, 64, 256)) m_MaterialHeight[heightMapIndex]->NumFramesDirty = gNumFrameResources;
+		if (ImGui::SliderFloat(u8"HeightScale##1", &m_MaterialHeight[heightMapIndex]->HeightScale, 0.0f, 0.1f)) m_MaterialHeight[heightMapIndex]->NumFramesDirty = gNumFrameResources;
+		showSelfShadow = m_MaterialHeight[heightMapIndex]->ShowSelfShadow;
+		if (ImGui::Checkbox(u8"ShowSelfShadow##1", &showSelfShadow))
 		{
-			m_MaterialTex[texIndex]->NumFramesDirty = gNumFrameResources;
+			m_MaterialHeight[heightMapIndex]->ShowSelfShadow = showSelfShadow;
+			m_MaterialHeight[heightMapIndex]->NumFramesDirty = gNumFrameResources;
 		}
+		ImGui::SameLine();
+		if (ImGui::SliderFloat(u8"ShadowSoftening##1", &m_MaterialHeight[heightMapIndex]->ShadowSoftening, 0.0f, 2.0f)) m_MaterialHeight[heightMapIndex]->NumFramesDirty = gNumFrameResources;
 		ImGui::PopItemWidth();
 		ImGui::Separator();
 
+		// MaterialCubeMap
 		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.5f);
 		ImGui::Combo(u8"MaterialCubeMapList", &cubeMapIndex, m_MaterialCubeMapNames.data(), GetMaterialCubeMapCount());
 		ImGui::PopItemWidth();
-
-		if (ImGui::ColorEdit4(u8"DiffuseAlbedo##1", (float*)&m_MaterialCubeMap[cubeMapIndex]->DiffuseAlbedo, ImGuiColorEditFlags_Float | misc_flags) &&
-			CRenderer::GetCurrentCubeMapIndex() == cubeMapIndex)
+		if (ImGui::ColorEdit4(u8"DiffuseAlbedo##2", (float*)&m_MaterialCubeMap[cubeMapIndex]->DiffuseAlbedo, ImGuiColorEditFlags_Float | misc_flags) &&
+			CRenderer::GetCurrentSkyCubeMapIndex() == cubeMapIndex)
 		{
 			for (int i = 1; i < (int)m_AllMaterials.size(); ++i)
 			{
