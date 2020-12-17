@@ -97,14 +97,16 @@ void CImGuiManager::Draw()
 	static bool showCloseb = true;
 
 	ImGui::SetNextWindowPos(ImVec2((app->GetWindowWidth() - 500) * 0.5f, 20), ImGuiCond_Once);
-	ImGui::SetNextWindowSize(ImVec2(420, 110), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(420, 150), ImGuiCond_Once);
 
 	if (showClose)
 	{
 		ImGui::Begin(u8"アピールポイント", &showCloseb, window_flags);
 		ImGui::Text(u8"・DX12で複数のオブジェクトに動的環境マッピングの実装");
+		ImGui::Text(u8"・ParallaxOcclusionMappingの実装・セルフシャドウ付き");
 		ImGui::Text(u8"・MaterialManagerを作って、それぞれのMaterialを管理する機能の実装");
-		ImGui::Text(u8"・ParallaxOcclusionMappingの実装");
+		ImGui::Text(u8"　・フレネル反射、Roughness、凹凸具合などの調整");
+		ImGui::Text(u8"　・環境マッピングの色変化によるObjectの色変化の確認");
 		ImGui::End();
 	}
 
