@@ -17,7 +17,7 @@ vector<unique_ptr<Material>> CMaterialManager::m_AllMaterials;
 
 void CMaterialManager::CreateMaterials()
 {
-	m_AllMaterials.reserve((int)MaterialNormalIndex::Material_Max + (int)MaterialCubeMapIndex::Material_Max);
+	m_AllMaterials.reserve((int)MaterialNormalIndex::Material_Max + (int)MaterialHeightIndex::Material_Max + (int)MaterialCubeMapIndex::Material_Max);
 	CreateMaterialNormal();
 	CreateMaterialHeight();
 	CreateMaterialCubeMap();
@@ -27,8 +27,9 @@ void CMaterialManager::CreateMaterialNormal()
 {
 	m_MaterialNormalNames =
 	{
+		"Material_Null",
+
 		"Material_Mirror_00", // NormalMap(With No Height)
-		"Material_Mirror_01",
 		"Material_Logo_00",
 		"Material_Tile_00",
 		"Material_Glass_00",
@@ -47,8 +48,8 @@ void CMaterialManager::CreateMaterialNormal()
 		auto material = make_unique<Material>();
 		material->Name = m_MaterialNormalNames[i];
 		material->MatCBIndex = i;
-		material->DiffuseSrvHeapIndex = i + (int)TextureIndex::Texture_Default_00_Diffuse;
-		material->NormalSrvHeapIndex = i + (int)TextureIndex::Texture_Default_00_Normal;
+		material->DiffuseSrvHeapIndex = i + (int)TextureIndex::Texture_Null_Diffuse;
+		material->NormalSrvHeapIndex = i + (int)TextureIndex::Texture_Null_Normal;
 		material->BitangentSign = 1;
 		material->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 		material->FresnelR0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
@@ -58,9 +59,9 @@ void CMaterialManager::CreateMaterialNormal()
 	}
 
 	// Customize
-	m_MaterialNormal[(int)MaterialNormalIndex::Material_Mirror_Dynamic_00]->DiffuseAlbedo = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-	m_MaterialNormal[(int)MaterialNormalIndex::Material_Mirror_Dynamic_00]->FresnelR0 = XMFLOAT3(0.98f, 0.97f, 0.95f);
-	m_MaterialNormal[(int)MaterialNormalIndex::Material_Mirror_Dynamic_00]->Roughness = 0.1f;
+	m_MaterialNormal[(int)MaterialNormalIndex::Material_Null]->DiffuseAlbedo = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	m_MaterialNormal[(int)MaterialNormalIndex::Material_Null]->FresnelR0 = XMFLOAT3(0.98f, 0.97f, 0.95f);
+	m_MaterialNormal[(int)MaterialNormalIndex::Material_Null]->Roughness = 0.1f;
 
 	m_MaterialNormal[(int)MaterialNormalIndex::Material_Mirror_00]->DiffuseAlbedo = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 	m_MaterialNormal[(int)MaterialNormalIndex::Material_Mirror_00]->FresnelR0 = XMFLOAT3(0.98f, 0.97f, 0.95f);

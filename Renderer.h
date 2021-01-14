@@ -60,6 +60,10 @@ private:
 	static std::vector<Microsoft::WRL::ComPtr<ID3D12PipelineState>> m_PSOs;
 	static int                                                      m_CurrentPSO;
 
+	// Null Textures
+	static CD3DX12_GPU_DESCRIPTOR_HANDLE m_NullTextureSrv;
+	static CD3DX12_GPU_DESCRIPTOR_HANDLE m_NullCubeMapSrv;
+
 	// CubeMap
 	static std::vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> m_SkyCubeMapDescHandles;
 	static int                                        m_CurrentSkyCubeMapIndex;
@@ -70,6 +74,9 @@ private:
 	static CD3DX12_CPU_DESCRIPTOR_HANDLE          m_DynamicCubeMapDsvHandle;
 	static UINT                                   m_DynamicCubeMapSize;
 	static Microsoft::WRL::ComPtr<ID3D12Resource> m_DynamicCubeMapDepthStencilBuffer;
+
+	// ShadowMap
+
 
 public:
 	// DX12èâä˙âª

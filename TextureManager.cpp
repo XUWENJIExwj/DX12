@@ -5,16 +5,19 @@ using namespace std;
 vector<const char*>         CTextureManager::m_TextureNames;
 vector<unique_ptr<Texture>> CTextureManager::m_Textures((int)TextureIndex::Texture_Max);
 
+UINT CTextureManager::m_NullTextureIndex = (int)TextureIndex::Texture_Null_Diffuse;
+UINT CTextureManager::m_NullCubeMapIndex = (int)TextureIndex::Texture_Max;
 UINT CTextureManager::m_SkyCubeMapIndex = (int)TextureIndex::Texture_SkyCube_00_Diffuse;
-UINT CTextureManager::m_DynamicCubeMapIndex = (int)TextureIndex::Texture_Max;
+UINT CTextureManager::m_DynamicCubeMapIndex = m_NullCubeMapIndex + 1;
 UINT CTextureManager::m_DynamicCubeMapsNum = 4; // DynamicCubeMap‚ª•K—v‚ÈObject‚Ì”‚¾‚¯‘‚â‚µ‚Ä‚¢‚­
 
 void CTextureManager::LoadTextures()
 {
 	m_TextureNames =
 	{
+		"Texture_Null_Diffuse",
+
 		"Texture_Default_00_Diffuse", // NomalMap‚Ì‚ ‚éTextures‚ğ‚±‚±‚©‚ç‡Ÿ’Ç‰Á
-		"Texture_Default_01_Diffuse",
 		"Texture_Logo_00_Diffuse",	
 		"Texture_Tile_00_Diffuse",
 		"Texture_Glass_00_Diffuse",
@@ -27,8 +30,9 @@ void CTextureManager::LoadTextures()
 		"Texture_Plane_02_Diffuse",
 		"Texture_Plane_03_Diffuse",
 
+		"Texture_Null_Normal",
+
 		"Texture_Default_00_Normal", // NormalMap(With No Height)‚ğ‚±‚±‚©‚ç‡Ÿ’Ç‰Á
-		"Texture_Default_01_Normal",
 		"Texture_Logo_00_Normal",
 		"Texture_Tile_00_Normal",
 		"Texture_Glass_00_Normal",
@@ -57,8 +61,9 @@ void CTextureManager::LoadTextures()
 
 	vector<wstring> texFilenames =
 	{
+		L"Asset\\Textures\\Default_00_Diffuse.dds", // ForNull
+
 		L"Asset\\Textures\\Default_00_Diffuse.dds", // NomalMap‚Ì‚ ‚éTextures‚ğ‚±‚±‚©‚ç‡Ÿ’Ç‰Á
-		L"Asset\\Textures\\Default_00_Diffuse.dds",
 		L"Asset\\Textures\\Logo_00_Diffuse.dds",
 		L"Asset\\Textures\\Tile_00_Diffuse.dds",
 		L"Asset\\Textures\\Glass_00_Diffuse.dds",

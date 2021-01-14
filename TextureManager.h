@@ -2,8 +2,9 @@
 
 enum class TextureIndex :int
 {
-	Texture_Default_00_Diffuse,// NomalMap‚Ì‚ ‚éTextures‚ğ‚±‚±‚©‚ç‡Ÿ’Ç‰Á
-	Texture_Default_01_Diffuse,
+	Texture_Null_Diffuse,
+
+	Texture_Default_00_Diffuse, // NomalMap‚Ì‚ ‚éTextures‚ğ‚±‚±‚©‚ç‡Ÿ’Ç‰Á
 	Texture_Logo_00_Diffuse,
 	Texture_Tile_00_Diffuse,
 	Texture_Glass_00_Diffuse,
@@ -16,8 +17,8 @@ enum class TextureIndex :int
 	Texture_Plane_02_Diffuse,
 	Texture_Plane_03_Diffuse,
 
-	Texture_Default_00_Normal, // NormalMap(With No Height)‚ğ‚±‚±‚©‚ç‡Ÿ’Ç‰Á
-	Texture_Default_01_Normal,
+	Texture_Null_Normal, // NormalMap(With No Height)‚ğ‚±‚±‚©‚ç‡Ÿ’Ç‰Á
+	Texture_Default_00_Normal,
 	Texture_Logo_00_Normal,
 	Texture_Tile_00_Normal,
 	Texture_Glass_00_Normal,
@@ -51,6 +52,8 @@ private:
 	static std::vector<const char*>              m_TextureNames;
 	static std::vector<std::unique_ptr<Texture>> m_Textures;
 
+	static UINT m_NullTextureIndex;
+	static UINT m_NullCubeMapIndex;
 	static UINT m_SkyCubeMapIndex;
 	static UINT m_DynamicCubeMapIndex;
 	static UINT m_DynamicCubeMapsNum;
@@ -60,6 +63,8 @@ public:
 
 	static std::vector<std::unique_ptr<Texture>>& GetTextures() { return m_Textures; }
 	static UINT GetTexturesNum() { return (UINT)m_Textures.size(); }
+	static UINT GetNullTextureIndex() { return m_NullTextureIndex; }
+	static UINT GetNullCubeMapIndex() { return m_NullCubeMapIndex; }
 	static UINT GetSkyCubeMapIndex() { return m_SkyCubeMapIndex; }
 	static UINT GetDynamicCubeMapIndex() { return m_DynamicCubeMapIndex; }
 	static UINT GetDynamicCubeMapsNum() { return m_DynamicCubeMapsNum; }

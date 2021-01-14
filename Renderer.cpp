@@ -47,6 +47,10 @@ ComPtr<ID3D12DescriptorHeap>        CRenderer::m_SrvHeap = nullptr;
 vector<ComPtr<ID3D12PipelineState>> CRenderer::m_PSOs((int)PSOTypeIndex::PSO_MAX);
 int                                 CRenderer::m_CurrentPSO = (int)PSOTypeIndex::PSO_Solid_Opaque;
 
+// Null Textures
+CD3DX12_GPU_DESCRIPTOR_HANDLE CRenderer::m_NullTextureSrv;
+CD3DX12_GPU_DESCRIPTOR_HANDLE CRenderer::m_NullCubeMapSrv;
+
 // CubeMap
 vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> CRenderer::m_SkyCubeMapDescHandles;
 int                                   CRenderer::m_CurrentSkyCubeMapIndex = 0;
@@ -434,7 +438,7 @@ void CRenderer::CreateDescriptorHeaps()
 {
 	// Create the SRV heap.
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
-	srvHeapDesc.NumDescriptors = CTextureManager::GetTexturesNum() + CTextureManager::GetDynamicCubeMapsNum();
+	srvHeapDesc.NumDescriptors = CTextureManager::GetTexturesNum() + 1 + CTextureManager::GetDynamicCubeMapsNum();
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	ThrowIfFailed(m_D3DDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_SrvHeap)));
@@ -442,18 +446,25 @@ void CRenderer::CreateDescriptorHeaps()
 	// Fill out the heap with actual descriptors.
 	CD3DX12_CPU_DESCRIPTOR_HANDLE hDescriptor(m_SrvHeap->GetCPUDescriptorHandleForHeapStart());
 
-	// Texture
+	// All Textures
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.MipLevels = 1;
 	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
 
-	UINT skyCubeMap = CTextureManager::GetSkyCubeMapIndex();
-	UINT dynamicCubeMapIndex = CTextureManager::GetDynamicCubeMapIndex();
-	auto textures = CTextureManager::GetTextures().data();
+	// Null Texture
+	m_D3DDevice->CreateShaderResourceView(nullptr, &srvDesc, hDescriptor);
+	hDescriptor.Offset(1, m_CbvSrvUavDescSize);
 
-	for (unsigned int i = 0; i < skyCubeMap; ++i)
+	// Textures
+	auto textures = CTextureManager::GetTextures().data();
+	UINT skyCubeMap = CTextureManager::GetSkyCubeMapIndex();
+	UINT nullCubeSrvIndex = CTextureManager::GetNullCubeMapIndex();
+
+	for (unsigned int i = (int)TextureIndex::Texture_Default_00_Diffuse; i < skyCubeMap; ++i)
 	{
 		auto texture = textures[i]->Resource;
 		srvDesc.Format = texture->GetDesc().Format;
@@ -469,7 +480,7 @@ void CRenderer::CreateDescriptorHeaps()
 	srvDesc.TextureCube.MostDetailedMip = 0;
 	srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
 
-	for (unsigned int i = skyCubeMap; i < dynamicCubeMapIndex; ++i)
+	for (unsigned int i = skyCubeMap; i < nullCubeSrvIndex; ++i)
 	{
 		m_SkyCubeMapDescHandles.push_back(ComputeCubeMapDescHandle(i));
 		auto texture = textures[i]->Resource;
@@ -480,11 +491,19 @@ void CRenderer::CreateDescriptorHeaps()
 		hDescriptor.Offset(1, m_CbvSrvUavDescSize);
 	}
 
+	// NullTextureCube
+	auto cpuSrvStart = m_SrvHeap->GetCPUDescriptorHandleForHeapStart();
+	auto gpuSrvStart = m_SrvHeap->GetGPUDescriptorHandleForHeapStart();
+
+	auto nullCubeMapSrv = CD3DX12_CPU_DESCRIPTOR_HANDLE(cpuSrvStart, nullCubeSrvIndex, m_CbvSrvUavDescSize);
+	m_NullCubeMapSrv = CD3DX12_GPU_DESCRIPTOR_HANDLE(gpuSrvStart, nullCubeSrvIndex, m_CbvSrvUavDescSize);
+	m_D3DDevice->CreateShaderResourceView(nullptr, &srvDesc, nullCubeMapSrv);
+
 	// DynamicCube
 	if (m_DynamicCubeMapOn)
 	{
-		auto cpuSrvStart = m_SrvHeap->GetCPUDescriptorHandleForHeapStart();
-		auto gpuSrvStart = m_SrvHeap->GetGPUDescriptorHandleForHeapStart();
+		UINT dynamicCubeMapIndex = CTextureManager::GetDynamicCubeMapIndex();
+
 		auto cpuRtvStart = m_RtvHeap->GetCPUDescriptorHandleForHeapStart();
 
 		// Cubemap RTV goes after the swap chain descriptors.

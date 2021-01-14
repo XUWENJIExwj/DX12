@@ -34,17 +34,17 @@ void CGame::Init()
 	CSphere* sphereDR0 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror00");
 	//CLogo* logo = AddGameObject<CLogo>((int)GameObjectsLayer::Layer_3D_Opaque);
 
-	CSphere* sphereDR1 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror01");
-	sphereDR1->SetPosition(XMFLOAT3(-3.0f, 1.0f, 0.0f));
-	sphereDR1->SetWorldMatrix();
+	//CSphere* sphereDR1 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror01");
+	//sphereDR1->SetPosition(XMFLOAT3(-3.0f, 1.0f, 0.0f));
+	//sphereDR1->SetWorldMatrix();
 
-	CSphere* sphereDR2 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror02");
-	sphereDR2->SetPosition(XMFLOAT3(0.0f, 2.0f, 3.0f));
-	sphereDR2->SetWorldMatrix();
+	//CSphere* sphereDR2 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror02");
+	//sphereDR2->SetPosition(XMFLOAT3(0.0f, 2.0f, 3.0f));
+	//sphereDR2->SetWorldMatrix();
 
-	CSphere* sphereDR3 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror03");
-	sphereDR3->SetPosition(XMFLOAT3(0.0f, 0.5f, 2.0f));
-	sphereDR3->SetWorldMatrix();
+	//CSphere* sphereDR3 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror03");
+	//sphereDR3->SetPosition(XMFLOAT3(0.0f, 0.5f, 2.0f));
+	//sphereDR3->SetWorldMatrix();
 
 	CFrameResourceManager::CreateFrameResources();
 }
