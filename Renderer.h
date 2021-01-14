@@ -12,6 +12,7 @@ enum class PSOTypeIndex :int
 	PSO_Solid_Sky,
 	PSO_WireFrame_Opaque,
 	PSO_WireFrame_Sky,
+	PSO_ShadowMapping,
 	PSO_MAX
 };
 
@@ -127,7 +128,7 @@ public:
 	static void LogOutputDisplayModes(IDXGIOutput* output, DXGI_FORMAT format);
 
 	// StaticSamplers
-	static std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> GetStaticSamplers();
+	static std::array<const CD3DX12_STATIC_SAMPLER_DESC, 7> GetStaticSamplers();
 
 	// •`‰æ—p
 	static void Begin();

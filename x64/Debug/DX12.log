@@ -1,22 +1,15 @@
-﻿  Camera.cpp
-  CameraDynamicCubeMap.cpp
-  CameraFP.cpp
-  Cube.cpp
-  FrameResource.cpp
+﻿  FrameResource.cpp
   Game.cpp
   GameObject.cpp
   GeoShapeManager.cpp
   ImGuiManager.cpp
-  Logo.cpp
   Manager.cpp
   MaterialManager.cpp
-  MeshField.cpp
   Renderer.cpp
   Scene.cpp
   ShaderManager.cpp
   Sky.cpp
-  Sphere.cpp
   SphereDR.cpp
   TextureManager.cpp
   コードを生成中...
-  DX12.vcxproj -> C:\Users\XUWENJIE\Documents\HAL\GM31\DX12-copy\x64\Debug\DX12.exe
+  DX12.vcxproj -> C:\Users\XUWENJIE\Documents\HAL\GM31\DX12\x64\Debug\DX12.exe
