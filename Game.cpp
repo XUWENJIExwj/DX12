@@ -46,6 +46,7 @@ void CGame::Init()
 	//sphereDR3->SetPosition(XMFLOAT3(0.0f, 0.5f, 2.0f));
 	//sphereDR3->SetWorldMatrix();
 
+	SetSceneBounds(50.0f, 50.0f);
 	CFrameResourceManager::CreateFrameResources();
 }
 

@@ -211,6 +211,11 @@ void CScene::UpdateMainPassCB(const GameTimer& GlobalTimer)
 	currPassCB->CopyData(0, m_MainPassCB);
 }
 
+void CScene::UpdateShadowPassCB(const GameTimer & GlobalTimer)
+{
+
+}
+
 void CScene::UpdateDynamicCubeMapPassCB(const GameTimer& GlobalTimer, int DCMResourcesIndex)
 {
 	for (int i = 0; i < (int)m_DCMCameras.size(); ++i)
@@ -239,8 +244,8 @@ void CScene::UpdateDynamicCubeMapPassCB(const GameTimer& GlobalTimer, int DCMRes
 
 		auto currPassCB = CFrameResourceManager::GetCurrentFrameResource()->PassCB.get();
 
-		// Cube map pass cbuffers are stored in elements from 1 to DCMResourcesIndex * 6.
-		currPassCB->CopyData(1 + i + DCMResourcesIndex * 6, cubeFacePassCB);
+		// Cube map pass cbuffers are stored in elements from 2 to DCMResourcesIndex * 6.
+		currPassCB->CopyData(2 + i + DCMResourcesIndex * 6, cubeFacePassCB);
 	}
 }
 
@@ -294,4 +299,10 @@ void CScene::CheckNecessaryCBBufferSize()
 			}
 		}
 	}
+}
+
+void CScene::SetSceneBounds(float Width, float Height, XMFLOAT3 Center)
+{
+	m_SceneBounds.Center = Center;
+	m_SceneBounds.Radius = sqrtf(Width*Width + Height * Height);
 }

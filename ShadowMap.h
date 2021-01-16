@@ -27,9 +27,9 @@ public:
 	~CShadowMap() = default;
 
 	void CreateDescriptors(
-		CD3DX12_CPU_DESCRIPTOR_HANDLE CpuSrvStartHandle,
-		CD3DX12_GPU_DESCRIPTOR_HANDLE GpuSrvStartHandle,
-		CD3DX12_CPU_DESCRIPTOR_HANDLE CpuDsvStartHandle);
+		CD3DX12_CPU_DESCRIPTOR_HANDLE CpuSrvHandle,
+		CD3DX12_GPU_DESCRIPTOR_HANDLE GpuSrvHandle,
+		CD3DX12_CPU_DESCRIPTOR_HANDLE CpuDsvHandle);
 
 	void OnResize(UINT NewWidth, UINT NewHeight);
 

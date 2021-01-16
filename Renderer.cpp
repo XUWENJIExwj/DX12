@@ -55,15 +55,18 @@ CD3DX12_GPU_DESCRIPTOR_HANDLE CRenderer::m_NullCubeMapSrv;
 vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> CRenderer::m_SkyCubeMapDescHandles;
 int                                   CRenderer::m_CurrentSkyCubeMapIndex = 0;
 
+// ShadowMap
+unique_ptr<CShadowMap>        CRenderer::m_ShadowMap = nullptr;
+CD3DX12_GPU_DESCRIPTOR_HANDLE CRenderer::m_ShadowMapDescHandle;
+UINT                          CRenderer::m_ShadowMapWidth = 2048;
+UINT                          CRenderer::m_ShadowMapHeight = 2048;
+
 // DynamicCubeMap
 bool                          CRenderer::m_DynamicCubeMapOn = true;
 unique_ptr<CCubeRenderTarget> CRenderer::m_DynamicCubeMap = nullptr;
 CD3DX12_CPU_DESCRIPTOR_HANDLE CRenderer::m_DynamicCubeMapDsvHandle;
 UINT                          CRenderer::m_DynamicCubeMapSize = 512;
 ComPtr<ID3D12Resource>        CRenderer::m_DynamicCubeMapDepthStencilBuffer = nullptr;
-
-// ShadowMap
-unique_ptr<CShadowMap> CRenderer::m_ShadowMap = nullptr;
 
 // DX12初期化
 bool CRenderer::Init()
@@ -218,12 +221,14 @@ void CRenderer::CreateRtvAndDsvDescriptorHeaps()
 		&rtvHeapDesc, IID_PPV_ARGS(m_RtvHeap.GetAddressOf())));
 
 	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc;
-	dsvHeapDesc.NumDescriptors = m_DynamicCubeMapOn ? 2 : 1;
+	dsvHeapDesc.NumDescriptors = m_DynamicCubeMapOn ? 3 : 2;
 	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
 	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	dsvHeapDesc.NodeMask = 0;
 	ThrowIfFailed(m_D3DDevice->CreateDescriptorHeap(
 		&dsvHeapDesc, IID_PPV_ARGS(m_DsvHeap.GetAddressOf())));
+
+	m_ShadowMap = make_unique<CShadowMap>(m_D3DDevice.Get(), m_ShadowMapWidth, m_ShadowMapHeight);
 
 	if (m_DynamicCubeMapOn)
 	{
@@ -231,7 +236,7 @@ void CRenderer::CreateRtvAndDsvDescriptorHeaps()
 			m_DynamicCubeMapSize, m_DynamicCubeMapSize, DXGI_FORMAT_R8G8B8A8_UNORM);
 		m_DynamicCubeMapDsvHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
 			m_DsvHeap->GetCPUDescriptorHandleForHeapStart(),
-			1,
+			2,
 			m_DsvDescSize);
 	}
 }
@@ -445,13 +450,13 @@ void CRenderer::CreateDescriptorHeaps()
 {
 	// Create the SRV heap.
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
-	srvHeapDesc.NumDescriptors = CTextureManager::GetTexturesNum() + 1 + CTextureManager::GetDynamicCubeMapsNum();
+	srvHeapDesc.NumDescriptors = CTextureManager::GetTexturesNum() + 2 + CTextureManager::GetDynamicCubeMapsNum(); // 2 = ShadowMapNum + NullCubeMapNym
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	ThrowIfFailed(m_D3DDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_SrvHeap)));
 
 	// Fill out the heap with actual descriptors.
-	CD3DX12_CPU_DESCRIPTOR_HANDLE hDescriptor(m_SrvHeap->GetCPUDescriptorHandleForHeapStart());
+	CD3DX12_CPU_DESCRIPTOR_HANDLE descHandle(m_SrvHeap->GetCPUDescriptorHandleForHeapStart());
 
 	// All Textures
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -463,8 +468,8 @@ void CRenderer::CreateDescriptorHeaps()
 	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
 
 	// Null Texture
-	m_D3DDevice->CreateShaderResourceView(nullptr, &srvDesc, hDescriptor);
-	hDescriptor.Offset(1, m_CbvSrvUavDescSize);
+	m_D3DDevice->CreateShaderResourceView(nullptr, &srvDesc, descHandle);
+	descHandle.Offset(1, m_CbvSrvUavDescSize);
 
 	// Textures
 	auto textures = CTextureManager::GetTextures().data();
@@ -475,10 +480,10 @@ void CRenderer::CreateDescriptorHeaps()
 		auto texture = textures[i]->Resource;
 		srvDesc.Format = texture->GetDesc().Format;
 		srvDesc.Texture2D.MipLevels = texture->GetDesc().MipLevels;
-		m_D3DDevice->CreateShaderResourceView(texture.Get(), &srvDesc, hDescriptor);
+		m_D3DDevice->CreateShaderResourceView(texture.Get(), &srvDesc, descHandle);
 
 		// next descriptor
-		hDescriptor.Offset(1, m_CbvSrvUavDescSize);
+		descHandle.Offset(1, m_CbvSrvUavDescSize);
 	}
 
 	// TextureCube
@@ -486,23 +491,33 @@ void CRenderer::CreateDescriptorHeaps()
 	srvDesc.TextureCube.MostDetailedMip = 0;
 	srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
 
-	UINT nullCubeSrvIndex = CTextureManager::GetNullCubeMapIndex();
+	UINT shadowMapSrvIndex = CTextureManager::GetShadowMapIndex();
 
-	for (unsigned int i = skyCubeMap; i < nullCubeSrvIndex; ++i)
+	for (unsigned int i = skyCubeMap; i < shadowMapSrvIndex; ++i)
 	{
-		m_SkyCubeMapDescHandles.push_back(ComputeCubeMapDescHandle(i));
+		m_SkyCubeMapDescHandles.push_back(ComputeGpuSrvDescHandle(i));
 		auto texture = textures[i]->Resource;
 		srvDesc.Format = texture->GetDesc().Format;
 		srvDesc.TextureCube.MipLevels = texture->GetDesc().MipLevels;
-		m_D3DDevice->CreateShaderResourceView(texture.Get(), &srvDesc, hDescriptor);
+		m_D3DDevice->CreateShaderResourceView(texture.Get(), &srvDesc, descHandle);
 		// next descriptor
-		hDescriptor.Offset(1, m_CbvSrvUavDescSize);
+		descHandle.Offset(1, m_CbvSrvUavDescSize);
 	}
 
-	// NullTextureCube
+	// ShadowMap
 	auto cpuSrvStart = m_SrvHeap->GetCPUDescriptorHandleForHeapStart();
 	auto gpuSrvStart = m_SrvHeap->GetGPUDescriptorHandleForHeapStart();
+	auto dsvCpuStart = m_DsvHeap->GetCPUDescriptorHandleForHeapStart();
 	m_NullTextureSrv = gpuSrvStart;
+
+	m_ShadowMap->CreateDescriptors(
+		CD3DX12_CPU_DESCRIPTOR_HANDLE(cpuSrvStart, shadowMapSrvIndex, m_CbvSrvUavDescSize),
+		CD3DX12_GPU_DESCRIPTOR_HANDLE(gpuSrvStart, shadowMapSrvIndex, m_CbvSrvUavDescSize),
+		CD3DX12_CPU_DESCRIPTOR_HANDLE(dsvCpuStart, 1, m_DsvDescSize));
+	descHandle.Offset(1, m_CbvSrvUavDescSize);
+
+	// NullTextureCube
+	UINT nullCubeSrvIndex = CTextureManager::GetNullCubeMapIndex();
 
 	auto nullCubeMapSrv = CD3DX12_CPU_DESCRIPTOR_HANDLE(cpuSrvStart, nullCubeSrvIndex, m_CbvSrvUavDescSize);
 	m_NullCubeMapSrv = CD3DX12_GPU_DESCRIPTOR_HANDLE(gpuSrvStart, nullCubeSrvIndex, m_CbvSrvUavDescSize);
@@ -664,11 +679,18 @@ D3D12_CPU_DESCRIPTOR_HANDLE CRenderer::GetCurrentBackBufferView()
 		m_RtvDescSize);
 }
 
-CD3DX12_GPU_DESCRIPTOR_HANDLE CRenderer::ComputeCubeMapDescHandle(UINT Offset)
+CD3DX12_CPU_DESCRIPTOR_HANDLE CRenderer::ComputeCpuSrvDescHandle(UINT Offset)
 {
-	CD3DX12_GPU_DESCRIPTOR_HANDLE cubeMapDesc(m_SrvHeap->GetGPUDescriptorHandleForHeapStart());
-	cubeMapDesc.Offset(Offset, m_CbvSrvUavDescSize);
-	return cubeMapDesc;
+	CD3DX12_CPU_DESCRIPTOR_HANDLE descHandle(m_SrvHeap->GetCPUDescriptorHandleForHeapStart());
+	descHandle.Offset(Offset, m_CbvSrvUavDescSize);
+	return descHandle;
+}
+
+CD3DX12_GPU_DESCRIPTOR_HANDLE CRenderer::ComputeGpuSrvDescHandle(UINT Offset)
+{
+	CD3DX12_GPU_DESCRIPTOR_HANDLE descHandle(m_SrvHeap->GetGPUDescriptorHandleForHeapStart());
+	descHandle.Offset(Offset, m_CbvSrvUavDescSize);
+	return descHandle;
 }
 
 // デバッガ―
@@ -889,7 +911,7 @@ void CRenderer::SetUpBeforeCreateEachDynamicCubeMapResource(int DCMResourcesInde
 	// Bind the pass constant buffer for this cube map face so we use 
 	// the right view/proj matrix for this cube face.
 	auto passCB = CFrameResourceManager::GetCurrentFrameResource()->PassCB->Resource();
-	D3D12_GPU_VIRTUAL_ADDRESS passCBAddress = passCB->GetGPUVirtualAddress() + (1 + FaceIndex + DCMResourcesIndex * 6) * CFrameResourceManager::GetPassCBByteSize();
+	D3D12_GPU_VIRTUAL_ADDRESS passCBAddress = passCB->GetGPUVirtualAddress() + (2 + FaceIndex + DCMResourcesIndex * 6) * CFrameResourceManager::GetPassCBByteSize();
 	m_CommandList->SetGraphicsRootConstantBufferView(1, passCBAddress);
 }
 

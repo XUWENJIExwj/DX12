@@ -54,13 +54,13 @@ void CMouse::Init()
 
 void CMouse::Update()
 {
-	SwithMode();
+	SwitchMode();
 	m_MouseState = m_Mouse->GetState();
 	m_MouseLastState = m_MouseTracker.GetLastState();
 	m_MouseTracker.Update(m_MouseState);
 }
 
-void CMouse::SwithMode()
+void CMouse::SwitchMode()
 {
 	if (CKeyboard::IsPressed(Keyboard::LeftAlt))
 	{

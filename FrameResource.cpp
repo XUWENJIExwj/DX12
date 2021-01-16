@@ -44,7 +44,7 @@ bool CFrameResourceManager::CreateFrameResources()
 		for (int i = 0; i < gNumFrameResources; ++i)
 		{
 			m_FrameResources.push_back(make_unique<FrameResource>(CRenderer::GetDevice(),
-				CRenderer::GetDynamicCubeOn() ? 1 + CTextureManager::GetDynamicCubeMapsNum() * 6 : 1, m_ObjectCBCount, CMaterialManager::GetAllMaterialsCount()));
+				CRenderer::GetDynamicCubeOn() ? 2 + CTextureManager::GetDynamicCubeMapsNum() * 6 : 1, m_ObjectCBCount, CMaterialManager::GetAllMaterialsCount()));
 		}
 		return true;
 	}

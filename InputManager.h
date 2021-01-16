@@ -36,7 +36,7 @@ namespace InputManager
 
 		static DirectX::Mouse*       Get() { return m_Mouse.get(); }
 		static DirectX::Mouse::State GetLastState() { return m_MouseLastState; }
-		static void SwithMode();
+		static void SwitchMode();
 		static int  GetMoveX();
 		static int  GetMoveY();
 		static bool IsModeRelative();

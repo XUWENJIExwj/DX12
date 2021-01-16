@@ -173,6 +173,7 @@
     <ClInclude Include="ImGui\imstb_textedit.h" />
     <ClInclude Include="ImGui\imstb_truetype.h" />
     <ClInclude Include="InputManager.h" />
+    <ClInclude Include="light.h" />
     <ClInclude Include="Logo.h" />
     <ClInclude Include="Manager.h" />
     <ClInclude Include="MaterialManager.h" />
@@ -212,6 +213,7 @@
     <ClCompile Include="ImGui\imgui_impl_win32.cpp" />
     <ClCompile Include="ImGui\imgui_widgets.cpp" />
     <ClCompile Include="InputManager.cpp" />
+    <ClCompile Include="light.cpp" />
     <ClCompile Include="Logo.cpp" />
     <ClCompile Include="Manager.cpp" />
     <ClCompile Include="MaterialManager.cpp" />

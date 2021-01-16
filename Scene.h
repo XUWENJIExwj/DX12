@@ -37,6 +37,9 @@ protected:
 	UINT          m_ObjectCBCounts = 0;
 	CCamera*      m_MainCamera;
 	PassConstants m_MainPassCB;
+	PassConstants m_ShadowPassCB;
+
+	DirectX::BoundingSphere m_SceneBounds;
 
 	std::vector<CCamera*> m_DCMCameras;
 
@@ -56,10 +59,13 @@ public:
 	virtual void UpdateGameObjectsCB(const GameTimer& GlobalTimer);
 	virtual void UpdateMaterialBuffer(const GameTimer& GlobalTimer);
 	virtual void UpdateMainPassCB(const GameTimer& GlobalTimer);
+	virtual void UpdateShadowPassCB(const GameTimer& GlobalTimer);
 	virtual void UpdateDynamicCubeMapPassCB(const GameTimer& GlobalTimer, int DCMResourcesIndex);
 
 	void SetUpDynamicCubeMapCamera(DirectX::XMFLOAT3 Center);
 	void CheckNecessaryCBBufferSize();
+
+	void SetSceneBounds(float Width, float Height, DirectX::XMFLOAT3 Center = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f));
 
 	template<typename T>
 	T* AddGameObject(int Layer, std::string Name = "")

@@ -70,15 +70,18 @@ private:
 	static std::vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> m_SkyCubeMapDescHandles;
 	static int                                        m_CurrentSkyCubeMapIndex;
 
+	// ShadowMap
+	static std::unique_ptr<CShadowMap>   m_ShadowMap;
+	static CD3DX12_GPU_DESCRIPTOR_HANDLE m_ShadowMapDescHandle;
+	static UINT                          m_ShadowMapWidth;
+	static UINT                          m_ShadowMapHeight;
+
 	// DynamicCubeMap
 	static bool                                   m_DynamicCubeMapOn;
 	static std::unique_ptr<CCubeRenderTarget>     m_DynamicCubeMap;
 	static CD3DX12_CPU_DESCRIPTOR_HANDLE          m_DynamicCubeMapDsvHandle;
 	static UINT                                   m_DynamicCubeMapSize;
 	static Microsoft::WRL::ComPtr<ID3D12Resource> m_DynamicCubeMapDepthStencilBuffer;
-
-	// ShadowMap
-	static std::unique_ptr<CShadowMap> m_ShadowMap;
 
 public:
 	// DX12初期化
@@ -115,13 +118,15 @@ public:
 	static DXGI_FORMAT                 GetBackBufferFormat() { return m_BackBufferFormat; }
 	static ID3D12DescriptorHeap*       GetSrvHeap() { return m_SrvHeap.Get(); }
 
+	static CD3DX12_CPU_DESCRIPTOR_HANDLE ComputeCpuSrvDescHandle(UINT Offset);
+	static CD3DX12_GPU_DESCRIPTOR_HANDLE ComputeGpuSrvDescHandle(UINT Offset);
+
 	// CubeMap
 	static int GetCurrentSkyCubeMapIndex() { return m_CurrentSkyCubeMapIndex; }
 
 	// DynamicCubeMap
-	static bool                          GetDynamicCubeOn() { return m_DynamicCubeMapOn; }
-	static CD3DX12_GPU_DESCRIPTOR_HANDLE ComputeCubeMapDescHandle(UINT Offset);
-	static UINT                          GetDynamicCubeMapSize() { return m_DynamicCubeMapSize; }
+	static bool GetDynamicCubeOn() { return m_DynamicCubeMapOn; }
+	static UINT GetDynamicCubeMapSize() { return m_DynamicCubeMapSize; }
 
 	// デバッガ―
 	static void LogAdapters();

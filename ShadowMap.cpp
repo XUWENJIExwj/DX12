@@ -14,14 +14,14 @@ CShadowMap::CShadowMap(ID3D12Device* Device, UINT Width, UINT Height)
 }
 
 void CShadowMap::CreateDescriptors(
-	CD3DX12_CPU_DESCRIPTOR_HANDLE CpuSrvStartHandle,
-	CD3DX12_GPU_DESCRIPTOR_HANDLE GpuSrvStartHandle,
-	CD3DX12_CPU_DESCRIPTOR_HANDLE CpuDsvStartHandle)
+	CD3DX12_CPU_DESCRIPTOR_HANDLE CpuSrvHandle,
+	CD3DX12_GPU_DESCRIPTOR_HANDLE GpuSrvHandle,
+	CD3DX12_CPU_DESCRIPTOR_HANDLE CpuDsvHandle)
 {
 	// Save references to the descriptors. 
-	m_CpuSrvHandle = CpuSrvStartHandle;
-	m_GpuSrvHandle = GpuSrvStartHandle;
-    m_CpuDsvHandle = CpuDsvStartHandle;
+	m_CpuSrvHandle = CpuSrvHandle;
+	m_GpuSrvHandle = GpuSrvHandle;
+    m_CpuDsvHandle = CpuDsvHandle;
 
 	//  Create the descriptors
 	CreateDescriptors();
