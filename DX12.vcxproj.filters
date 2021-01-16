@@ -43,6 +43,9 @@
     <Filter Include="ソース ファイル\ImGui">
       <UniqueIdentifier>{932c3f69-028b-4fbb-bbf0-500defa92183}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\GameObject\Light">
+      <UniqueIdentifier>{27e9aab6-4803-4af3-999c-c47b0235710b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DX12App.h">
@@ -171,7 +174,13 @@
     <ClInclude Include="ShadowMap.h">
       <Filter>ソース ファイル\System\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="light.h">
+    <ClInclude Include="Light.h">
+      <Filter>ソース ファイル\GameObject\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectionalLight.h">
+      <Filter>ソース ファイル\GameObject\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="Quad.h">
       <Filter>ソース ファイル\GameObject</Filter>
     </ClInclude>
   </ItemGroup>
@@ -287,7 +296,13 @@
     <ClCompile Include="ShadowMap.cpp">
       <Filter>ソース ファイル\System\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="light.cpp">
+    <ClCompile Include="Light.cpp">
+      <Filter>ソース ファイル\GameObject\Light</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectionalLight.cpp">
+      <Filter>ソース ファイル\GameObject\Light</Filter>
+    </ClCompile>
+    <ClCompile Include="Quad.cpp">
       <Filter>ソース ファイル\GameObject</Filter>
     </ClCompile>
   </ItemGroup>
@@ -305,6 +320,12 @@
       <Filter>ソース ファイル\Shader</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\parallaxOcclusionMapping.hlsl">
+      <Filter>ソース ファイル\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\ShadowDebug.hlsl">
+      <Filter>ソース ファイル\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Shadows.hlsl">
       <Filter>ソース ファイル\Shader</Filter>
     </FxCompile>
   </ItemGroup>

@@ -48,8 +48,8 @@ vector<ComPtr<ID3D12PipelineState>> CRenderer::m_PSOs((int)PSOTypeIndex::PSO_MAX
 int                                 CRenderer::m_CurrentPSO = (int)PSOTypeIndex::PSO_Solid_Opaque;
 
 // Null Textures
-CD3DX12_GPU_DESCRIPTOR_HANDLE CRenderer::m_NullTextureSrv;
-CD3DX12_GPU_DESCRIPTOR_HANDLE CRenderer::m_NullCubeMapSrv;
+CD3DX12_GPU_DESCRIPTOR_HANDLE CRenderer::m_NullTextureDescHandle;
+CD3DX12_GPU_DESCRIPTOR_HANDLE CRenderer::m_NullCubeMapDescHandle;
 
 // CubeMap
 vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> CRenderer::m_SkyCubeMapDescHandles;
@@ -508,11 +508,12 @@ void CRenderer::CreateDescriptorHeaps()
 	auto cpuSrvStart = m_SrvHeap->GetCPUDescriptorHandleForHeapStart();
 	auto gpuSrvStart = m_SrvHeap->GetGPUDescriptorHandleForHeapStart();
 	auto dsvCpuStart = m_DsvHeap->GetCPUDescriptorHandleForHeapStart();
-	m_NullTextureSrv = gpuSrvStart;
+	m_NullTextureDescHandle = gpuSrvStart;
 
+	m_ShadowMapDescHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(gpuSrvStart, shadowMapSrvIndex, m_CbvSrvUavDescSize);
 	m_ShadowMap->CreateDescriptors(
 		CD3DX12_CPU_DESCRIPTOR_HANDLE(cpuSrvStart, shadowMapSrvIndex, m_CbvSrvUavDescSize),
-		CD3DX12_GPU_DESCRIPTOR_HANDLE(gpuSrvStart, shadowMapSrvIndex, m_CbvSrvUavDescSize),
+		m_ShadowMapDescHandle,
 		CD3DX12_CPU_DESCRIPTOR_HANDLE(dsvCpuStart, 1, m_DsvDescSize));
 	descHandle.Offset(1, m_CbvSrvUavDescSize);
 
@@ -520,7 +521,7 @@ void CRenderer::CreateDescriptorHeaps()
 	UINT nullCubeSrvIndex = CTextureManager::GetNullCubeMapIndex();
 
 	auto nullCubeMapSrv = CD3DX12_CPU_DESCRIPTOR_HANDLE(cpuSrvStart, nullCubeSrvIndex, m_CbvSrvUavDescSize);
-	m_NullCubeMapSrv = CD3DX12_GPU_DESCRIPTOR_HANDLE(gpuSrvStart, nullCubeSrvIndex, m_CbvSrvUavDescSize);
+	m_NullCubeMapDescHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(gpuSrvStart, nullCubeSrvIndex, m_CbvSrvUavDescSize);
 	m_D3DDevice->CreateShaderResourceView(nullptr, &srvDesc, nullCubeMapSrv);
 
 	// DynamicCube
@@ -668,6 +669,54 @@ void CRenderer::CreataPSOs()
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC wireframeSkyPsoDesc = skyPsoDesc;
 	wireframeSkyPsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
 	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&wireframeSkyPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_WireFrame_Sky])));
+
+	// PSO for shadow map pass
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC smapPsoDesc = opaquePsoDesc;
+	smapPsoDesc.RasterizerState.DepthBias = 100000;
+	smapPsoDesc.RasterizerState.DepthBiasClamp = 10.0f;
+	smapPsoDesc.RasterizerState.SlopeScaledDepthBias = 1.0f;
+	smapPsoDesc.VS =
+	{
+		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMap].vertexShader->GetBufferPointer()),
+		shaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMap].vertexShader->GetBufferSize()
+	};
+	smapPsoDesc.PS =
+	{
+		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMap].pixelShader->GetBufferPointer()),
+		shaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMap].pixelShader->GetBufferSize()
+	};
+
+	// Shadow map pass does not have a render target.
+	smapPsoDesc.RTVFormats[0] = DXGI_FORMAT_UNKNOWN;
+	smapPsoDesc.NumRenderTargets = 0;
+	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&smapPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_ShadowMap])));
+
+	// PSO for shadow map with alpha test
+	smapPsoDesc.VS =
+	{
+		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapWithAlphaTest].vertexShader->GetBufferPointer()),
+		shaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapWithAlphaTest].vertexShader->GetBufferSize()
+	};
+	smapPsoDesc.PS =
+	{
+		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapWithAlphaTest].pixelShader->GetBufferPointer()),
+		shaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapWithAlphaTest].pixelShader->GetBufferSize()
+	};
+	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&smapPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_ShadowMapWithAlphaTest])));
+
+	// PSO for shadow map debug
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC debugPsoDesc = opaquePsoDesc;
+	debugPsoDesc.VS =
+	{
+		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapDebug].vertexShader->GetBufferPointer()),
+		shaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapDebug].vertexShader->GetBufferSize()
+	};
+	debugPsoDesc.PS =
+	{
+		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapDebug].pixelShader->GetBufferPointer()),
+		shaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapDebug].pixelShader->GetBufferSize()
+	};
+	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&debugPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_ShadowMapDebug])));
 }
 
 // ƒQƒbƒ^[
@@ -868,10 +917,49 @@ void CRenderer::SetUpCommonResources()
 	auto matBuffer = CFrameResourceManager::GetCurrentFrameResource()->MaterialBuffer->Resource();
 	m_CommandList->SetGraphicsRootShaderResourceView(2, matBuffer->GetGPUVirtualAddress());
 
+	// Bind ShadowMap
+	m_CommandList->SetGraphicsRootDescriptorTable(4, m_ShadowMapDescHandle);
+
 	// Bind all the textures used in this scene.  Observe
 	// that we only have to specify the first descriptor in the table.  
 	// The root signature knows how many descriptors are expected in the table.
 	m_CommandList->SetGraphicsRootDescriptorTable(5, m_SrvHeap->GetGPUDescriptorHandleForHeapStart());
+}
+
+void CRenderer::SetUpNullCubeMapResource()
+{
+	m_CommandList->SetGraphicsRootDescriptorTable(3, m_NullCubeMapDescHandle);
+}
+
+void CRenderer::SetUpBeforeCreateShadowMapReource()
+{
+	m_CommandList->RSSetViewports(1, &m_ShadowMap->GetViewport());
+	m_CommandList->RSSetScissorRects(1, &m_ShadowMap->GetScissorRect());
+
+	// Change to DEPTH_WRITE.
+	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_ShadowMap->GetResource(),
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_DEPTH_WRITE));
+
+	// Clear the back buffer and depth buffer.
+	m_CommandList->ClearDepthStencilView(m_ShadowMap->GetDsvHandle(),
+		D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+
+	// Set null render target because we are only going to draw to
+	// depth buffer.  Setting a null render target will disable color writes.
+	// Note the active PSO also must specify a render target count of 0.
+	m_CommandList->OMSetRenderTargets(0, nullptr, false, &m_ShadowMap->GetDsvHandle());
+
+	// Bind the pass constant buffer for the shadow map pass.
+	auto passCB = CFrameResourceManager::GetCurrentFrameResource()->PassCB->Resource();
+	D3D12_GPU_VIRTUAL_ADDRESS passCBAddress = passCB->GetGPUVirtualAddress() + 1 * CFrameResourceManager::GetPassCBByteSize();
+	m_CommandList->SetGraphicsRootConstantBufferView(1, passCBAddress);
+}
+
+void CRenderer::CompleteCreateShadowMapResource()
+{
+	// Change back to GENERIC_READ so we can read the texture in a shader.
+	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_ShadowMap->GetResource(),
+		D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ));
 }
 
 void CRenderer::SetUpSkyCubeMapResources()
@@ -902,7 +990,7 @@ void CRenderer::SetUpBeforeCreateAllDynamicCubeMapResources(int DCMResourcesInde
 void CRenderer::SetUpBeforeCreateEachDynamicCubeMapResource(int DCMResourcesIndex, int FaceIndex)
 {
 	// Clear the back buffer and depth buffer.
-	m_CommandList->ClearRenderTargetView(m_DynamicCubeMap->GetRtvHandle(DCMResourcesIndex, FaceIndex), Colors::LightPink, 0, nullptr);
+	m_CommandList->ClearRenderTargetView(m_DynamicCubeMap->GetRtvHandle(DCMResourcesIndex, FaceIndex), Colors::LightSkyBlue, 0, nullptr);
 	m_CommandList->ClearDepthStencilView(m_DynamicCubeMapDsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 	// Specify the buffers we are going to render to.

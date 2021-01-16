@@ -52,9 +52,9 @@ public:
 	void LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up);
 
 	// Get View/Proj matrices.
-	DirectX::XMMATRIX XM_CALLCONV GetView()const;
-	DirectX::XMMATRIX XM_CALLCONV GetProj()const { return XMLoadFloat4x4(&m_Proj); }
-
 	DirectX::XMFLOAT4X4 GetView4x4f()const;
 	DirectX::XMFLOAT4X4 GetProj4x4f()const { return m_Proj; }
+
+	DirectX::XMMATRIX XM_CALLCONV GetView()const;
+	DirectX::XMMATRIX XM_CALLCONV GetProj()const { return XMLoadFloat4x4(&m_Proj); }
 };

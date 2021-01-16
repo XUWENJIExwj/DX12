@@ -7,19 +7,21 @@
 enum class RenderLayers :int
 {
 	Layer_Camera,
-	Layer_Light,
+	Layer_DirLight,
 	Layer_3D_Opaque,
 	Layer_3D_Opaque_POM,
 	Layer_3D_Sky,
 	Layer_3D_BillBoard,
 	Layer_3D_Opaque_DynamicReflectors,
 	Layer_2D_Opaque,
+	Layer_2D_Debug,
 	Layer_Fade,
 	Layer_Max
 };
 
 class CGameObject;
 class CCamera;
+class CDirLight;
 
 struct AllGameObjectsListEmptyReference
 {
@@ -36,12 +38,15 @@ protected:
 
 	UINT          m_ObjectCBCounts = 0;
 	CCamera*      m_MainCamera;
+	CDirLight*    m_MainDirLight;
 	PassConstants m_MainPassCB;
 	PassConstants m_ShadowPassCB;
 
-	DirectX::BoundingSphere m_SceneBounds;
+	std::vector<CCamera*>   m_DCMCameras;
+	std::vector<CDirLight*> m_DirLights;
 
-	std::vector<CCamera*> m_DCMCameras;
+	DirectX::BoundingSphere m_SceneBounds;
+	DirectX::XMFLOAT4X4     m_ShadowTransform = MathHelper::Identity4x4();
 
 public:
 	CScene() = default;
@@ -76,6 +81,11 @@ public:
 		gameObject->SetRenderLayer(Layer);
 		gameObject->SetName(Name);
 		gameObject->Init();
+
+		if (Layer == (int)RenderLayers::Layer_DirLight)
+		{
+			m_DirLights.push_back((CDirLight*)gameObject);
+		}
 
 		if (m_ListEmptyReference.objIteratorStore.size() > 0)
 		{
@@ -129,5 +139,6 @@ public:
 	std::list<CGameObject*>* GetAllRenderLayers() { return m_AllRenderLayers; }
 	AllGameObjectsListEmptyReference* GetListEmptyReference() { return &m_ListEmptyReference; }
 	UINT GetAllGameObjectsCount() { return (UINT)m_AllGameObjects.size(); }
+	DirectX::BoundingSphere* GetSceneBounds() { return &m_SceneBounds; }
 	std::vector<CCamera*>& GetDynamicCubeMapCameras() { return m_DCMCameras; }
 };

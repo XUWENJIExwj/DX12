@@ -2,6 +2,8 @@
 #include "Scene.h"
 #include "GameObject.h"
 #include "Camera.h"
+#include "Light.h"
+#include "DirectionalLight.h"
 
 using namespace DirectX;
 
@@ -110,7 +112,7 @@ void CScene::UpdateGameObjectsCB(const GameTimer& GlobalTimer)
 			int numFramesDirty = gameObject->GetNumFramesDirty();
 			// Only update the cbuffer data if the constants have changed.  
 			// This needs to be tracked per frame resource.
-			if (numFramesDirty > 0 && gameObject->GetGameObjectLayer() != (int)RenderLayers::Layer_Camera)
+			if (numFramesDirty > 0 && gameObject->GetGameObjectLayer() >= (int)RenderLayers::Layer_3D_Opaque)
 			{
 				DirectX::XMMATRIX world = gameObject->GetWorldMatrix();
 				DirectX::XMMATRIX texTransform = gameObject->GetTexTransformMatrix();
@@ -188,6 +190,7 @@ void CScene::UpdateMainPassCB(const GameTimer& GlobalTimer)
 	XMStoreFloat4x4(&m_MainPassCB.InvProj, XMMatrixTranspose(invProj));
 	XMStoreFloat4x4(&m_MainPassCB.ViewProj, XMMatrixTranspose(viewProj));
 	XMStoreFloat4x4(&m_MainPassCB.InvViewProj, XMMatrixTranspose(invViewProj));
+
 	m_MainPassCB.EyePosW = m_MainCamera->GetPosition3f();
 	m_MainPassCB.RenderTargetSize = XMFLOAT2((float)windowWidth, (float)windowHeight);
 	m_MainPassCB.InvRenderTargetSize = XMFLOAT2(1.0f / windowWidth, 1.0f / windowHeight);
@@ -199,13 +202,30 @@ void CScene::UpdateMainPassCB(const GameTimer& GlobalTimer)
 	m_MainPassCB.DeltaTime = GlobalTimer.DeltaTime();
 
 	// Light
+	if (m_DirLights.size() > 0)
+	{
+		XMMATRIX shadowTransform = m_DirLights[0]->ComputeShadowTransform(&m_SceneBounds);
+		XMStoreFloat4x4(&m_MainPassCB.ShadowTransform, XMMatrixTranspose(shadowTransform));
+		m_ShadowTransform = m_MainPassCB.ShadowTransform;
+
+		for (UINT i = 0; i < m_DirLights.size(); ++i)
+		{
+			m_MainPassCB.Lights[i].Direction = m_DirLights[i]->GetDirection3f();
+			m_MainPassCB.Lights[i].Strength = m_DirLights[i]->GetStrength3f();
+		}
+	}
+	else
+	{
+		m_MainPassCB.ShadowTransform = m_ShadowTransform;
+		m_MainPassCB.Lights[0].Direction = { 0.57735f, -0.57735f, 0.57735f };
+		m_MainPassCB.Lights[0].Strength = { 0.8f, 0.8f, 0.8f };
+		m_MainPassCB.Lights[1].Direction = { -0.57735f, -0.57735f, 0.57735f };
+		m_MainPassCB.Lights[1].Strength = { 0.4f, 0.4f, 0.4f };
+		m_MainPassCB.Lights[2].Direction = { 0.0f, -0.707f, -0.707f };
+		m_MainPassCB.Lights[2].Strength = { 0.2f, 0.2f, 0.2f };
+	}
+
 	m_MainPassCB.AmbientLight = { 0.25f, 0.25f, 0.35f, 1.0f };
-	m_MainPassCB.Lights[0].Direction = { 0.57735f, -0.57735f, 0.57735f };
-	m_MainPassCB.Lights[0].Strength = { 0.8f, 0.8f, 0.8f };
-	m_MainPassCB.Lights[1].Direction = { -0.57735f, -0.57735f, 0.57735f };
-	m_MainPassCB.Lights[1].Strength = { 0.4f, 0.4f, 0.4f };
-	m_MainPassCB.Lights[2].Direction = { 0.0f, -0.707f, -0.707f };
-	m_MainPassCB.Lights[2].Strength = { 0.2f, 0.2f, 0.2f };
 
 	auto currPassCB = CFrameResourceManager::GetCurrentFrameResource()->PassCB.get();
 	currPassCB->CopyData(0, m_MainPassCB);
@@ -213,7 +233,31 @@ void CScene::UpdateMainPassCB(const GameTimer& GlobalTimer)
 
 void CScene::UpdateShadowPassCB(const GameTimer & GlobalTimer)
 {
+	XMMATRIX view = m_DirLights[0]->GetView();
+	XMMATRIX proj = m_DirLights[0]->GetProj();
 
+	XMMATRIX viewProj = XMMatrixMultiply(view, proj);
+	XMMATRIX invView = XMMatrixInverse(&XMMatrixDeterminant(view), view);
+	XMMATRIX invProj = XMMatrixInverse(&XMMatrixDeterminant(proj), proj);
+	XMMATRIX invViewProj = XMMatrixInverse(&XMMatrixDeterminant(viewProj), viewProj);
+
+	UINT width = CRenderer::GetShadowMapWidth();
+	UINT height = CRenderer::GetShadowMapHeight();
+
+	XMStoreFloat4x4(&m_ShadowPassCB.View, XMMatrixTranspose(view));
+	XMStoreFloat4x4(&m_ShadowPassCB.InvView, XMMatrixTranspose(invView));
+	XMStoreFloat4x4(&m_ShadowPassCB.Proj, XMMatrixTranspose(proj));
+	XMStoreFloat4x4(&m_ShadowPassCB.InvProj, XMMatrixTranspose(invProj));
+	XMStoreFloat4x4(&m_ShadowPassCB.ViewProj, XMMatrixTranspose(viewProj));
+	XMStoreFloat4x4(&m_ShadowPassCB.InvViewProj, XMMatrixTranspose(invViewProj));
+	m_ShadowPassCB.EyePosW = m_DirLights[0]->GetPosition3f();
+	m_ShadowPassCB.RenderTargetSize = XMFLOAT2((float)width, (float)height);
+	m_ShadowPassCB.InvRenderTargetSize = XMFLOAT2(1.0f / width, 1.0f / height);
+	m_ShadowPassCB.NearZ = m_DirLights[0]->GetNearZ();
+	m_ShadowPassCB.FarZ = m_DirLights[0]->GetFarZ();
+
+	auto currPassCB = CFrameResourceManager::GetCurrentFrameResource()->PassCB.get();
+	currPassCB->CopyData(1, m_ShadowPassCB);
 }
 
 void CScene::UpdateDynamicCubeMapPassCB(const GameTimer& GlobalTimer, int DCMResourcesIndex)
@@ -236,6 +280,7 @@ void CScene::UpdateDynamicCubeMapPassCB(const GameTimer& GlobalTimer, int DCMRes
 		XMStoreFloat4x4(&cubeFacePassCB.InvProj, XMMatrixTranspose(invProj));
 		XMStoreFloat4x4(&cubeFacePassCB.ViewProj, XMMatrixTranspose(viewProj));
 		XMStoreFloat4x4(&cubeFacePassCB.InvViewProj, XMMatrixTranspose(invViewProj));
+		cubeFacePassCB.ShadowTransform = m_ShadowTransform;
 		cubeFacePassCB.EyePosW = m_DCMCameras[i]->GetPosition3f();
 
 		float dynamicCubeMapSize = (float)CRenderer::GetDynamicCubeMapSize();

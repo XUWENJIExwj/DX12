@@ -10,6 +10,6 @@ public:
 
 	void Init()override;
 	void Uninit()override;
-	void Update(const GameTimer& GlobalTimer)override;
+	void UpdateAll(const GameTimer& GlobalTimer)override;
 	void Draw(const GameTimer& GlobalTimer)override;
 };

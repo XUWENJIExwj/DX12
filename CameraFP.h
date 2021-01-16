@@ -13,13 +13,13 @@ public:
 	void UpdateImGui(const GameTimer& GlobalTimer)override;
 
 	// Move the camera
-	void WalkDepth(float d);
-	void WalkHorizontal(float d);
-	void WalkVertical(float d);
+	void WalkDepth(float Speed);
+	void WalkHorizontal(float Speed);
+	void WalkVertical(float Speed);
 	void CameraWalk(const GameTimer& GlobalTimer);
 
 	// Rotate the camera.
-	void Pitch(float angle);
-	void RotateY(float angle);
+	void Pitch(float Angle);
+	void RotateY(float Angle);
 	void CameraRotate(const GameTimer& GlobalTimer);
 };

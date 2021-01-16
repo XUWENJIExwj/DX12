@@ -13,7 +13,9 @@ enum class PSOTypeIndex :int
 	PSO_Solid_Sky,
 	PSO_WireFrame_Opaque,
 	PSO_WireFrame_Sky,
-	PSO_ShadowMapping,
+	PSO_ShadowMap,
+	PSO_ShadowMapWithAlphaTest,
+	PSO_ShadowMapDebug,
 	PSO_MAX
 };
 
@@ -63,8 +65,8 @@ private:
 	static int                                                      m_CurrentPSO;
 
 	// Null Textures
-	static CD3DX12_GPU_DESCRIPTOR_HANDLE m_NullTextureSrv;
-	static CD3DX12_GPU_DESCRIPTOR_HANDLE m_NullCubeMapSrv;
+	static CD3DX12_GPU_DESCRIPTOR_HANDLE m_NullTextureDescHandle;
+	static CD3DX12_GPU_DESCRIPTOR_HANDLE m_NullCubeMapDescHandle;
 
 	// CubeMap
 	static std::vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> m_SkyCubeMapDescHandles;
@@ -124,6 +126,10 @@ public:
 	// CubeMap
 	static int GetCurrentSkyCubeMapIndex() { return m_CurrentSkyCubeMapIndex; }
 
+	// ShadowMap
+	static UINT GetShadowMapWidth() { return m_ShadowMapWidth; }
+	static UINT GetShadowMapHeight() { return m_ShadowMapHeight; }
+
 	// DynamicCubeMap
 	static bool GetDynamicCubeOn() { return m_DynamicCubeMapOn; }
 	static UINT GetDynamicCubeMapSize() { return m_DynamicCubeMapSize; }
@@ -139,6 +145,9 @@ public:
 	// •`‰æ—p
 	static void Begin();
 	static void SetUpCommonResources();
+	static void SetUpNullCubeMapResource();
+	static void SetUpBeforeCreateShadowMapReource();
+	static void CompleteCreateShadowMapResource();
 	static void SetCurrentSkyCubeMapIndex(int CubeMapIndex) { m_CurrentSkyCubeMapIndex = CubeMapIndex; }
 	static void SetUpSkyCubeMapResources();
 	static void SetUpDynamicCubeMapResources(int DCMResourcesIndex);

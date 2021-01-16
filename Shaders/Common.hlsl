@@ -45,7 +45,7 @@ Texture2D gShadowMap : register(t0, space1);
 // An array of textures, which is only supported in shader model 5.1+.  Unlike Texture2DArray, the textures
 // in this array can be different sizes and formats, making it more flexible than texture arrays.
 // TextureÇÃêîÇ…ÇÊÇ¡ÇƒÅAîzóÒóvëfêîÇëùÇ‚ÇµÇƒÇ¢Ç≠
-Texture2D gTextureMaps[19] : register(t1);
+Texture2D gTextureMaps[36] : register(t1);
 
 // Put in space1, so the texture array does not overlap with these resources.  
 // The texture array will occupy registers t1, ..., t3 in space0. 
@@ -57,6 +57,7 @@ SamplerState gsamLinearWrap       : register(s2);
 SamplerState gsamLinearClamp      : register(s3);
 SamplerState gsamAnisotropicWrap  : register(s4);
 SamplerState gsamAnisotropicClamp : register(s5);
+SamplerComparisonState gsamShadow : register(s6);
 
 // Constant data that varies per frame.
 cbuffer cbPerObject : register(b0)
@@ -78,6 +79,7 @@ cbuffer cbPass : register(b1)
     float4x4 gInvProj;
     float4x4 gViewProj;
     float4x4 gInvViewProj;
+    float4x4 gShadowTransform;
     float3   gEyePosWS;
     float    cbPerObjectPad1;
     float2   gRenderTargetSize;
@@ -121,3 +123,37 @@ float3 NormalSampleToWorldSpace(float3 NormalMapSample, float3 NormalWS, float3 
     return bumpedNormalWS;
 }
 
+//---------------------------------------------------------------------------------------
+// PCF for shadow mapping.
+//---------------------------------------------------------------------------------------
+float CalcShadowFactor(float4 ShadowPosHS)
+{
+    // Complete projection by doing division by w.
+    ShadowPosHS.xyz /= ShadowPosHS.w;
+
+    // Depth in NDC space.
+    float depth = ShadowPosHS.z;
+
+    uint width, height, numMips;
+    gShadowMap.GetDimensions(0, width, height, numMips);
+
+    // Texel size.
+    float dx = 1.0f / (float) width;
+
+    float percentLit = 0.0f;
+    const float2 offsets[9] =
+    {
+        float2(-dx, -dx),  float2(0.0f, -dx),  float2(dx, -dx),
+        float2(-dx, 0.0f), float2(0.0f, 0.0f), float2(dx, 0.0f),
+        float2(-dx, +dx),  float2(0.0f, +dx),  float2(dx, +dx)
+    };
+
+    [unroll]
+    for (int i = 0; i < 9; ++i)
+    {
+        percentLit += gShadowMap.SampleCmpLevelZero(gsamShadow,
+            ShadowPosHS.xy + offsets[i], depth).r;
+    }
+    
+    return percentLit / 9.0f;
+}

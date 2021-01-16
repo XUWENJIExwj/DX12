@@ -10,8 +10,8 @@ class CCamera;
 class CManager
 {
 private:
-	static CScene*  m_Scene;
-	static CCamera* m_MainCamera;
+	static CScene*         m_Scene;
+	static CCamera*        m_MainCamera;
 
 public:
 	static bool Init();
@@ -37,6 +37,6 @@ public:
 
 	static void SetMainCamera(CCamera* Camera = nullptr) { m_MainCamera = Camera; }
 
-	static ID3D12Device* GetDevice();
-	static CScene*       GetScene() { return m_Scene; }
+	static ID3D12Device*   GetDevice();
+	static CScene*         GetScene() { return m_Scene; }
 };

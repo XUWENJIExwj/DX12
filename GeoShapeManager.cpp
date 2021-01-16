@@ -12,6 +12,7 @@ void CGeoShapeManager::CreateGeoShapes()
 	GeometryGenerator::MeshData grid = geoGen.CreateGrid(20.0f, 30.0f, 60, 40);
 	GeometryGenerator::MeshData sphere = geoGen.CreateSphere(0.5f, 20, 20);
 	GeometryGenerator::MeshData cylinder = geoGen.CreateCylinder(0.5f, 0.3f, 3.0f, 20, 20);
+	GeometryGenerator::MeshData quad = geoGen.CreateQuad(-1.0f, -0.152f, 0.48f, 0.848f, 0.0f);
 
 	//
 	// We are concatenating all the geometry into one big vertex/index buffer.  So
@@ -23,12 +24,14 @@ void CGeoShapeManager::CreateGeoShapes()
 	UINT gridVertexOffset = (UINT)cube.Vertices.size();
 	UINT sphereVertexOffset = gridVertexOffset + (UINT)grid.Vertices.size();
 	UINT cylinderVertexOffset = sphereVertexOffset + (UINT)sphere.Vertices.size();
+	UINT quadVertexOffset = cylinderVertexOffset + (UINT)cylinder.Vertices.size();
 
 	// Cache the starting index for each object in the concatenated index buffer.
 	UINT cubeIndexOffset = 0;
 	UINT gridIndexOffset = (UINT)cube.Indices32.size();
 	UINT sphereIndexOffset = gridIndexOffset + (UINT)grid.Indices32.size();
 	UINT cylinderIndexOffset = sphereIndexOffset + (UINT)sphere.Indices32.size();
+	UINT quadIndexOffset = cylinderIndexOffset + (UINT)cylinder.Indices32.size();
 
 	SubmeshGeometry cubeSubmesh;
 	cubeSubmesh.IndexCount = (UINT)cube.Indices32.size();
@@ -50,6 +53,11 @@ void CGeoShapeManager::CreateGeoShapes()
 	cylinderSubmesh.StartIndexLocation = cylinderIndexOffset;
 	cylinderSubmesh.BaseVertexLocation = cylinderVertexOffset;
 
+	SubmeshGeometry quadSubmesh;
+	quadSubmesh.IndexCount = (UINT)quad.Indices32.size();
+	quadSubmesh.StartIndexLocation = quadIndexOffset;
+	quadSubmesh.BaseVertexLocation = quadVertexOffset;
+
 	////
 	//// Extract the vertex elements we are interested in and pack the
 	//// vertices of all the meshes into one vertex buffer.
@@ -59,7 +67,8 @@ void CGeoShapeManager::CreateGeoShapes()
 		cube.Vertices.size() +
 		grid.Vertices.size() +
 		sphere.Vertices.size() +
-		cylinder.Vertices.size();
+		cylinder.Vertices.size() +
+		quad.Vertices.size();
 
 	vector<Vertex> vertices(totalVertexCount);
 
@@ -96,11 +105,20 @@ void CGeoShapeManager::CreateGeoShapes()
 		vertices[k].TexC = cylinder.Vertices[i].TexC;
 	}
 
+	for (int i = 0; i < quad.Vertices.size(); ++i, ++k)
+	{
+		vertices[k].Pos = quad.Vertices[i].Position;
+		vertices[k].Normal = quad.Vertices[i].Normal;
+		vertices[k].TexC = quad.Vertices[i].TexC;
+		vertices[k].Tangent = quad.Vertices[i].TangentU;
+	}
+
 	vector<uint16_t> indices;
 	indices.insert(indices.end(), begin(cube.GetIndices16()), end(cube.GetIndices16()));
 	indices.insert(indices.end(), begin(grid.GetIndices16()), end(grid.GetIndices16()));
 	indices.insert(indices.end(), begin(sphere.GetIndices16()), end(sphere.GetIndices16()));
 	indices.insert(indices.end(), begin(cylinder.GetIndices16()), end(cylinder.GetIndices16()));
+	indices.insert(indices.end(), std::begin(quad.GetIndices16()), std::end(quad.GetIndices16()));
 
 	const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
 	const UINT ibByteSize = (UINT)indices.size() * sizeof(uint16_t);
@@ -129,6 +147,7 @@ void CGeoShapeManager::CreateGeoShapes()
 	geo->DrawArgs["grid"] = gridSubmesh;
 	geo->DrawArgs["sphere"] = sphereSubmesh;
 	geo->DrawArgs["cylinder"] = cylinderSubmesh;
+	geo->DrawArgs["quad"] = quadSubmesh;
 
 	m_Geometries.push_back(move(geo));
 }

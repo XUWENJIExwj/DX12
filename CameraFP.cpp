@@ -1,5 +1,5 @@
-#include "CameraFP.h"
 #include "InputManager.h"
+#include "CameraFP.h"
 
 using namespace DirectX;
 using namespace InputManager;
@@ -72,10 +72,10 @@ void CCameraFP::UpdateImGui(const GameTimer& GlobalTimer)
 	}
 }
 
-void CCameraFP::WalkDepth(float d)
+void CCameraFP::WalkDepth(float Speed)
 {
-	// mPosition += d * m_Look
-	XMVECTOR s = XMVectorReplicate(d);
+	// m_Position += Speed * m_Look
+	XMVECTOR s = XMVectorReplicate(Speed);
 	XMVECTOR l = XMLoadFloat3(&XMFLOAT3(m_Look.x, 0.0f, m_Look.z));;
 	XMVector3Normalize(l);
 	XMVECTOR p = XMLoadFloat3(&m_Position);
@@ -84,10 +84,10 @@ void CCameraFP::WalkDepth(float d)
 	m_ViewDirty = true;
 }
 
-void CCameraFP::WalkHorizontal(float d)
+void CCameraFP::WalkHorizontal(float Speed)
 {
-	// mPosition += d * m_Right
-	XMVECTOR s = XMVectorReplicate(d);
+	// m_Position += Speed * m_Right
+	XMVECTOR s = XMVectorReplicate(Speed);
 	XMVECTOR r = XMLoadFloat3(&m_Right);
 	XMVECTOR p = XMLoadFloat3(&m_Position);
 	XMStoreFloat3(&m_Position, XMVectorMultiplyAdd(s, r, p));
@@ -95,10 +95,10 @@ void CCameraFP::WalkHorizontal(float d)
 	m_ViewDirty = true;
 }
 
-void CCameraFP::WalkVertical(float d)
+void CCameraFP::WalkVertical(float Speed)
 {
-	// mPosition += d * WorldUp
-	XMVECTOR s = XMVectorReplicate(d);
+	// m_Position += Speed * WorldUp
+	XMVECTOR s = XMVectorReplicate(Speed);
 	XMFLOAT3 worldUp = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	XMVECTOR u = XMLoadFloat3(&worldUp);
 	XMVECTOR p = XMLoadFloat3(&m_Position);
@@ -135,25 +135,23 @@ void CCameraFP::CameraWalk(const GameTimer& GlobalTimer)
 	}
 }
 
-void CCameraFP::Pitch(float angle)
+void CCameraFP::Pitch(float Angle)
 {
 	// Rotate up and look vector about the right vector.
+	XMMATRIX R = XMMatrixRotationAxis(XMLoadFloat3(&m_Right), Angle);
 
-	XMMATRIX R = XMMatrixRotationAxis(XMLoadFloat3(&m_Right), angle);
-
-	XMStoreFloat3(&m_Up,   XMVector3TransformNormal(XMLoadFloat3(&m_Up), R));
+	XMStoreFloat3(&m_Up, XMVector3TransformNormal(XMLoadFloat3(&m_Up), R));
 	XMStoreFloat3(&m_Look, XMVector3TransformNormal(XMLoadFloat3(&m_Look), R));
 
 	m_ViewDirty = true;
 }
 
-void CCameraFP::RotateY(float angle)
+void CCameraFP::RotateY(float Angle)
 {
 	// Rotate the basis vectors about the world y-axis.
+	XMMATRIX R = XMMatrixRotationY(Angle);
 
-	XMMATRIX R = XMMatrixRotationY(angle);
-
-	XMStoreFloat3(&m_Right,   XMVector3TransformNormal(XMLoadFloat3(&m_Right), R));
+	XMStoreFloat3(&m_Right, XMVector3TransformNormal(XMLoadFloat3(&m_Right), R));
 	XMStoreFloat3(&m_Up, XMVector3TransformNormal(XMLoadFloat3(&m_Up), R));
 	XMStoreFloat3(&m_Look, XMVector3TransformNormal(XMLoadFloat3(&m_Look), R));
 

@@ -5,7 +5,10 @@ enum class VertexShaderIndex :int
 	VS_Opaque,
 	VS_Opaque_POM,
 	VS_Sky,
-	VS_MAX
+	VS_ShadowMap,
+	VS_ShadowMapWithAlphaTest,
+	VS_ShadowMapDebug,
+	VS_Max
 };
 
 enum class PixelShaderIndex :int
@@ -13,7 +16,10 @@ enum class PixelShaderIndex :int
 	PS_Opaque,
 	PS_Opaque_POM,
 	PS_Sky,
-	PS_MAX
+	PS_ShadowMap,
+	PS_ShadowMapWithAlphaTest,
+	PS_ShadowMapDebug,
+	PS_Max
 };
 
 enum class ShaderTypeIndex :int
@@ -21,7 +27,10 @@ enum class ShaderTypeIndex :int
 	Shader_Type_Opaque,
 	Shader_Type_Opaque_POM,
 	Shader_Type_Sky,
-	Shader_Type_MAX
+	Shader_Type_ShadowMap,
+	Shader_Type_ShadowMapWithAlphaTest,
+	Shader_Type_ShadowMapDebug,
+	Shader_Type_Max
 };
 
 struct ShaderType
