@@ -180,6 +180,7 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="ShaderManager.h" />
+    <ClInclude Include="ShadowMap.h" />
     <ClInclude Include="Sky.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="SphereDR.h" />
@@ -218,6 +219,7 @@
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
+    <ClCompile Include="ShadowMap.cpp" />
     <ClCompile Include="Sky.cpp" />
     <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="SphereDR.cpp" />

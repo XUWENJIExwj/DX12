@@ -62,6 +62,9 @@ CD3DX12_CPU_DESCRIPTOR_HANDLE CRenderer::m_DynamicCubeMapDsvHandle;
 UINT                          CRenderer::m_DynamicCubeMapSize = 512;
 ComPtr<ID3D12Resource>        CRenderer::m_DynamicCubeMapDepthStencilBuffer = nullptr;
 
+// ShadowMap
+unique_ptr<CShadowMap> CRenderer::m_ShadowMap = nullptr;
+
 // DX12èâä˙âª
 bool CRenderer::Init()
 {
@@ -395,23 +398,27 @@ void CRenderer::CreateRootSignature()
 	CD3DX12_DESCRIPTOR_RANGE cubeMapTable;
 	cubeMapTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
 
+	CD3DX12_DESCRIPTOR_RANGE shadowMapTable;
+	shadowMapTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 1);
+
 	CD3DX12_DESCRIPTOR_RANGE texturesTable;
 	texturesTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, CTextureManager::GetTexturesNum() + CTextureManager::GetDynamicCubeMapsNum(), 1, 0);
 
 	// Root parameter can be a table, root descriptor or root constants.
-	CD3DX12_ROOT_PARAMETER slotRootParameter[5];
+	CD3DX12_ROOT_PARAMETER slotRootParameter[6];
 
 	// Perfomance TIP: Order from most frequent to least frequent.
 	slotRootParameter[0].InitAsConstantBufferView(0);
 	slotRootParameter[1].InitAsConstantBufferView(1);
-	slotRootParameter[2].InitAsShaderResourceView(0, 1);
+	slotRootParameter[2].InitAsShaderResourceView(1, 1);
 	slotRootParameter[3].InitAsDescriptorTable(1, &cubeMapTable, D3D12_SHADER_VISIBILITY_PIXEL);
-	slotRootParameter[4].InitAsDescriptorTable(1, &texturesTable, D3D12_SHADER_VISIBILITY_PIXEL);
+	slotRootParameter[4].InitAsDescriptorTable(1, &shadowMapTable, D3D12_SHADER_VISIBILITY_PIXEL);
+	slotRootParameter[5].InitAsDescriptorTable(1, &texturesTable, D3D12_SHADER_VISIBILITY_PIXEL);
 
 	auto staticSamplers = GetStaticSamplers();
 
 	// A root signature is an array of root parameters.
-	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(5, slotRootParameter,
+	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(6, slotRootParameter,
 		(UINT)staticSamplers.size(), staticSamplers.data(),
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
@@ -462,7 +469,6 @@ void CRenderer::CreateDescriptorHeaps()
 	// Textures
 	auto textures = CTextureManager::GetTextures().data();
 	UINT skyCubeMap = CTextureManager::GetSkyCubeMapIndex();
-	UINT nullCubeSrvIndex = CTextureManager::GetNullCubeMapIndex();
 
 	for (unsigned int i = (int)TextureIndex::Texture_Default_00_Diffuse; i < skyCubeMap; ++i)
 	{
@@ -479,6 +485,8 @@ void CRenderer::CreateDescriptorHeaps()
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
 	srvDesc.TextureCube.MostDetailedMip = 0;
 	srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
+
+	UINT nullCubeSrvIndex = CTextureManager::GetNullCubeMapIndex();
 
 	for (unsigned int i = skyCubeMap; i < nullCubeSrvIndex; ++i)
 	{
@@ -841,7 +849,7 @@ void CRenderer::SetUpCommonResources()
 	// Bind all the textures used in this scene.  Observe
 	// that we only have to specify the first descriptor in the table.  
 	// The root signature knows how many descriptors are expected in the table.
-	m_CommandList->SetGraphicsRootDescriptorTable(4, m_SrvHeap->GetGPUDescriptorHandleForHeapStart());
+	m_CommandList->SetGraphicsRootDescriptorTable(5, m_SrvHeap->GetGPUDescriptorHandleForHeapStart());
 }
 
 void CRenderer::SetUpSkyCubeMapResources()

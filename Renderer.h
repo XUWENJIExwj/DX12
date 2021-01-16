@@ -2,6 +2,7 @@
 
 #include "DX12App.h"
 #include "CubeRenderTarget.h"
+#include "ShadowMap.h"
 #include "GameObject.h"
 #include "FrameResource.h"
 
@@ -77,7 +78,7 @@ private:
 	static Microsoft::WRL::ComPtr<ID3D12Resource> m_DynamicCubeMapDepthStencilBuffer;
 
 	// ShadowMap
-
+	static std::unique_ptr<CShadowMap> m_ShadowMap;
 
 public:
 	// DX12‰Šú‰»

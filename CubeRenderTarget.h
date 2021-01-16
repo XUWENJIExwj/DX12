@@ -20,8 +20,8 @@ private:
 	D3D12_VIEWPORT m_Viewport;
 	D3D12_RECT     m_ScissorRect;
 
-	UINT m_Width = 0;
-	UINT m_Height = 0;
+	UINT        m_Width = 0;
+	UINT        m_Height = 0;
 	DXGI_FORMAT m_Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 
 	std::vector<CD3DX12_CPU_DESCRIPTOR_HANDLE>              m_CpuSrvHandles;

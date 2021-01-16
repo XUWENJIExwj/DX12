@@ -1,4 +1,5 @@
-﻿  FrameResource.cpp
+﻿  CubeRenderTarget.cpp
+  FrameResource.cpp
   Game.cpp
   GameObject.cpp
   GeoShapeManager.cpp
@@ -8,8 +9,9 @@
   Renderer.cpp
   Scene.cpp
   ShaderManager.cpp
+  ShadowMap.cpp
   Sky.cpp
   SphereDR.cpp
   TextureManager.cpp
   コードを生成中...
-  DX12.vcxproj -> C:\Users\XUWENJIE\Documents\HAL\GM31\DX12\x64\Debug\DX12.exe
+  DX12.vcxproj -> D:\HAL\GM31\DX12\x64\Debug\DX12.exe
