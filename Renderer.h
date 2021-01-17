@@ -143,7 +143,7 @@ public:
 	static std::array<const CD3DX12_STATIC_SAMPLER_DESC, 7> GetStaticSamplers();
 
 	// •`‰æ—p
-	static void Begin();
+	static void Begin(int BeginPSOIndex);
 	static void SetUpCommonResources();
 	static void SetUpNullCubeMapResource();
 	static void SetUpBeforeCreateShadowMapReource();

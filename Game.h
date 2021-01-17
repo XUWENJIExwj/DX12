@@ -12,4 +12,6 @@ public:
 	void Uninit()override;
 	void UpdateAll(const GameTimer& GlobalTimer)override;
 	void Draw(const GameTimer& GlobalTimer)override;
+
+	void OnResize()override;
 };

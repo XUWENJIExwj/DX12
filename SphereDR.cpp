@@ -36,6 +36,7 @@ void CSphereDR::GlobalRotate(const GameTimer& GlobalTimer)
 
 void CSphereDR::DrawDynamicCubeMapScene(std::list<CGameObject*>* AllRenderLayers)
 {
+	CRenderer::DrawGameObjectsWithLayer(AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque_DynamicReflectors]);
 	CRenderer::DrawGameObjectsWithLayer(AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque]);
 	CRenderer::SetPSO((int)PSOTypeIndex::PSO_Solid_Opaque_POM);
 	CRenderer::DrawGameObjectsWithLayer(AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque_POM]);

@@ -19,6 +19,8 @@ using namespace DirectX;
 
 void CGame::Init()
 {
+	m_BeginPSOIndex = (int)PSOTypeIndex::PSO_ShadowMap;
+
 	m_MainCamera = AddGameObject<CCameraFP>((int)RenderLayers::Layer_Camera, "MainCamera");
 	CManager::SetMainCamera(m_MainCamera);
 
@@ -61,7 +63,7 @@ void CGame::Init()
 	//sphereDR3->SetPosition(XMFLOAT3(0.0f, 0.5f, 2.0f));
 	//sphereDR3->SetWorldMatrix();
 
-	CQuad* quad = AddGameObject<CQuad>((int)RenderLayers::Layer_2D_Debug, "Debug");
+	CQuad* quad = AddGameObject<CQuad>((int)RenderLayers::Layer_2D_Debug, "ShadowMapDebug");
 
 	SetSceneBounds(10.0f, 15.0f, meshField->GetPosition3f());
 	CFrameResourceManager::CreateFrameResources();
@@ -87,15 +89,14 @@ void CGame::Draw(const GameTimer& GlobalTimer)
 	// CreateShadowMap
 	CRenderer::SetUpNullCubeMapResource();
 	CRenderer::SetUpBeforeCreateShadowMapReource();
-	CRenderer::SetPSO((int)PSOTypeIndex::PSO_ShadowMap);
 	CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque_DynamicReflectors]);
 	CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque]);
 	CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque_POM]);
 	CRenderer::CompleteCreateShadowMapResource();
 
-	CRenderer::SetUpSkyCubeMapResources();
-
 	// CreateDynamicCubeMap
+	CRenderer::SetPSO((int)PSOTypeIndex::PSO_Solid_Opaque);
+	CRenderer::SetUpSkyCubeMapResources();
 	CRenderer::CreateDynamicCubeMapResources(GlobalTimer, m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque_DynamicReflectors]);
 
 	CRenderer::SetUpBeforeDrawScene();
@@ -114,4 +115,9 @@ void CGame::Draw(const GameTimer& GlobalTimer)
 
 	CRenderer::SetPSO((int)PSOTypeIndex::PSO_ShadowMapDebug);
 	CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_2D_Debug]);
+}
+
+void CGame::OnResize()
+{
+	OnResizeLayer((int)RenderLayers::Layer_2D_Debug);
 }

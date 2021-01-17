@@ -48,6 +48,8 @@ protected:
 	DirectX::BoundingSphere m_SceneBounds;
 	DirectX::XMFLOAT4X4     m_ShadowTransform = MathHelper::Identity4x4();
 
+	int m_BeginPSOIndex; // SceneÇÃInitÇ≈ÇÃê›íËÇñYÇÍÇ∏Ç…
+
 public:
 	CScene() = default;
 	virtual ~CScene() = default;
@@ -66,6 +68,9 @@ public:
 	virtual void UpdateMainPassCB(const GameTimer& GlobalTimer);
 	virtual void UpdateShadowPassCB(const GameTimer& GlobalTimer);
 	virtual void UpdateDynamicCubeMapPassCB(const GameTimer& GlobalTimer, int DCMResourcesIndex);
+
+	virtual void OnResize() {}
+	void OnResizeLayer(int Layer);
 
 	void SetUpDynamicCubeMapCamera(DirectX::XMFLOAT3 Center);
 	void CheckNecessaryCBBufferSize();
@@ -141,4 +146,5 @@ public:
 	UINT GetAllGameObjectsCount() { return (UINT)m_AllGameObjects.size(); }
 	DirectX::BoundingSphere* GetSceneBounds() { return &m_SceneBounds; }
 	std::vector<CCamera*>& GetDynamicCubeMapCameras() { return m_DCMCameras; }
+	int GetBeginPSOIndex() { return m_BeginPSOIndex; }
 };

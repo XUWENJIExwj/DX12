@@ -12,7 +12,7 @@ void CGeoShapeManager::CreateGeoShapes()
 	GeometryGenerator::MeshData grid = geoGen.CreateGrid(20.0f, 30.0f, 60, 40);
 	GeometryGenerator::MeshData sphere = geoGen.CreateSphere(0.5f, 20, 20);
 	GeometryGenerator::MeshData cylinder = geoGen.CreateCylinder(0.5f, 0.3f, 3.0f, 20, 20);
-	GeometryGenerator::MeshData quad = geoGen.CreateQuad(-1.0f, -0.152f, 0.48f, 0.848f, 0.0f);
+	GeometryGenerator::MeshData quad = geoGen.CreateQuad(0.0f, 0.0f, 1.0f, 1.0f, 0.0f);
 
 	//
 	// We are concatenating all the geometry into one big vertex/index buffer.  So

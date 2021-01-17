@@ -294,6 +294,14 @@ void CScene::UpdateDynamicCubeMapPassCB(const GameTimer& GlobalTimer, int DCMRes
 	}
 }
 
+void CScene::OnResizeLayer(int Layer)
+{
+	for (CGameObject* gameObject : m_AllRenderLayers[Layer])
+	{
+		gameObject->OnResize();
+	}
+}
+
 void CScene::SetUpDynamicCubeMapCamera(XMFLOAT3 Center)
 {
 	// Generate the cube map about the given position.

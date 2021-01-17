@@ -15,7 +15,9 @@ protected:
 	DirectX::XMFLOAT3 m_OldPosition = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 	DirectX::XMFLOAT3 m_Rotation = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 	DirectX::XMFLOAT4 m_Quaternion;
-	DirectX::XMFLOAT3 m_Scale = DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f);;
+	DirectX::XMFLOAT3 m_Scale = DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f);
+	DirectX::XMFLOAT2 m_ScaleWindowXYRatio = DirectX::XMFLOAT2(1.0f, 1.0f);
+	float             m_ScaleXYRatio = 1.0f;
 
 	DirectX::XMFLOAT4X4 m_World = MathHelper::Identity4x4();
 	DirectX::XMFLOAT4X4 m_TexTransform = MathHelper::Identity4x4();
@@ -42,6 +44,9 @@ public:
 	virtual void FixedUpdate(const GameTimer& GlobalTimer) {}
 	virtual void LateUpdate(const GameTimer& GlobalTimer) {}
 	virtual void Draw(const GameTimer& GlobalTimer, int DCMResourcesIndex) {}
+
+	virtual void OnResize();
+	void Init2DScaleRatio();
 
 	// DynamicCubeMap•`‰æ—p
 	void CreateDynamicCubeMapResources(const GameTimer& GlobalTimer, int DCMResourcesIndex);
@@ -75,6 +80,7 @@ public:
 	DirectX::XMFLOAT4X4 GetWorldMatrix4x4()const { return m_World; }
 	DirectX::XMFLOAT4X4 GetTexTransformMatrix4x4()const { return m_TexTransform; }
 	DirectX::XMFLOAT4X4 ComputeWorldMatrix4x4()const;
+	DirectX::XMFLOAT4X4 Compute2DWVPMatrix4x4()const;
 
 	DirectX::XMVECTOR XM_CALLCONV GetPosition()const { return XMLoadFloat3(&m_Position); }
 	DirectX::XMVECTOR XM_CALLCONV GetRotation()const { return XMLoadFloat3(&m_Rotation); }
@@ -89,6 +95,7 @@ public:
 	DirectX::XMMATRIX XM_CALLCONV GetWorldMatrix()const { return XMLoadFloat4x4(&m_World); }
 	DirectX::XMMATRIX XM_CALLCONV GetTexTransformMatrix()const { return XMLoadFloat4x4(&m_TexTransform); }
 	DirectX::XMMATRIX XM_CALLCONV ComputeWorldMatrix()const;
+	DirectX::XMMATRIX XM_CALLCONV Compute2DWVPMatrix()const;
 
 	int  GetNumFramesDirty() { return m_NumFramesDirty; }
 	UINT GetObjCBIndex() { return m_ObjCBIndex; }

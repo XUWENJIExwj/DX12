@@ -42,6 +42,8 @@ void CManager::OnResize()
 	{
 		m_MainCamera->SetProjectionMatrix(0.25f * MathHelper::Pi, DX12App::GetApp()->GetAspectRatio(), 1.0f, 1000.0f);
 	}
+
+	m_Scene->OnResize();
 }
 
 void CManager::Uninit()
@@ -71,7 +73,7 @@ void CManager::Update(const GameTimer& GlobalTimer)
 
 void CManager::Draw(const GameTimer& GlobalTimer)
 {
-	CRenderer::Begin();
+	CRenderer::Begin(m_Scene->GetBeginPSOIndex());
 
 	m_Scene->Draw(GlobalTimer);
 

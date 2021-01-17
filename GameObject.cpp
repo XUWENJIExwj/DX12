@@ -11,6 +11,35 @@ CGameObject::CGameObject()
 	XMStoreFloat4(&m_Quaternion, XMQuaternionIdentity());
 }
 
+void CGameObject::OnResize()
+{
+	DX12App* app = DX12App::GetApp();
+	float width = (float)app->GetWindowWidth();
+	float height = (float)app->GetWindowHeight();
+	float aspectRatio = app->GetAspectRatio();
+
+	if (aspectRatio >= 1.0f)
+	{
+		m_Scale.y = m_ScaleWindowXYRatio.y * height;
+		m_Scale.x = m_Scale.y * m_ScaleXYRatio;
+	}
+	else
+	{
+		m_Scale.x = m_ScaleWindowXYRatio.x * width;
+		m_Scale.y = m_Scale.x / m_ScaleXYRatio;
+	}
+}
+
+void CGameObject::Init2DScaleRatio()
+{
+	DX12App* app = DX12App::GetApp();
+	float width = (float)app->GetWindowWidth();
+	float height = (float)app->GetWindowHeight();
+
+	m_ScaleWindowXYRatio = XMFLOAT2(m_Scale.x / width, m_Scale.y / height);
+	m_ScaleXYRatio = m_Scale.x / m_Scale.y;
+}
+
 void CGameObject::CreateDynamicCubeMapResources(const GameTimer & GlobalTimer, int DCMResourcesIndex)
 {
 	CManager::GetScene()->SetUpDynamicCubeMapCamera(m_Position);
@@ -160,6 +189,14 @@ DirectX::XMFLOAT4X4 CGameObject::ComputeWorldMatrix4x4()const
 	return world;
 }
 
+XMFLOAT4X4 CGameObject::Compute2DWVPMatrix4x4() const
+{
+	XMFLOAT4X4 world;
+	XMStoreFloat4x4(&world, Compute2DWVPMatrix());
+
+	return world;
+}
+
 DirectX::XMMATRIX CGameObject::ComputeWorldMatrix()const
 {
 	XMMATRIX scl = XMMatrixScalingFromVector(GetScale());
@@ -167,6 +204,21 @@ DirectX::XMMATRIX CGameObject::ComputeWorldMatrix()const
 	XMMATRIX trs = XMMatrixTranslationFromVector(GetPosition());
 
 	return scl * rot * trs;
+}
+
+XMMATRIX XM_CALLCONV CGameObject::Compute2DWVPMatrix()const
+{
+	DX12App* app = DX12App::GetApp();
+	float width = (float)app->GetWindowWidth();
+	float height = (float)app->GetWindowHeight();
+
+	XMMATRIX world = ComputeWorldMatrix();
+	XMMATRIX projection = XMMatrixOrthographicOffCenterLH(0.0f, width, 0.0f, height, 0.0f, 1.0f);
+	//XMMATRIX projection = XMMatrixOrthographicLH(width, height, 0.0f, 1.0f);
+
+	world *= projection;
+	
+	return world;
 }
 
 bool CGameObject::Destroy()
@@ -194,8 +246,5 @@ bool CGameObject::Destroy()
 		*iteratorAll = nullptr;
 		return true;
 	}
-	else
-	{
-		return false;
-	}
+	return false;
 }

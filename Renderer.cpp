@@ -890,7 +890,7 @@ array<const CD3DX12_STATIC_SAMPLER_DESC, 7> CRenderer::GetStaticSamplers()
 }
 
 // •`‰æ—p
-void CRenderer::Begin()
+void CRenderer::Begin(int BeginPSOIndex)
 {
 	auto cmdListAlloc = CFrameResourceManager::GetCurrentFrameResource()->CmdListAlloc;
 	//auto cmdListAlloc = mDirectCmdListAlloc;
@@ -901,8 +901,8 @@ void CRenderer::Begin()
 
 	// A command list can be reset after it has been added to the command queue via ExecuteCommandList.
 	// Reusing the command list reuses memory.
-	ThrowIfFailed(m_CommandList->Reset(cmdListAlloc.Get(), m_PSOs[(int)PSOTypeIndex::PSO_Solid_Opaque].Get()));
-	m_CurrentPSO = (int)PSOTypeIndex::PSO_Solid_Opaque;
+	ThrowIfFailed(m_CommandList->Reset(cmdListAlloc.Get(), m_PSOs[BeginPSOIndex].Get()));
+	m_CurrentPSO = BeginPSOIndex;
 
 	ID3D12DescriptorHeap* descHeaps[] = { m_SrvHeap.Get() };
 	m_CommandList->SetDescriptorHeaps(_countof(descHeaps), descHeaps);

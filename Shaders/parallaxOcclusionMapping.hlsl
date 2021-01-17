@@ -231,7 +231,7 @@ float4 PS(VertexOut pin) : SV_Target
         }
     }
     
-    shadowFactor[0] = CalcShadowFactor(pin.ShadowPosHS);
+    shadowFactor[0] *= CalcShadowFactor(pin.ShadowPosHS);
     
     float4 directLight = ComputeLighting(gLights, mat, pin.PosWS,
         bumpedNormalWS, toEyeWS, shadowFactor);
