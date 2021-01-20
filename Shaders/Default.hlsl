@@ -51,7 +51,7 @@ VertexOut VS(VertexIn vin)
     vout.PosHS = mul(posWS, gViewProj);
 	
 	// Output vertex attributes for interpolation across triangle.
-	float4 texC = mul(float4(vin.TexC, 0.0f, 1.0f), gTexTransform);
+	float4 texC = mul(float4(vin.TexC, 0.0, 1.0), gTexTransform);
 	vout.TexC = mul(texC, matData.MatTransform).xy;
     
     // Generate projective tex-coords to project shadow map onto scene.

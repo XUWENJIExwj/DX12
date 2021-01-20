@@ -116,7 +116,7 @@ float3x3 ComputeTBN(float3 NormalWS, float3 TangentWS, int BitangentSign)
 float3 NormalSampleToWorldSpace(float3 NormalMapSample, float3 NormalWS, float3 TangentWS, int BitangentSign)
 {
 	// Uncompress each component from [0,1] to [-1,1].
-    float3 normalTS = 2.0f * NormalMapSample - 1.0f;
+    float3 normalTS = 2.0 * NormalMapSample - 1.0;
 
     float3 bumpedNormalWS = mul(normalTS, ComputeTBN(NormalWS, TangentWS, BitangentSign));
 
@@ -138,14 +138,15 @@ float CalcShadowFactor(float4 ShadowPosHS)
     gShadowMap.GetDimensions(0, width, height, numMips);
 
     // Texel size.
-    float dx = 1.0f / (float) width;
+    float dx = 1.0 / (float)width;
+    float dy = 1.0 / (float)height;
 
-    float percentLit = 0.0f;
+    float percentLit = 0.0;
     const float2 offsets[9] =
     {
-        float2(-dx, -dx),  float2(0.0f, -dx),  float2(dx, -dx),
-        float2(-dx, 0.0f), float2(0.0f, 0.0f), float2(dx, 0.0f),
-        float2(-dx, +dx),  float2(0.0f, +dx),  float2(dx, +dx)
+        float2(-dx, -dy),  float2(0.0, -dy),  float2(dx, -dy),
+        float2(-dx, 0.0),  float2(0.0, 0.0),  float2(dx, 0.0),
+        float2(-dx, +dy),  float2(0.0, +dy),  float2(dx, +dy)
     };
 
     [unroll]
@@ -155,5 +156,5 @@ float CalcShadowFactor(float4 ShadowPosHS)
             ShadowPosHS.xy + offsets[i], depth).r;
     }
     
-    return percentLit / 9.0f;
+    return percentLit / 9.0;
 }

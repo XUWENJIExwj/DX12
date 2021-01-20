@@ -58,8 +58,8 @@ int                                   CRenderer::m_CurrentSkyCubeMapIndex = 0;
 // ShadowMap
 unique_ptr<CShadowMap>        CRenderer::m_ShadowMap = nullptr;
 CD3DX12_GPU_DESCRIPTOR_HANDLE CRenderer::m_ShadowMapDescHandle;
-UINT                          CRenderer::m_ShadowMapWidth = 2048;
-UINT                          CRenderer::m_ShadowMapHeight = 2048;
+UINT                          CRenderer::m_ShadowMapHeight = 2048 * 8;
+UINT                          CRenderer::m_ShadowMapWidth = m_ShadowMapHeight;
 
 // DynamicCubeMap
 bool                          CRenderer::m_DynamicCubeMapOn = true;
@@ -672,51 +672,51 @@ void CRenderer::CreataPSOs()
 
 	// PSO for shadow map pass
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC smapPsoDesc = opaquePsoDesc;
-	smapPsoDesc.RasterizerState.DepthBias = 100000;
-	smapPsoDesc.RasterizerState.DepthBiasClamp = 10.0f;
+	smapPsoDesc.RasterizerState.DepthBias = 2000;
+	smapPsoDesc.RasterizerState.DepthBiasClamp = 0.0f;
 	smapPsoDesc.RasterizerState.SlopeScaledDepthBias = 1.0f;
 	smapPsoDesc.VS =
 	{
-		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMap].vertexShader->GetBufferPointer()),
-		shaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMap].vertexShader->GetBufferSize()
+		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSM].vertexShader->GetBufferPointer()),
+		shaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSM].vertexShader->GetBufferSize()
 	};
 	smapPsoDesc.PS =
 	{
-		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMap].pixelShader->GetBufferPointer()),
-		shaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMap].pixelShader->GetBufferSize()
+		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSM].pixelShader->GetBufferPointer()),
+		shaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSM].pixelShader->GetBufferSize()
 	};
 
 	// Shadow map pass does not have a render target.
 	smapPsoDesc.RTVFormats[0] = DXGI_FORMAT_UNKNOWN;
 	smapPsoDesc.NumRenderTargets = 0;
-	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&smapPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_ShadowMap])));
+	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&smapPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_LiSPSM])));
 
 	// PSO for shadow map with alpha test
 	smapPsoDesc.VS =
 	{
-		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapWithAlphaTest].vertexShader->GetBufferPointer()),
-		shaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapWithAlphaTest].vertexShader->GetBufferSize()
+		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSMWithAlphaTest].vertexShader->GetBufferPointer()),
+		shaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSMWithAlphaTest].vertexShader->GetBufferSize()
 	};
 	smapPsoDesc.PS =
 	{
-		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapWithAlphaTest].pixelShader->GetBufferPointer()),
-		shaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapWithAlphaTest].pixelShader->GetBufferSize()
+		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSMWithAlphaTest].pixelShader->GetBufferPointer()),
+		shaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSMWithAlphaTest].pixelShader->GetBufferSize()
 	};
-	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&smapPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_ShadowMapWithAlphaTest])));
+	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&smapPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_LiSPSMWithAlphaTest])));
 
 	// PSO for shadow map debug
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC debugPsoDesc = opaquePsoDesc;
 	debugPsoDesc.VS =
 	{
-		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapDebug].vertexShader->GetBufferPointer()),
-		shaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapDebug].vertexShader->GetBufferSize()
+		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSMDebug].vertexShader->GetBufferPointer()),
+		shaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSMDebug].vertexShader->GetBufferSize()
 	};
 	debugPsoDesc.PS =
 	{
-		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapDebug].pixelShader->GetBufferPointer()),
-		shaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapDebug].pixelShader->GetBufferSize()
+		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSMDebug].pixelShader->GetBufferPointer()),
+		shaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSMDebug].pixelShader->GetBufferSize()
 	};
-	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&debugPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_ShadowMapDebug])));
+	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&debugPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_LiSPSMDebug])));
 }
 
 // ÉQÉbÉ^Å[

@@ -23,6 +23,8 @@ protected:
 	DirectX::XMFLOAT4X4 m_View = MathHelper::Identity4x4();
 	DirectX::XMFLOAT4X4 m_Proj = MathHelper::Identity4x4();
 
+	DirectX::BoundingFrustum m_Bounds;
+
 public:
 	CCamera() = default;
 	~CCamera() = default;
@@ -30,6 +32,10 @@ public:
 	//virtual void Init()override = 0;
 	virtual void LateUpdate(const GameTimer& GlobalTimer)override;
 	virtual void UpdateViewMatrix();
+
+	void CreateFrustumBounds();
+	void ComputeFrustumPointsInWorldSpace(DirectX::XMVECTOR FrustumPoints[8]);
+	void ComputeFrustumPointsInWorldSpace(DirectX::XMVECTOR FrustumPoints[8], const DirectX::XMMATRIX& InvView);
 
 	// Get frustum properties.
 	float GetNearZ()const { return m_NearZ; }
@@ -45,7 +51,7 @@ public:
 	float GetFarWindowHeight()const { return m_FarWindowHeight; }
 
 	// Set frustum.
-	void SetProjectionMatrix(float fovY, float aspect, float zn, float zf);
+	void ComputeProjectionMatrix(float fovY, float aspect, float zn, float zf);
 
 	// Define camera space via LookAt parameters.
 	void LookAt(DirectX::FXMVECTOR pos, DirectX::FXMVECTOR target, DirectX::FXMVECTOR worldUp);

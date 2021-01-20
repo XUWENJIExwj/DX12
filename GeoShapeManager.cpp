@@ -1,9 +1,15 @@
-#include "Common/GeometryGenerator.h"
+#include "Common\\GeometryGenerator.h"
 #include "Renderer.h"
 
 using namespace std;
+using namespace DirectX;
 
 vector<unique_ptr<MeshGeometry>> CGeoShapeManager::m_Geometries;
+
+unordered_map<string, BoundingBox>         CGeoShapeManager::m_BoxBounds;
+unordered_map<string, BoundingOrientedBox> CGeoShapeManager::m_OrientedBoxBounds;
+unordered_map<string, BoundingSphere>      CGeoShapeManager::m_SphereBounds;
+unordered_map<string, BoundingFrustum>     CGeoShapeManager::m_FrustumBounds;
 
 void CGeoShapeManager::CreateGeoShapes()
 {
@@ -37,26 +43,31 @@ void CGeoShapeManager::CreateGeoShapes()
 	cubeSubmesh.IndexCount = (UINT)cube.Indices32.size();
 	cubeSubmesh.StartIndexLocation = cubeIndexOffset;
 	cubeSubmesh.BaseVertexLocation = cubeVertexOffset;
+	BoundingBox::CreateFromPoints(m_BoxBounds["cube"], cube.Vertices.size(), &cube.Vertices[0].Position, sizeof(GeometryGenerator::Vertex));
 
 	SubmeshGeometry gridSubmesh;
 	gridSubmesh.IndexCount = (UINT)grid.Indices32.size();
 	gridSubmesh.StartIndexLocation = gridIndexOffset;
 	gridSubmesh.BaseVertexLocation = gridVertexOffset;
+	BoundingBox::CreateFromPoints(m_BoxBounds["grid"], grid.Vertices.size(), &grid.Vertices[0].Position, sizeof(GeometryGenerator::Vertex));
 
 	SubmeshGeometry sphereSubmesh;
 	sphereSubmesh.IndexCount = (UINT)sphere.Indices32.size();
 	sphereSubmesh.StartIndexLocation = sphereIndexOffset;
 	sphereSubmesh.BaseVertexLocation = sphereVertexOffset;
+	BoundingSphere::CreateFromPoints(m_SphereBounds["sphere"], sphere.Vertices.size(), &sphere.Vertices[0].Position, sizeof(GeometryGenerator::Vertex));
 
 	SubmeshGeometry cylinderSubmesh;
 	cylinderSubmesh.IndexCount = (UINT)cylinder.Indices32.size();
 	cylinderSubmesh.StartIndexLocation = cylinderIndexOffset;
 	cylinderSubmesh.BaseVertexLocation = cylinderVertexOffset;
+	BoundingBox::CreateFromPoints(m_BoxBounds["cylinder"], cylinder.Vertices.size(), &cylinder.Vertices[0].Position, sizeof(GeometryGenerator::Vertex));
 
 	SubmeshGeometry quadSubmesh;
 	quadSubmesh.IndexCount = (UINT)quad.Indices32.size();
 	quadSubmesh.StartIndexLocation = quadIndexOffset;
 	quadSubmesh.BaseVertexLocation = quadVertexOffset;
+	BoundingBox::CreateFromPoints(m_BoxBounds["quad"], quad.Vertices.size(), &quad.Vertices[0].Position, sizeof(GeometryGenerator::Vertex));
 
 	////
 	//// Extract the vertex elements we are interested in and pack the

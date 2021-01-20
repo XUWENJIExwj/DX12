@@ -33,13 +33,13 @@ struct VertexOut
 
 VertexOut VS(VertexIn vin)
 {
-    VertexOut vout = (VertexOut) 0.0f;
+    VertexOut vout = (VertexOut) 0.0;
 
 	// Fetch the material data.
     MaterialData matData = gMaterialData[gMaterialIndex];
 	
     // Transform to world space.
-    float4 posWS = mul(float4(vin.PosLS, 1.0f), gWorld);
+    float4 posWS = mul(float4(vin.PosLS, 1.0), gWorld);
     vout.PosWS = posWS.xyz;
 
     // Assumes nonuniform scaling; otherwise, need to use inverse-transpose of world matrix.
@@ -51,7 +51,7 @@ VertexOut VS(VertexIn vin)
     vout.PosHS = mul(posWS, gViewProj);
 	
 	// Output vertex attributes for interpolation across triangle.
-    float4 texC = mul(float4(vin.TexC, 0.0f, 1.0f), gTexTransform);
+    float4 texC = mul(float4(vin.TexC, 0.0, 1.0), gTexTransform);
     vout.TexC = mul(texC, matData.MatTransform).xy;
     
     // Generate projective tex-coords to project shadow map onto scene.
@@ -96,7 +96,7 @@ float4 PS(VertexOut pin) : SV_Target
     // the surface normal. (Head-on angles require less samples than
     // glancing angles.)
     int sampleCount = (int)lerp(maxSampleCount, minSampleCount, dot(toEyeWS, normalWS));
-    float zStep = 1.0f / (float)sampleCount;
+    float zStep = 1.0 / (float)sampleCount;
     
     float2 texStep = maxParallaxOffset * zStep;
     
@@ -111,11 +111,11 @@ float4 PS(VertexOut pin) : SV_Target
     float2 currTexOffset = 0;
     float2 prevTexOffset = 0;
     float2 finalTexOffset = 0;
-    float currRayZ = 1.0f - zStep;
-    float prevRayZ = 1.0f;
-    float4 height = 0.0f;
-    float currHeight = 0.0f;
-    float prevHeight = 0.0f;
+    float currRayZ = 1.0 - zStep;
+    float prevRayZ = 1.0;
+    float4 height = 0.0;
+    float currHeight = 0.0;
+    float prevHeight = 0.0;
     
     // Ray trace the heightfield.
     while (sampleIndex < sampleCount + 1)
@@ -166,11 +166,11 @@ float4 PS(VertexOut pin) : SV_Target
     // Light terms.
     float4 ambient = gAmbientLight * diffuseAlbedo;
 
-    const float shininess = max(1.0f - roughness, 0.01);
+    const float shininess = max(1.0 - roughness, 0.01);
     Material mat = { diffuseAlbedo, fresnelR0, shininess };
 
     // SelfShadow
-    float3 shadowFactor = 1.0f;
+    float3 shadowFactor = 1.0;
     if(showSelfShadow)
     {
         // 最初の平行光源だけでSelfShadowを計算（処理コストを下げるため）

@@ -13,9 +13,9 @@ enum class PSOTypeIndex :int
 	PSO_Solid_Sky,
 	PSO_WireFrame_Opaque,
 	PSO_WireFrame_Sky,
-	PSO_ShadowMap,
-	PSO_ShadowMapWithAlphaTest,
-	PSO_ShadowMapDebug,
+	PSO_LiSPSM,
+	PSO_LiSPSMWithAlphaTest,
+	PSO_LiSPSMDebug,
 	PSO_MAX
 };
 

@@ -9,4 +9,6 @@ public:
 	void Update(const GameTimer& GlobalTimer)override;
 
 	void OnResize()override;
+
+	void AnimateMaterial(const GameTimer& GlobalTimer);
 };

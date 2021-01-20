@@ -204,7 +204,11 @@ void CScene::UpdateMainPassCB(const GameTimer& GlobalTimer)
 	// Light
 	if (m_DirLights.size() > 0)
 	{
-		XMMATRIX shadowTransform = m_DirLights[0]->ComputeShadowTransform(&m_SceneBounds);
+		XMVECTOR frustumPoints[8];
+		m_MainCamera->ComputeFrustumPointsInWorldSpace(frustumPoints, invView);
+
+		XMMATRIX shadowTransform = m_DirLights[0]->ComputeShadowTransformWithCameraFrustum(&m_SceneBounds, frustumPoints);
+		//XMMATRIX shadowTransform = m_DirLights[0]->ComputeShadowTransformWithSceneBounds(&m_SceneBounds);
 		XMStoreFloat4x4(&m_MainPassCB.ShadowTransform, XMMatrixTranspose(shadowTransform));
 		m_ShadowTransform = m_MainPassCB.ShadowTransform;
 
@@ -354,8 +358,13 @@ void CScene::CheckNecessaryCBBufferSize()
 	}
 }
 
+void CScene::SetSceneBounds(DirectX::BoundingBox * Bounds)
+{
+	SetSceneBounds(Bounds->Extents.x, Bounds->Extents.z, Bounds->Center);
+}
+
 void CScene::SetSceneBounds(float Width, float Height, XMFLOAT3 Center)
 {
 	m_SceneBounds.Center = Center;
-	m_SceneBounds.Radius = sqrtf(Width*Width + Height * Height);
+	m_SceneBounds.Radius = sqrtf(Width * Width + Height * Height);
 }

@@ -322,10 +322,10 @@
     <FxCompile Include="Shaders\parallaxOcclusionMapping.hlsl">
       <Filter>ソース ファイル\Shader</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\ShadowDebug.hlsl">
+    <FxCompile Include="Shaders\lightSpacePSM.hlsl">
       <Filter>ソース ファイル\Shader</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\Shadows.hlsl">
+    <FxCompile Include="Shaders\lightSpacePSMDebug.hlsl">
       <Filter>ソース ファイル\Shader</Filter>
     </FxCompile>
   </ItemGroup>

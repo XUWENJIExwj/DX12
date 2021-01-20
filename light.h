@@ -29,7 +29,10 @@ public:
 	DirectX::XMMATRIX XM_CALLCONV GetView()const { return XMLoadFloat4x4(&m_View); }
 	DirectX::XMMATRIX XM_CALLCONV GetProj()const { return XMLoadFloat4x4(&m_Proj); }
 
-	DirectX::XMFLOAT4X4 ComputeShadowTransform4x4(DirectX::BoundingSphere* SceneBounds);
+	DirectX::XMFLOAT4X4 ComputeLightView4x4(DirectX::BoundingSphere* SceneBounds);
+	DirectX::XMFLOAT4X4 ComputeShadowTransformWithSceneBounds4x4(DirectX::BoundingSphere* SceneBounds);
 
-	virtual DirectX::XMMATRIX XM_CALLCONV ComputeShadowTransform(DirectX::BoundingSphere* SceneBounds) { return XMLoadFloat4x4(&MathHelper::Identity4x4()); }
+	virtual DirectX::XMMATRIX XM_CALLCONV ComputeLightView(DirectX::BoundingSphere* SceneBounds) { return XMLoadFloat4x4(&MathHelper::Identity4x4()); }
+	virtual DirectX::XMMATRIX XM_CALLCONV ComputeShadowTransformWithSceneBounds(DirectX::BoundingSphere* SceneBounds) { return XMLoadFloat4x4(&MathHelper::Identity4x4()); }
+	virtual DirectX::XMMATRIX XM_CALLCONV ComputeShadowTransformWithCameraFrustum(DirectX::BoundingSphere* SceneBounds, DirectX::XMVECTOR FrustumPoints[8]) { return XMLoadFloat4x4(&MathHelper::Identity4x4()); }
 };

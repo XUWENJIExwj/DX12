@@ -16,11 +16,11 @@ void CCube::Init()
 
 void CCube::Update(const GameTimer& GlobalTimer)
 {
-	m_Rotation.y += 1.0f * GlobalTimer.DeltaTime();
-	XMMATRIX rot = XMMatrixRotationRollPitchYawFromVector(GetRotation());
-	m_World = ComputeWorldMatrix4x4();
+	//m_Rotation.y += 1.0f * GlobalTimer.DeltaTime();
+	//XMMATRIX rot = XMMatrixRotationRollPitchYawFromVector(GetRotation());
+	//m_World = ComputeWorldMatrix4x4();
 
-	m_NumFramesDirty = gNumFrameResources;
+	//m_NumFramesDirty = gNumFrameResources;
 }
 
 void CCube::UpdateImGui(const GameTimer & GlobalTimer)

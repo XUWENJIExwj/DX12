@@ -75,6 +75,8 @@ public:
 	void SetUpDynamicCubeMapCamera(DirectX::XMFLOAT3 Center);
 	void CheckNecessaryCBBufferSize();
 
+	void SetSceneBounds(DirectX::BoundingBox* Bounds);
+	void SetSceneBounds(DirectX::BoundingSphere* Bounds) { m_SceneBounds = *Bounds; }
 	void SetSceneBounds(float Width, float Height, DirectX::XMFLOAT3 Center = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f));
 
 	template<typename T>

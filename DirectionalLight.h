@@ -22,5 +22,7 @@ public:
 	DirectX::XMFLOAT3 ComputeDirection3f();
 
 	DirectX::XMVECTOR XM_CALLCONV ComputeDirection();
-	DirectX::XMMATRIX XM_CALLCONV ComputeShadowTransform(DirectX::BoundingSphere* SceneBounds)override;
+	DirectX::XMMATRIX XM_CALLCONV ComputeLightView(DirectX::BoundingSphere* SceneBounds)override;
+	DirectX::XMMATRIX XM_CALLCONV ComputeShadowTransformWithSceneBounds(DirectX::BoundingSphere* SceneBounds)override;
+	DirectX::XMMATRIX XM_CALLCONV ComputeShadowTransformWithCameraFrustum(DirectX::BoundingSphere* SceneBounds, DirectX::XMVECTOR FrustumPoints[8])override;
 };

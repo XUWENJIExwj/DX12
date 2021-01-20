@@ -40,7 +40,7 @@ void CManager::OnResize()
 
 	if (m_MainCamera)
 	{
-		m_MainCamera->SetProjectionMatrix(0.25f * MathHelper::Pi, DX12App::GetApp()->GetAspectRatio(), 1.0f, 1000.0f);
+		m_MainCamera->ComputeProjectionMatrix(0.25f * MathHelper::Pi, DX12App::GetApp()->GetAspectRatio(), 1.0f, 1000.0f);
 	}
 
 	m_Scene->OnResize();
