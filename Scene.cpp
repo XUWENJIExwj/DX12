@@ -5,6 +5,7 @@
 #include "Light.h"
 #include "DirectionalLight.h"
 
+using namespace std;
 using namespace DirectX;
 
 void CScene::Uninit()
@@ -159,7 +160,6 @@ void CScene::UpdateMaterialBuffer(const GameTimer& GlobalTimer)
 			matData.UseACForPOM = materials[i]->UseACForPOM;
 			matData.MaxSampleCount = materials[i]->MaxSampleCount;
 			matData.MinSampleCount = materials[i]->MinSampleCount;
-			//matData.IntPad0 = materials[i]->BitangentSign;
 			matData.HeightScale = materials[i]->HeightScale;
 			matData.ShadowSoftening = materials[i]->ShadowSoftening;
 			matData.ShowSelfShadow = materials[i]->ShowSelfShadow;
@@ -204,13 +204,24 @@ void CScene::UpdateMainPassCB(const GameTimer& GlobalTimer)
 	// Light
 	if (m_DirLights.size() > 0)
 	{
-		XMVECTOR frustumPoints[8];
-		m_MainCamera->ComputeFrustumPointsInWorldSpace(frustumPoints, invView);
+		// LiSPSM
+		//XMVECTOR frustumPoints[8];
+		//m_MainCamera->ComputeFrustumPointsInWorldSpace(frustumPoints, invView);
+		//XMMATRIX shadowTransform = m_DirLights[0]->ComputeShadowTransformWithCameraFrustum(&m_SceneBounds, frustumPoints);
+		////XMMATRIX shadowTransform = m_DirLights[0]->ComputeShadowTransformWithSceneBounds(&m_SceneBounds);
+		////XMStoreFloat4x4(&m_MainPassCB.ShadowTransform, XMMatrixTranspose(shadowTransform));
+		//XMStoreFloat4x4(&m_MainPassCB.ShadowTransform[0], XMMatrixTranspose(shadowTransform));
+		//XMStoreFloat4x4(&m_ShadowTransform, shadowTransform);
 
-		XMMATRIX shadowTransform = m_DirLights[0]->ComputeShadowTransformWithCameraFrustum(&m_SceneBounds, frustumPoints);
-		//XMMATRIX shadowTransform = m_DirLights[0]->ComputeShadowTransformWithSceneBounds(&m_SceneBounds);
-		XMStoreFloat4x4(&m_MainPassCB.ShadowTransform, XMMatrixTranspose(shadowTransform));
-		m_ShadowTransform = m_MainPassCB.ShadowTransform;
+		// CSM
+		vector<vector<XMVECTOR>> vfrustumPoints(CRenderer::GetCascadNum());
+		m_MainCamera->ComputeFrustumPointsInWorldSpace(vfrustumPoints, invView);
+		vector<XMMATRIX> shadowTransforms(CRenderer::GetCascadNum());
+		m_DirLights[0]->ComputeShadowTransformWithCameraFrustum(shadowTransforms, &m_SceneBounds, vfrustumPoints);
+		for (UINT i = 0; i < shadowTransforms.size(); ++i)
+		{
+			XMStoreFloat4x4(&m_MainPassCB.ShadowTransform[i], XMMatrixTranspose(shadowTransforms[i]));
+		}
 
 		for (UINT i = 0; i < m_DirLights.size(); ++i)
 		{
@@ -220,7 +231,8 @@ void CScene::UpdateMainPassCB(const GameTimer& GlobalTimer)
 	}
 	else
 	{
-		m_MainPassCB.ShadowTransform = m_ShadowTransform;
+		//m_MainPassCB.ShadowTransform = m_ShadowTransform;
+		m_MainPassCB.ShadowTransform[0] = m_ShadowTransform;
 		m_MainPassCB.Lights[0].Direction = { 0.57735f, -0.57735f, 0.57735f };
 		m_MainPassCB.Lights[0].Strength = { 0.8f, 0.8f, 0.8f };
 		m_MainPassCB.Lights[1].Direction = { -0.57735f, -0.57735f, 0.57735f };
@@ -245,8 +257,8 @@ void CScene::UpdateShadowPassCB(const GameTimer & GlobalTimer)
 	XMMATRIX invProj = XMMatrixInverse(&XMMatrixDeterminant(proj), proj);
 	XMMATRIX invViewProj = XMMatrixInverse(&XMMatrixDeterminant(viewProj), viewProj);
 
-	UINT width = CRenderer::GetShadowMapWidth();
-	UINT height = CRenderer::GetShadowMapHeight();
+	float width = (float)CRenderer::GetShadowMapWidth() / CRenderer::GetCascadNum();
+	float height = (float)CRenderer::GetShadowMapHeight() / CRenderer::GetCascadNum();
 
 	XMStoreFloat4x4(&m_ShadowPassCB.View, XMMatrixTranspose(view));
 	XMStoreFloat4x4(&m_ShadowPassCB.InvView, XMMatrixTranspose(invView));
@@ -262,6 +274,35 @@ void CScene::UpdateShadowPassCB(const GameTimer & GlobalTimer)
 
 	auto currPassCB = CFrameResourceManager::GetCurrentFrameResource()->PassCB.get();
 	currPassCB->CopyData(1, m_ShadowPassCB);
+}
+
+void CScene::UpdateShadowPassCB(const GameTimer& GlobalTimer, int CascadeIndex)
+{
+	XMMATRIX view = m_DirLights[0]->GetView();
+	XMMATRIX proj = m_DirLights[0]->GetProj(CascadeIndex);
+
+	XMMATRIX viewProj = XMMatrixMultiply(view, proj);
+	XMMATRIX invView = XMMatrixInverse(&XMMatrixDeterminant(view), view);
+	XMMATRIX invProj = XMMatrixInverse(&XMMatrixDeterminant(proj), proj);
+	XMMATRIX invViewProj = XMMatrixInverse(&XMMatrixDeterminant(viewProj), viewProj);
+
+	float width = (float)CRenderer::GetShadowMapWidth() / CRenderer::GetCascadNum();
+	float height = (float)CRenderer::GetShadowMapHeight() / CRenderer::GetCascadNum();
+
+	XMStoreFloat4x4(&m_ShadowPassCB.View, XMMatrixTranspose(view));
+	XMStoreFloat4x4(&m_ShadowPassCB.InvView, XMMatrixTranspose(invView));
+	XMStoreFloat4x4(&m_ShadowPassCB.Proj, XMMatrixTranspose(proj));
+	XMStoreFloat4x4(&m_ShadowPassCB.InvProj, XMMatrixTranspose(invProj));
+	XMStoreFloat4x4(&m_ShadowPassCB.ViewProj, XMMatrixTranspose(viewProj));
+	XMStoreFloat4x4(&m_ShadowPassCB.InvViewProj, XMMatrixTranspose(invViewProj));
+	m_ShadowPassCB.EyePosW = m_DirLights[0]->GetPosition3f();
+	m_ShadowPassCB.RenderTargetSize = XMFLOAT2((float)width, (float)height);
+	m_ShadowPassCB.InvRenderTargetSize = XMFLOAT2(1.0f / width, 1.0f / height);
+	m_ShadowPassCB.NearZ = m_DirLights[0]->GetNearZ();
+	m_ShadowPassCB.FarZ = m_DirLights[0]->GetFarZ();
+
+	auto currPassCB = CFrameResourceManager::GetCurrentFrameResource()->PassCB.get();
+	currPassCB->CopyData(1 + CascadeIndex, m_ShadowPassCB);
 }
 
 void CScene::UpdateDynamicCubeMapPassCB(const GameTimer& GlobalTimer, int DCMResourcesIndex)
@@ -284,7 +325,8 @@ void CScene::UpdateDynamicCubeMapPassCB(const GameTimer& GlobalTimer, int DCMRes
 		XMStoreFloat4x4(&cubeFacePassCB.InvProj, XMMatrixTranspose(invProj));
 		XMStoreFloat4x4(&cubeFacePassCB.ViewProj, XMMatrixTranspose(viewProj));
 		XMStoreFloat4x4(&cubeFacePassCB.InvViewProj, XMMatrixTranspose(invViewProj));
-		cubeFacePassCB.ShadowTransform = m_ShadowTransform;
+		//cubeFacePassCB.ShadowTransform = m_ShadowTransform;
+		//cubeFacePassCB.ShadowTransform[0] = m_ShadowTransform;
 		cubeFacePassCB.EyePosW = m_DCMCameras[i]->GetPosition3f();
 
 		float dynamicCubeMapSize = (float)CRenderer::GetDynamicCubeMapSize();
@@ -294,7 +336,7 @@ void CScene::UpdateDynamicCubeMapPassCB(const GameTimer& GlobalTimer, int DCMRes
 		auto currPassCB = CFrameResourceManager::GetCurrentFrameResource()->PassCB.get();
 
 		// Cube map pass cbuffers are stored in elements from 2 to DCMResourcesIndex * 6.
-		currPassCB->CopyData(2 + i + DCMResourcesIndex * 6, cubeFacePassCB);
+		currPassCB->CopyData(1 + CRenderer::GetCascadNum() + i + DCMResourcesIndex * 6, cubeFacePassCB);
 	}
 }
 

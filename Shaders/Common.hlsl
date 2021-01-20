@@ -11,6 +11,10 @@
     #define NUM_SPOT_LIGHTS 0
 #endif
 
+#ifndef CASCADE_NUM
+    #define CASCADE_NUM 3
+#endif
+
 // Include structures and functions for lighting.
 #include "LightingUtil.hlsl"
 
@@ -79,7 +83,8 @@ cbuffer cbPass : register(b1)
     float4x4 gInvProj;
     float4x4 gViewProj;
     float4x4 gInvViewProj;
-    float4x4 gShadowTransform;
+    //float4x4 gShadowTransform;
+    float4x4 gShadowTransform[CASCADE_NUM];
     float3   gEyePosWS;
     float    cbPerObjectPad1;
     float2   gRenderTargetSize;
@@ -95,6 +100,11 @@ cbuffer cbPass : register(b1)
     // indices [NUM_DIR_LIGHTS+NUM_POINT_LIGHTS, NUM_DIR_LIGHTS+NUM_POINT_LIGHT+NUM_SPOT_LIGHTS)
     // are spot lights for a maximum of MaxLights per object.
     Light gLights[MaxLights];
+};
+
+cbuffer cbCascadeShadow : register(b2)
+{
+    float4x4 gCSMProj[CASCADE_NUM];
 };
 
 float3x3 ComputeTBN(float3 NormalWS, float3 TangentWS, int BitangentSign)

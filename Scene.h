@@ -67,6 +67,7 @@ public:
 	virtual void UpdateMaterialBuffer(const GameTimer& GlobalTimer);
 	virtual void UpdateMainPassCB(const GameTimer& GlobalTimer);
 	virtual void UpdateShadowPassCB(const GameTimer& GlobalTimer);
+	virtual void UpdateShadowPassCB(const GameTimer& GlobalTimer, int CascadeIndex);
 	virtual void UpdateDynamicCubeMapPassCB(const GameTimer& GlobalTimer, int DCMResourcesIndex);
 
 	virtual void OnResize() {}

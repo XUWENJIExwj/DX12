@@ -58,8 +58,9 @@ int                                   CRenderer::m_CurrentSkyCubeMapIndex = 0;
 // ShadowMap
 unique_ptr<CShadowMap>        CRenderer::m_ShadowMap = nullptr;
 CD3DX12_GPU_DESCRIPTOR_HANDLE CRenderer::m_ShadowMapDescHandle;
-UINT                          CRenderer::m_ShadowMapHeight = 2048 * 8;
-UINT                          CRenderer::m_ShadowMapWidth = m_ShadowMapHeight;
+UINT                          CRenderer::m_ShadowMapHeight = 2048 * 2;
+UINT                          CRenderer::m_ShadowMapWidth = m_ShadowMapHeight * 3;
+UINT                          CRenderer::m_CascadNum = 3;
 
 // DynamicCubeMap
 bool                          CRenderer::m_DynamicCubeMapOn = true;
@@ -228,7 +229,7 @@ void CRenderer::CreateRtvAndDsvDescriptorHeaps()
 	ThrowIfFailed(m_D3DDevice->CreateDescriptorHeap(
 		&dsvHeapDesc, IID_PPV_ARGS(m_DsvHeap.GetAddressOf())));
 
-	m_ShadowMap = make_unique<CShadowMap>(m_D3DDevice.Get(), m_ShadowMapWidth, m_ShadowMapHeight);
+	m_ShadowMap = make_unique<CShadowMap>(m_D3DDevice.Get(), m_ShadowMapWidth, m_ShadowMapHeight, 3);
 
 	if (m_DynamicCubeMapOn)
 	{
@@ -671,38 +672,38 @@ void CRenderer::CreataPSOs()
 	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&wireframeSkyPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_WireFrame_Sky])));
 
 	// PSO for shadow map pass
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC smapPsoDesc = opaquePsoDesc;
-	smapPsoDesc.RasterizerState.DepthBias = 2000;
-	smapPsoDesc.RasterizerState.DepthBiasClamp = 0.0f;
-	smapPsoDesc.RasterizerState.SlopeScaledDepthBias = 1.0f;
-	smapPsoDesc.VS =
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC shadowMapPsoDesc = opaquePsoDesc;
+	shadowMapPsoDesc.RasterizerState.DepthBias = 4500;
+	shadowMapPsoDesc.RasterizerState.DepthBiasClamp = 0.0f;
+	shadowMapPsoDesc.RasterizerState.SlopeScaledDepthBias = 1.0f;
+	shadowMapPsoDesc.VS =
 	{
 		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSM].vertexShader->GetBufferPointer()),
 		shaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSM].vertexShader->GetBufferSize()
 	};
-	smapPsoDesc.PS =
+	shadowMapPsoDesc.PS =
 	{
 		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSM].pixelShader->GetBufferPointer()),
 		shaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSM].pixelShader->GetBufferSize()
 	};
 
 	// Shadow map pass does not have a render target.
-	smapPsoDesc.RTVFormats[0] = DXGI_FORMAT_UNKNOWN;
-	smapPsoDesc.NumRenderTargets = 0;
-	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&smapPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_LiSPSM])));
+	shadowMapPsoDesc.RTVFormats[0] = DXGI_FORMAT_UNKNOWN;
+	shadowMapPsoDesc.NumRenderTargets = 0;
+	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&shadowMapPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_LiSPSM])));
 
 	// PSO for shadow map with alpha test
-	smapPsoDesc.VS =
+	shadowMapPsoDesc.VS =
 	{
 		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSMWithAlphaTest].vertexShader->GetBufferPointer()),
 		shaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSMWithAlphaTest].vertexShader->GetBufferSize()
 	};
-	smapPsoDesc.PS =
+	shadowMapPsoDesc.PS =
 	{
 		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSMWithAlphaTest].pixelShader->GetBufferPointer()),
 		shaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSMWithAlphaTest].pixelShader->GetBufferSize()
 	};
-	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&smapPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_LiSPSMWithAlphaTest])));
+	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&shadowMapPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_LiSPSMWithAlphaTest])));
 
 	// PSO for shadow map debug
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC debugPsoDesc = opaquePsoDesc;
@@ -955,6 +956,33 @@ void CRenderer::SetUpBeforeCreateShadowMapReource()
 	m_CommandList->SetGraphicsRootConstantBufferView(1, passCBAddress);
 }
 
+void CRenderer::SetUpBeforeCreateCascadeShadowMapReources()
+{
+	// Change to DEPTH_WRITE.
+	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_ShadowMap->GetResource(),
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_DEPTH_WRITE));
+
+	// Clear the back buffer and depth buffer.
+	m_CommandList->ClearDepthStencilView(m_ShadowMap->GetDsvHandle(),
+		D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+
+	// Set null render target because we are only going to draw to
+	// depth buffer.  Setting a null render target will disable color writes.
+	// Note the active PSO also must specify a render target count of 0.
+	m_CommandList->OMSetRenderTargets(0, nullptr, false, &m_ShadowMap->GetDsvHandle());
+}
+
+void CRenderer::SetUPViewPortAndScissorRectAndPassCBBeforeCreateCascadeShadowMapReources(int CascadeIndex)
+{
+	m_CommandList->RSSetViewports(1, &m_ShadowMap->GetViewport(CascadeIndex));
+	m_CommandList->RSSetScissorRects(1, &m_ShadowMap->GetScissorRect(CascadeIndex));
+
+	// Bind the pass constant buffer for the shadow map pass.
+	auto passCB = CFrameResourceManager::GetCurrentFrameResource()->PassCB->Resource();
+	D3D12_GPU_VIRTUAL_ADDRESS passCBAddress = passCB->GetGPUVirtualAddress() + (1 + CascadeIndex) * CFrameResourceManager::GetPassCBByteSize();
+	m_CommandList->SetGraphicsRootConstantBufferView(1, passCBAddress);
+}
+
 void CRenderer::CompleteCreateShadowMapResource()
 {
 	// Change back to GENERIC_READ so we can read the texture in a shader.
@@ -999,7 +1027,7 @@ void CRenderer::SetUpBeforeCreateEachDynamicCubeMapResource(int DCMResourcesInde
 	// Bind the pass constant buffer for this cube map face so we use 
 	// the right view/proj matrix for this cube face.
 	auto passCB = CFrameResourceManager::GetCurrentFrameResource()->PassCB->Resource();
-	D3D12_GPU_VIRTUAL_ADDRESS passCBAddress = passCB->GetGPUVirtualAddress() + (2 + FaceIndex + DCMResourcesIndex * 6) * CFrameResourceManager::GetPassCBByteSize();
+	D3D12_GPU_VIRTUAL_ADDRESS passCBAddress = passCB->GetGPUVirtualAddress() + (1 + m_CascadNum + FaceIndex + DCMResourcesIndex * 6) * CFrameResourceManager::GetPassCBByteSize();
 	m_CommandList->SetGraphicsRootConstantBufferView(1, passCBAddress);
 }
 

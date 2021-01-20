@@ -5,7 +5,7 @@ using namespace DirectX;
 void CQuad::Init()
 {
 	m_Rotation = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_Scale = XMFLOAT3(300.0f, 300.0f, 1.0f);
+	m_Scale = XMFLOAT3(750.0f, 250.0f, 1.0f);
 	m_Position = XMFLOAT3(m_Scale.x / 2, m_Scale.y / 2, m_Position.z);
 	m_World = Compute2DWVPMatrix4x4();
 

@@ -1,6 +1,13 @@
+#include "Renderer.h"
 #include "Light.h"
 
+using namespace std;
 using namespace DirectX;
+
+void CLight::Init()
+{
+	m_Proj.resize(CRenderer::GetCascadNum());
+}
 
 DirectX::XMFLOAT4X4 CLight::ComputeLightView4x4(DirectX::BoundingSphere * SceneBounds)
 {

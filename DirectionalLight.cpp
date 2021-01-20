@@ -3,6 +3,7 @@
 #include "Camera.h"
 #include "DirectionalLight.h"
 
+using namespace std;
 using namespace DirectX;
 
 void CDirLight::Update(const GameTimer& GlobalTimer)
@@ -59,7 +60,7 @@ XMMATRIX XM_CALLCONV CDirLight::ComputeShadowTransformWithSceneBounds(BoundingSp
 	m_FarZ = f;
 
 	XMMATRIX lightProj = XMMatrixOrthographicOffCenterLH(l, r, b, t, n, f);
-	XMStoreFloat4x4(&m_Proj, lightProj);
+	XMStoreFloat4x4(&m_Proj[0], lightProj);
 
 	// Transform NDC space [-1,+1]^2 to texture space [0,1]^2
 	XMMATRIX T(
@@ -88,24 +89,64 @@ XMMATRIX XM_CALLCONV CDirLight::ComputeShadowTransformWithCameraFrustum(Bounding
 		max = XMVectorMax(max, FrustumPoints[i]);
 	}
 
-	XMFLOAT3 center, extents;
-	XMStoreFloat3(&center, XMVectorScale(XMVectorAdd(min, max), 0.5f));
-	XMStoreFloat3(&extents, XMVectorScale(XMVectorSubtract(max, min), 0.5f));
-	float posZ = center.z - extents.z;
+	// lightProj
+	XMMATRIX lightProj = XMMatrixOrthographicOffCenterLH(
+		XMVectorGetX(min), XMVectorGetX(max),
+		XMVectorGetY(min), XMVectorGetY(max),
+		XMVectorGetZ(min), XMVectorGetZ(max));
+	XMStoreFloat4x4(&m_Proj[0], lightProj);
+
+	// Transform NDC space [-1,+1]^2 to texture space [0,1]^2
+	XMMATRIX T(
+		0.5f / 3,  0.0f, 0.0f, 0.0f,
+		0.0f,     -0.5f, 0.0f, 0.0f,
+		0.0f,      0.0f, 1.0f, 0.0f,
+		0.5f / 3,  0.5f, 0.0f, 1.0f);
+
+	XMMATRIX S = lightView * lightProj * T;
+
+	return S;
+}
+
+void CDirLight::ComputeShadowTransformWithCameraFrustum(vector<XMMATRIX>& ShadowTransforms, BoundingSphere* SceneBounds, vector<vector<XMVECTOR>>& FrustumPoints)
+{
+	// SceneÇÃãÖñ è„ÇÃlightView
+	XMMATRIX lightView = ComputeLightView(SceneBounds);
+
+	for (UINT i = 0; i < ShadowTransforms.size(); ++i)
+	{
+		ShadowTransforms[i] = ComputeShadowTransformWithCameraFrustumForEachCascade(FrustumPoints[i], i);
+	}
+}
+
+XMMATRIX XM_CALLCONV CDirLight::ComputeShadowTransformWithCameraFrustumForEachCascade(vector<XMVECTOR>& FrustumPoints, int CascadeIndex)
+{
+	// SceneÇÃãÖñ è„ÇÃlightView
+	XMMATRIX lightView = GetView();
+
+	XMVECTOR min, max;
+	min = max = FrustumPoints[0] = XMVector3TransformCoord(FrustumPoints[0], lightView);
+
+	for (int i = 1; i < 8; ++i)
+	{
+		FrustumPoints[i] = XMVector3TransformCoord(FrustumPoints[i], lightView);
+		min = XMVectorMin(min, FrustumPoints[i]);
+		max = XMVectorMax(max, FrustumPoints[i]);
+	}
 
 	// lightProj
 	XMMATRIX lightProj = XMMatrixOrthographicOffCenterLH(
 		XMVectorGetX(min), XMVectorGetX(max),
 		XMVectorGetY(min), XMVectorGetY(max),
 		XMVectorGetZ(min), XMVectorGetZ(max));
-	XMStoreFloat4x4(&m_Proj, lightProj);
+	XMStoreFloat4x4(&m_Proj[CascadeIndex], lightProj);
 
 	// Transform NDC space [-1,+1]^2 to texture space [0,1]^2
 	XMMATRIX T(
-		0.5f,  0.0f, 0.0f, 0.0f,
+		0.5f / m_Proj.size(), 0.0f, 0.0f, 0.0f,
 		0.0f, -0.5f, 0.0f, 0.0f,
-		0.0f,  0.0f, 1.0f, 0.0f,
-		0.5f,  0.5f, 0.0f, 1.0f);
+		0.0f, 0.0f, 1.0f, 0.0f,
+		0.5f / m_Proj.size() + 0.5f / m_Proj.size() * CascadeIndex * 2, 0.5f, 0.0f, 1.0f);
 
 	XMMATRIX S = lightView * lightProj * T;
 

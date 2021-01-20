@@ -34,8 +34,11 @@ public:
 	virtual void UpdateViewMatrix();
 
 	void CreateFrustumBounds();
-	void ComputeFrustumPointsInWorldSpace(DirectX::XMVECTOR FrustumPoints[8]);
-	void ComputeFrustumPointsInWorldSpace(DirectX::XMVECTOR FrustumPoints[8], const DirectX::XMMATRIX& InvView);
+	void ComputeFrustumPointsInWorldSpace(DirectX::XMVECTOR FrustumPoints[8]); // LiSPSM用
+	void ComputeFrustumPointsInWorldSpace(DirectX::XMVECTOR FrustumPoints[8], const DirectX::XMMATRIX& InvView); // LiSPSM用
+	void ComputeFrustumPointsInWorldSpace(std::vector<std::vector<DirectX::XMVECTOR>>& FrustumPoints); // CSM用
+	void ComputeFrustumPointsInWorldSpace(std::vector<std::vector<DirectX::XMVECTOR>>& FrustumPoints, const DirectX::XMMATRIX& InvView); // CSM用
+	void ComputeFrustumPointsInWorldSpaceForEachCascade(std::vector<DirectX::XMVECTOR>& FrustumPoints, const DirectX::XMMATRIX& InvView, float Near, float Far); // CSM用
 
 	// Get frustum properties.
 	float GetNearZ()const { return m_NearZ; }

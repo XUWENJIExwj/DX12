@@ -88,8 +88,6 @@ void CGame::Uninit()
 void CGame::UpdateAll(const GameTimer& GlobalTimer)
 {
 	CScene::UpdateAll(GlobalTimer);
-
-	UpdateShadowPassCB(GlobalTimer);
 }
 
 void CGame::Draw(const GameTimer& GlobalTimer)
@@ -98,10 +96,22 @@ void CGame::Draw(const GameTimer& GlobalTimer)
 
 	// CreateShadowMap
 	CRenderer::SetUpNullCubeMapResource();
-	CRenderer::SetUpBeforeCreateShadowMapReource();
-	CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque_DynamicReflectors]);
-	CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque]);
-	CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque_POM]);
+	//UpdateShadowPassCB(GlobalTimer);
+	//CRenderer::SetUpBeforeCreateShadowMapReource();
+	//CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque_DynamicReflectors]);
+	//CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque]);
+	//CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque_POM]);
+
+	// CreateCascadeShadowMap
+	CRenderer::SetUpBeforeCreateCascadeShadowMapReources();
+	for (UINT i = 0; i < CRenderer::GetCascadNum(); ++i)
+	{
+		UpdateShadowPassCB(GlobalTimer, i);
+		CRenderer::SetUPViewPortAndScissorRectAndPassCBBeforeCreateCascadeShadowMapReources(i);
+		CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque_DynamicReflectors]);
+		CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque]);
+		CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque_POM]);
+	}
 	CRenderer::CompleteCreateShadowMapResource();
 
 	// CreateDynamicCubeMap

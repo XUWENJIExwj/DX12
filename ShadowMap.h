@@ -7,8 +7,8 @@ class CShadowMap
 private:
 	ID3D12Device* m_D3dDevice = nullptr;
 
-	D3D12_VIEWPORT m_Viewport;
-	D3D12_RECT     m_ScissorRect;
+	std::vector<D3D12_VIEWPORT> m_Viewports;
+	std::vector<D3D12_RECT>     m_ScissorRects;
 
 	UINT        m_Width = 0;
 	UINT        m_Height = 0;
@@ -21,7 +21,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> m_ShadowMap = nullptr;
 
 public:
-	CShadowMap(ID3D12Device* Device, UINT Width, UINT Height);
+	CShadowMap(ID3D12Device* Device, UINT Width, UINT Height, UINT CascadNum = 1);
 	CShadowMap(const CShadowMap& rhs) = delete;
 	CShadowMap& operator=(const CShadowMap& rhs) = delete;
 	~CShadowMap() = default;
@@ -40,8 +40,8 @@ public:
 	CD3DX12_GPU_DESCRIPTOR_HANDLE GetSrvHandle()const { return m_GpuSrvHandle; }
 	CD3DX12_CPU_DESCRIPTOR_HANDLE GetDsvHandle()const { return m_CpuDsvHandle; }
 
-	D3D12_VIEWPORT GetViewport()const { return m_Viewport; }
-	D3D12_RECT     GetScissorRect()const { return m_ScissorRect; }
+	D3D12_VIEWPORT GetViewport(int CascadIndex = 0)const { return m_Viewports[CascadIndex]; }
+	D3D12_RECT     GetScissorRect(int CascadIndex = 0)const { return m_ScissorRects[CascadIndex]; }
 
 private:
 	void CreateResource();

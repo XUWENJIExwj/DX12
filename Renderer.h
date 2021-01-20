@@ -77,6 +77,7 @@ private:
 	static CD3DX12_GPU_DESCRIPTOR_HANDLE m_ShadowMapDescHandle;
 	static UINT                          m_ShadowMapWidth;
 	static UINT                          m_ShadowMapHeight;
+	static UINT                          m_CascadNum;
 
 	// DynamicCubeMap
 	static bool                                   m_DynamicCubeMapOn;
@@ -129,6 +130,7 @@ public:
 	// ShadowMap
 	static UINT GetShadowMapWidth() { return m_ShadowMapWidth; }
 	static UINT GetShadowMapHeight() { return m_ShadowMapHeight; }
+	static UINT GetCascadNum() { return m_CascadNum; }
 
 	// DynamicCubeMap
 	static bool GetDynamicCubeOn() { return m_DynamicCubeMapOn; }
@@ -148,6 +150,8 @@ public:
 	static void SetUpNullCubeMapResource();
 	static void SetUpBeforeCreateShadowMapReource();
 	static void CompleteCreateShadowMapResource();
+	static void SetUpBeforeCreateCascadeShadowMapReources();
+	static void SetUPViewPortAndScissorRectAndPassCBBeforeCreateCascadeShadowMapReources(int CascadeIndex);
 	static void SetCurrentSkyCubeMapIndex(int CubeMapIndex) { m_CurrentSkyCubeMapIndex = CubeMapIndex; }
 	static void SetUpSkyCubeMapResources();
 	static void SetUpDynamicCubeMapResources(int DCMResourcesIndex);

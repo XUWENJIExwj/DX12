@@ -1,5 +1,6 @@
 #include "Camera.h"
 
+using namespace std;
 using namespace DirectX;
 
 void CCamera::LateUpdate(const GameTimer& GlobalTimer)
@@ -76,8 +77,63 @@ void CCamera::ComputeFrustumPointsInWorldSpace(DirectX::XMVECTOR FrustumPoints[8
 	XMVECTORF32 leftBottom = { m_Bounds.LeftSlope, m_Bounds.BottomSlope, 1.0f, 1.0f };
 	XMVECTORF32 n = { m_Bounds.Near, m_Bounds.Near, m_Bounds.Near, 1.0f };
 	//XMVECTORF32 f = { m_Bounds.Far, m_Bounds.Far, m_Bounds.Far, 1.0f };
-	float cameraFar = m_Bounds.Far * 0.05f;
+	float cameraFar = m_Bounds.Far * 0.02f;
 	XMVECTORF32 f = { cameraFar, cameraFar, cameraFar, 1.0f };
+	XMVECTOR rightTopNear = rightTop * n;
+	XMVECTOR rightTopFar = rightTop * f;
+	XMVECTOR leftBottomNear = leftBottom * n;
+	XMVECTOR leftBottomFar = leftBottom * f;
+
+	static const XMVECTORU32 grabX = { 0xFFFFFFFF,0x00000000,0x00000000,0x00000000 };
+	static const XMVECTORU32 grabY = { 0x00000000,0xFFFFFFFF,0x00000000,0x00000000 };
+
+	// Near
+	FrustumPoints[0] = rightTopNear; // 右上
+	FrustumPoints[1] = XMVectorSelect(rightTopNear, leftBottomNear, grabX); // 左上
+	FrustumPoints[2] = leftBottomNear; // 左下
+	FrustumPoints[3] = XMVectorSelect(rightTopNear, leftBottomNear, grabY); // 右下
+
+	// Far
+	FrustumPoints[4] = rightTopFar; // 右上
+	FrustumPoints[5] = XMVectorSelect(rightTopFar, leftBottomFar, grabX); // 左上
+	FrustumPoints[6] = leftBottomFar; // 左下
+	FrustumPoints[7] = XMVectorSelect(rightTopFar, leftBottomFar, grabY); // 右下
+
+	// Camera空間にある点の座標をWorld空間に転換
+	for (int i = 0; i < 8; ++i)
+	{
+		FrustumPoints[i] = XMVector3TransformCoord(FrustumPoints[i], InvView);
+	}
+}
+
+void CCamera::ComputeFrustumPointsInWorldSpace(vector<vector<XMVECTOR>>& FrustumPoints)
+{
+	// Camera空間にある点の座標をWorld空間に転換
+	XMMATRIX view = GetView();
+	XMMATRIX invView = XMMatrixInverse(&XMMatrixDeterminant(view), view);
+
+	ComputeFrustumPointsInWorldSpace(FrustumPoints, invView);
+}
+
+void CCamera::ComputeFrustumPointsInWorldSpace(vector<vector<XMVECTOR>>& FrustumPoints, const XMMATRIX& InvView)
+{
+	//vector<float> n = { m_Bounds.Near, m_Bounds.Far * 0.02f, m_Bounds.Far * 0.5f };
+	//vector<float> f = { m_Bounds.Far * 0.02f, m_Bounds.Far * 0.5f, m_Bounds.Far };
+	vector<float> n = { m_Bounds.Near, m_Bounds.Near, m_Bounds.Near };
+	vector<float> f = { m_Bounds.Far * 0.02f, m_Bounds.Far * 0.03f, m_Bounds.Far*0.5f };
+	for (int i = 0; i < FrustumPoints.size(); ++i)
+	{
+		FrustumPoints[i].resize(8);
+		ComputeFrustumPointsInWorldSpaceForEachCascade(FrustumPoints[i], InvView, n[i], f[i]);
+	}
+}
+
+void CCamera::ComputeFrustumPointsInWorldSpaceForEachCascade(vector<XMVECTOR>& FrustumPoints, const XMMATRIX& InvView, float Near, float Far)
+{
+	XMVECTORF32 rightTop = { m_Bounds.RightSlope, m_Bounds.TopSlope, 1.0f, 1.0f };
+	XMVECTORF32 leftBottom = { m_Bounds.LeftSlope, m_Bounds.BottomSlope, 1.0f, 1.0f };
+	XMVECTORF32 n = { Near, Near, Near, 1.0f };
+	XMVECTORF32 f = { Far, Far, Far, 1.0f };
 	XMVECTOR rightTopNear = rightTop * n;
 	XMVECTOR rightTopFar = rightTop * f;
 	XMVECTOR leftBottomNear = leftBottom * n;
