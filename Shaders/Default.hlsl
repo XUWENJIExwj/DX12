@@ -23,18 +23,17 @@ struct VertexIn
 
 struct VertexOut
 {
-	float4 PosHS       : SV_POSITION;
-    float3 PosWS       : POSITION;
-    float4 ShadowPosHS : POSITION1;
-    float3 NormalWS    : NORMAL;
-    float3 TangentWS   : TANGENT;
-	float2 TexC        : TEXCOORD;
+	float4 PosHS        : SV_POSITION;
+    float3 PosWS        : POSITION;
+    float4 ShadowPosLiS : POSITION1;
+    float3 NormalWS     : NORMAL;
+    float3 TangentWS    : TANGENT;
+	float2 TexC         : TEXCOORD;
+    float  DepthCamS    : TEXCOORD1;
 };
 
 VertexOut VS(VertexIn vin)
 {
-    //int cascadeIndex = 0;
-    
 	VertexOut vout = (VertexOut)0.0f;
 
 	// Fetch the material data.
@@ -57,16 +56,15 @@ VertexOut VS(VertexIn vin)
 	vout.TexC = mul(texC, matData.MatTransform).xy;
     
     // Generate projective tex-coords to project shadow map onto scene.
-    //vout.ShadowPosHS = mul(posWS, gShadowTransform[cascadeIndex]);
-    vout.ShadowPosHS = posWS;
+    vout.ShadowPosLiS = mul(posWS, gShadowView);
+    
+    vout.DepthCamS = mul(posWS, gView).z;
 	
     return vout;
 }
 
 float4 PS(VertexOut pin) : SV_Target
 {
-    int cascadeIndex = 0;
-    
 	// Fetch the material data.
 	MaterialData matData = gMaterialData[gMaterialIndex];
 	float4 diffuseAlbedo = matData.DiffuseAlbedo;
@@ -100,7 +98,13 @@ float4 PS(VertexOut pin) : SV_Target
 
     // Cascade
     float3 shadowFactor = float3(1.0, 1.0, 1.0);
-    shadowFactor[0] *= CalcShadowFactor(pin.ShadowPosHS, cascadeIndex);
+    float pcfBlursize = gPCFBlurForLoopEnd - gPCFBlurForLoopStart;
+    pcfBlursize *= pcfBlursize;
+    float4 shadowMapTexHS = 0.0;
+    int currentCascadeIndex = 0;
+    ComputeCascadeIndex(pin.ShadowPosLiS, shadowMapTexHS, currentCascadeIndex);
+
+    shadowFactor[0] *= CalcShadowFactor(shadowMapTexHS, pcfBlursize, currentCascadeIndex);
     
     float4 directLight = ComputeLighting(gLights, mat, pin.PosWS,
         bumpedNormalWS, toEyeWS, shadowFactor);
@@ -112,6 +116,14 @@ float4 PS(VertexOut pin) : SV_Target
     float4 reflectionColor = gCubeMap.Sample(gsamLinearWrap, r) * cubeMapDiffuseAlbedo;
     float3 fresnelFactor = SchlickFresnel(fresnelR0, bumpedNormalWS, r);
 	litColor.rgb += shininess * fresnelFactor * reflectionColor.rgb;
+    
+    // CascadeVisualOn
+    float4 visualCascadeColor = 1.0f;
+    if (gVisualCascade)
+    {
+        visualCascadeColor = gCascadeColorsMultiplier[currentCascadeIndex];
+    }
+    litColor *= visualCascadeColor;
 
     // Common convention to take alpha from diffuse albedo.
     litColor.a = diffuseAlbedo.a;

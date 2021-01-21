@@ -83,8 +83,7 @@ cbuffer cbPass : register(b1)
     float4x4 gInvProj;
     float4x4 gViewProj;
     float4x4 gInvViewProj;
-    //float4x4 gShadowTransform;
-    float4x4 gShadowTransform[CASCADE_NUM];
+    float4x4 gShadowView;
     float3   gEyePosWS;
     float    cbPerObjectPad1;
     float2   gRenderTargetSize;
@@ -96,7 +95,17 @@ cbuffer cbPass : register(b1)
     float    gMaxBorderPadding;
     float    gMinBorderPadding;
     float    gShadowBias;
-    float    gVisualCascade; // ‰¼
+    float    gCascadeBlendArea;
+    float4   gShadowTexScale[CASCADE_NUM];
+    float4   gShadowTexOffset[CASCADE_NUM];
+    int      gPCFBlurForLoopStart;
+    int      gPCFBlurForLoopEnd;
+    int      cbPerObjectPad2;
+    int      cbPerObjectPad3;
+    bool     gVisualCascade;
+    bool     cbPerObjectPad4;
+    bool     cbPerObjectPad5;
+    bool     cbPerObjectPad6;
     float4   gAmbientLight;
 
     // Indices [0, NUM_DIR_LIGHTS) are directional lights;
@@ -104,11 +113,6 @@ cbuffer cbPass : register(b1)
     // indices [NUM_DIR_LIGHTS+NUM_POINT_LIGHTS, NUM_DIR_LIGHTS+NUM_POINT_LIGHT+NUM_SPOT_LIGHTS)
     // are spot lights for a maximum of MaxLights per object.
     Light gLights[MaxLights];
-};
-
-cbuffer cbCascadeShadow : register(b2)
-{
-    float4x4 gCSMProj[CASCADE_NUM];
 };
 
 static const float4 gCascadeColorsMultiplier[8] =
@@ -153,13 +157,10 @@ float3 NormalSampleToWorldSpace(float3 NormalMapSample, float3 NormalWS, float3 
 //---------------------------------------------------------------------------------------
 // PCF for shadow mapping.
 //---------------------------------------------------------------------------------------
-float CalcShadowFactor(float4 ShadowPosHS, int CascadeIndex)
+float CalcShadowFactor(float4 ShadowPosHS, float PCFBlurSize, int CascadeIndex)
 {
     // Complete projection by doing division by w.
     ShadowPosHS.xyz /= ShadowPosHS.w;
-
-    // Depth in NDC space.
-    //float depth = ShadowPosHS.z;
 
     uint width, height, numMips;
     gShadowMap[CascadeIndex].GetDimensions(0, width, height, numMips);
@@ -169,21 +170,59 @@ float CalcShadowFactor(float4 ShadowPosHS, int CascadeIndex)
     float dy = 1.0 / (float)height;
 
     float percentLit = 0.0;
-    const float2 offsets[9] =
+    
+    for (int y = gPCFBlurForLoopStart; y < gPCFBlurForLoopEnd; ++y)
     {
-        float2(-dx, -dy),  float2(0.0, -dy),  float2(dx, -dy),
-        float2(-dx, 0.0),  float2(0.0, 0.0),  float2(dx, 0.0),
-        float2(-dx, +dy),  float2(0.0, +dy),  float2(dx, +dy)
-    };
-
-    [unroll]
-    for (int i = 0; i < 9; ++i)
-    {
-        float depth = ShadowPosHS.z;
-        depth -= gShadowBias * pow((CascadeIndex + 1), 2);
-        percentLit += gShadowMap[CascadeIndex].SampleCmpLevelZero(gsamShadow,
-            ShadowPosHS.xy + offsets[i], depth).r;
+        for (int x = gPCFBlurForLoopStart; x < gPCFBlurForLoopEnd; ++x)
+        {
+            // Depth in NDC space.
+            float depth = ShadowPosHS.z;
+            depth -= gShadowBias * pow((CascadeIndex + 1), 2);
+            percentLit += gShadowMap[CascadeIndex].SampleCmpLevelZero(gsamShadow, float2(ShadowPosHS.x + x * dx, ShadowPosHS.y + y * dy), depth).r;
+        }
     }
     
-    return percentLit / 9.0;
+    return percentLit / PCFBlurSize;
+}
+
+float4 ComputeShadowTexCoord(float4 ShadowPosLiS, int CasecadeIndex)
+{
+    float4 texC = ShadowPosLiS * gShadowTexScale[CasecadeIndex];
+    texC += gShadowTexOffset[CasecadeIndex];
+    return texC;
+}
+
+void ComputeCascadeIndex(in float4 ShadowPosLiS, out float4 ShadowMapTexHS, out int CasecadeIndex)
+{
+    CasecadeIndex = 0;
+    ShadowMapTexHS = 0.0;
+    
+    int cascadeFound = 0;
+    
+    [unroll]
+    for (int i = 0; i < CASCADE_NUM && cascadeFound == 0; ++i)
+    {
+        ShadowMapTexHS = ComputeShadowTexCoord(ShadowPosLiS, i);
+ 
+        if (min(ShadowMapTexHS.x, ShadowMapTexHS.y) > gMinBorderPadding &&
+            max(ShadowMapTexHS.x, ShadowMapTexHS.y) < gMaxBorderPadding &&
+            ShadowMapTexHS.z > 0.0 && gMaxBorderPadding && ShadowMapTexHS.z < 1.0)
+        {
+            CasecadeIndex = i;
+            cascadeFound = 1;
+        }
+    }
+}
+
+//--------------------------------------------------------------------------------------
+// Calculate amount to blend between two cascades and the band where blending will occure.
+//--------------------------------------------------------------------------------------
+void CalculateBlendAmountForMap(float4 ShadowMapTexHS, in out float CurrentPixelsBlendBandLocation, out float BlendBetweenCascadesAmount)
+{
+    // Calcaulte the blend band for the map based selection.
+    float2 distanceToOne = float2(1.0f - ShadowMapTexHS.x, 1.0f - ShadowMapTexHS.y);
+    CurrentPixelsBlendBandLocation = min(ShadowMapTexHS.x, ShadowMapTexHS.y);
+    float CurrentPixelsBlendBandLocation2 = min(distanceToOne.x, distanceToOne.y);
+    CurrentPixelsBlendBandLocation = min(CurrentPixelsBlendBandLocation, CurrentPixelsBlendBandLocation2);
+    BlendBetweenCascadesAmount = CurrentPixelsBlendBandLocation / gCascadeBlendArea;
 }

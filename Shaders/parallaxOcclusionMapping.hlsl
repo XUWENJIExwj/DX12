@@ -23,12 +23,13 @@ struct VertexIn
 
 struct VertexOut
 {
-    float4 PosHS       : SV_POSITION;
-    float3 PosWS       : POSITION;
-    float4 ShadowPosHS : POSITION1;
-    float3 NormalWS    : NORMAL;
-    float3 TangentWS   : TANGENT;
-    float2 TexC        : TEXCOORD;
+    float4 PosHS        : SV_POSITION;
+    float3 PosWS        : POSITION;
+    float4 ShadowPosLiS : POSITION1;
+    float3 NormalWS     : NORMAL;
+    float3 TangentWS    : TANGENT;
+    float2 TexC         : TEXCOORD;
+    float  DepthCamS    : TEXCOORD1;
 };
 
 
@@ -58,7 +59,9 @@ VertexOut VS(VertexIn vin)
     vout.TexC = mul(texC, matData.MatTransform).xy;
     
     // Generate projective tex-coords to project shadow map onto scene.
-    vout.ShadowPosHS = posWS;
+    vout.ShadowPosLiS = mul(posWS, gShadowView);
+    
+    vout.DepthCamS = mul(posWS, gView).z;
 	
     return vout;
 }
@@ -235,24 +238,35 @@ float4 PS(VertexOut pin) : SV_Target
     }
     
     // Cascade
-    int cascadeFound = 0;
-    int currentCascadeIndex = 0;
+    float pcfBlursize = gPCFBlurForLoopEnd - gPCFBlurForLoopStart;
+    pcfBlursize *= pcfBlursize;
     float4 shadowMapTexHS = 0.0;
+    int currentCascadeIndex = 0;
+    int nextCascadeIndex = 1;
+    float currentPixelDepth = pin.DepthCamS;
+    float4 shadowPosLiS = pin.ShadowPosLiS;
+    ComputeCascadeIndex(shadowPosLiS, shadowMapTexHS, currentCascadeIndex);
     
-    for (int i = 0; i < CASCADE_NUM && cascadeFound == 0; ++i)
+    // Blend Between Cascade Layers
+    nextCascadeIndex = min(CASCADE_NUM - 1, currentCascadeIndex + 1);
+    float blendBetweenCascadesAmount = 1.0;
+    float currentPixelsBlendBandLocation = 1.0;
+    CalculateBlendAmountForMap(shadowMapTexHS, currentPixelsBlendBandLocation, blendBetweenCascadesAmount);
+    
+    shadowFactor[0] *= CalcShadowFactor(shadowMapTexHS, pcfBlursize, currentCascadeIndex);
+    float shadowFactor_blend = 1.0;
+    
+    float4 shadowMapTexHS_blend = 0.0;
+    if (currentPixelsBlendBandLocation < gCascadeBlendArea)
     {
-        shadowMapTexHS = mul(pin.ShadowPosHS, gShadowTransform[i]);
- 
-        if (min(shadowMapTexHS.x, shadowMapTexHS.y) > gMinBorderPadding && 
-            max(shadowMapTexHS.x, shadowMapTexHS.y) < gMaxBorderPadding && 
-            shadowMapTexHS.z > 0.0 && gMaxBorderPadding && shadowMapTexHS.z < 1.0)
+        shadowMapTexHS_blend = ComputeShadowTexCoord(shadowPosLiS, nextCascadeIndex);
+        
+        if (currentPixelsBlendBandLocation < gCascadeBlendArea)
         {
-            currentCascadeIndex = i;
-            cascadeFound = 1;
+            shadowFactor_blend = CalcShadowFactor(shadowMapTexHS_blend, pcfBlursize, nextCascadeIndex);
+            shadowFactor[0] = lerp(shadowFactor_blend, shadowFactor[0], blendBetweenCascadesAmount);
         }
     }
-
-    shadowFactor[0] *= CalcShadowFactor(shadowMapTexHS, currentCascadeIndex);
     
     float4 directLight = ComputeLighting(gLights, mat, pin.PosWS,
         bumpedNormalWS, toEyeWS, shadowFactor);
@@ -267,7 +281,7 @@ float4 PS(VertexOut pin) : SV_Target
     
     // CascadeVisualOn
     float4 visualCascadeColor = 1.0f;
-    if(gVisualCascade > 1.0f)
+    if(gVisualCascade)
     {
         visualCascadeColor = gCascadeColorsMultiplier[currentCascadeIndex];
     }

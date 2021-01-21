@@ -80,7 +80,7 @@ void CImGuiManager::Draw()
 	DX12App* app = DX12App::GetApp();
 
 	ImGui::SetNextWindowPos(ImVec2((float)app->GetWindowWidth() - 420, 20), ImGuiCond_Once);
-	ImGui::SetNextWindowSize(ImVec2(400, 200), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(400, 170), ImGuiCond_Once);
 
 	if (showClose)
 	{

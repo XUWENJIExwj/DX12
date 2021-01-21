@@ -46,6 +46,9 @@
     <Filter Include="ソース ファイル\GameObject\Light">
       <UniqueIdentifier>{27e9aab6-4803-4af3-999c-c47b0235710b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\GameObject\Quad">
+      <UniqueIdentifier>{ecb907ff-c73e-451c-b0f2-f0727c91a197}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DX12App.h">
@@ -181,7 +184,10 @@
       <Filter>ソース ファイル\GameObject\Light</Filter>
     </ClInclude>
     <ClInclude Include="Quad.h">
-      <Filter>ソース ファイル\GameObject</Filter>
+      <Filter>ソース ファイル\GameObject\Quad</Filter>
+    </ClInclude>
+    <ClInclude Include="QuadShadowDebug.h">
+      <Filter>ソース ファイル\GameObject\Quad</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -303,7 +309,10 @@
       <Filter>ソース ファイル\GameObject\Light</Filter>
     </ClCompile>
     <ClCompile Include="Quad.cpp">
-      <Filter>ソース ファイル\GameObject</Filter>
+      <Filter>ソース ファイル\GameObject\Quad</Filter>
+    </ClCompile>
+    <ClCompile Include="QuadShadowDebug.cpp">
+      <Filter>ソース ファイル\GameObject\Quad</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -322,10 +331,10 @@
     <FxCompile Include="Shaders\parallaxOcclusionMapping.hlsl">
       <Filter>ソース ファイル\Shader</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\lightSpacePSM.hlsl">
+    <FxCompile Include="Shaders\ShadowMapDebug.hlsl">
       <Filter>ソース ファイル\Shader</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\lightSpacePSMDebug.hlsl">
+    <FxCompile Include="Shaders\ShadowMap.hlsl">
       <Filter>ソース ファイル\Shader</Filter>
     </FxCompile>
   </ItemGroup>

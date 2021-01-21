@@ -37,11 +37,11 @@ void CShaderManager::LoadShaders()
 	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_Sky].vertexShader = d3dUtil::CompileShader(L"Shaders\\Sky.hlsl", nullptr, "VS", "vs_5_1");
 	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_Sky].pixelShader = d3dUtil::CompileShader(L"Shaders\\Sky.hlsl", nullptr, "PS", "ps_5_1");
 
-	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSM].vertexShader = d3dUtil::CompileShader(L"Shaders\\lightSpacePSM.hlsl", nullptr, "VS", "vs_5_1");
-	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSM].pixelShader = d3dUtil::CompileShader(L"Shaders\\lightSpacePSM.hlsl", nullptr, "PS", "ps_5_1");
+	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMap].vertexShader = d3dUtil::CompileShader(L"Shaders\\ShadowMap.hlsl", nullptr, "VS", "vs_5_1");
+	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMap].pixelShader = d3dUtil::CompileShader(L"Shaders\\ShadowMap.hlsl", nullptr, "PS", "ps_5_1");
 
-	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSMWithAlphaTest].vertexShader = d3dUtil::CompileShader(L"Shaders\\lightSpacePSM.hlsl", nullptr, "VS", "vs_5_1");
-	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSMWithAlphaTest].pixelShader = d3dUtil::CompileShader(L"Shaders\\lightSpacePSM.hlsl", alphaTestDefines, "PS", "ps_5_1");
+	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapWithAlphaTest].vertexShader = d3dUtil::CompileShader(L"Shaders\\ShadowMap.hlsl", nullptr, "VS", "vs_5_1");
+	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapWithAlphaTest].pixelShader = d3dUtil::CompileShader(L"Shaders\\ShadowMap.hlsl", alphaTestDefines, "PS", "ps_5_1");
 
 	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapDebug].vertexShader = d3dUtil::CompileShader(L"Shaders\\ShadowMapDebug.hlsl", nullptr, "VS", "vs_5_1");
 	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapDebug].pixelShader = d3dUtil::CompileShader(L"Shaders\\ShadowMapDebug.hlsl", nullptr, "PS", "ps_5_1");

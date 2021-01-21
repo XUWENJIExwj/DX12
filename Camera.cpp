@@ -117,10 +117,8 @@ void CCamera::ComputeFrustumPointsInWorldSpace(vector<vector<XMVECTOR>>& Frustum
 
 void CCamera::ComputeFrustumPointsInWorldSpace(vector<vector<XMVECTOR>>& FrustumPoints, const XMMATRIX& InvView)
 {
-	vector<float> n = { m_Bounds.Near, m_Bounds.Far * 0.02f, m_Bounds.Far * 0.5f };
-	vector<float> f = { m_Bounds.Far * 0.02f, m_Bounds.Far * 0.5f, m_Bounds.Far };
-	//vector<float> n = { m_Bounds.Near, m_Bounds.Near, m_Bounds.Near };
-	//vector<float> f = { m_Bounds.Far * 0.02f, m_Bounds.Far * 0.5f, m_Bounds.Far * 1.0f };
+	vector<float> n = { m_Bounds.Near, m_Bounds.Far * 0.01f, m_Bounds.Far * 0.15f };
+	vector<float> f = { n[1], n[2], m_Bounds.Far };
 	for (int i = 0; i < FrustumPoints.size(); ++i)
 	{
 		FrustumPoints[i].resize(8);

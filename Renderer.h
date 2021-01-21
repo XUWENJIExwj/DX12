@@ -13,8 +13,8 @@ enum class PSOTypeIndex :int
 	PSO_Solid_Sky,
 	PSO_WireFrame_Opaque,
 	PSO_WireFrame_Sky,
-	PSO_LiSPSM,
-	PSO_LiSPSMWithAlphaTest,
+	PSO_ShadowMap,
+	PSO_ShadowMapWithAlphaTest,
 	PSO_ShadowMapDebug,
 	PSO_MAX
 };
@@ -73,8 +73,7 @@ private:
 	static int                                        m_CurrentSkyCubeMapIndex;
 
 	// ShadowMap
-	static UINT                                       m_ShadowMapWidth;
-	static UINT                                       m_ShadowMapHeight;
+	static UINT                                       m_ShadowMapSize;
 	static UINT                                       m_CascadNum;
 	static std::vector<std::unique_ptr<CShadowMap>>   m_ShadowMap;
 	static std::vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> m_ShadowMapDescHandle;
@@ -128,8 +127,7 @@ public:
 	static int GetCurrentSkyCubeMapIndex() { return m_CurrentSkyCubeMapIndex; }
 
 	// ShadowMap
-	static UINT GetShadowMapWidth() { return m_ShadowMapWidth; }
-	static UINT GetShadowMapHeight() { return m_ShadowMapHeight; }
+	static UINT GetShadowMapSize() { return m_ShadowMapSize; }
 	static UINT GetCascadNum() { return m_CascadNum; }
 
 	// DynamicCubeMap

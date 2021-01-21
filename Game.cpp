@@ -13,13 +13,14 @@
 #include "Sphere.h"
 #include "SphereDR.h"
 #include "Quad.h"
+#include "QuadShadowDebug.h"
 
 using namespace std;
 using namespace DirectX;
 
 void CGame::Init()
 {
-	m_BeginPSOIndex = (int)PSOTypeIndex::PSO_LiSPSM;
+	m_BeginPSOIndex = (int)PSOTypeIndex::PSO_ShadowMap;
 
 	m_MainCamera = AddGameObject<CCameraFP>((int)RenderLayers::Layer_Camera, "MainCamera");
 	CManager::SetMainCamera(m_MainCamera);
@@ -55,32 +56,34 @@ void CGame::Init()
 	// è„éÆÇèÌÇ…ê¨ÇËóßÇΩÇπÇÈïKóvÇ™Ç†ÇÈ
 	CSphere* sphereDR0 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror00");
 
-	//CSphere* sphereDR1 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror01");
-	//sphereDR1->SetPosition(XMFLOAT3(-3.0f, 1.0f, 0.0f));
-	//sphereDR1->SetWorldMatrix();
+	CSphere* sphereDR1 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror01");
+	sphereDR1->SetPosition(XMFLOAT3(-3.0f, 1.0f, 0.0f));
+	sphereDR1->SetWorldMatrix();
 
-	//CSphere* sphereDR2 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror02");
-	//sphereDR2->SetPosition(XMFLOAT3(0.0f, 2.0f, 3.0f));
-	//sphereDR2->SetWorldMatrix();
+	CSphere* sphereDR2 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror02");
+	sphereDR2->SetPosition(XMFLOAT3(0.0f, 2.0f, 3.0f));
+	sphereDR2->SetWorldMatrix();
 
-	//CSphere* sphereDR3 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror03");
-	//sphereDR3->SetPosition(XMFLOAT3(0.0f, 0.5f, 2.0f));
-	//sphereDR3->SetWorldMatrix();
+	CSphere* sphereDR3 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror03");
+	sphereDR3->SetPosition(XMFLOAT3(0.0f, 0.5f, 2.0f));
+	sphereDR3->SetWorldMatrix();
 
 	CLogo* logo00 = AddGameObject<CLogo>((int)RenderLayers::Layer_3D_Opaque, "Logo00");
 	CLogo* logo01 = AddGameObject<CLogo>((int)RenderLayers::Layer_3D_Opaque, "Logo01");
 	logo01->SetRotation(XMFLOAT3(0.0f, MathHelper::Pi, 0.0f));
 	logo01->SetWorldMatrix();
 
-	CQuad* quad00 = AddGameObject<CQuad>((int)RenderLayers::Layer_2D_Debug, "Cascade00");
-	CQuad* quad01 = AddGameObject<CQuad>((int)RenderLayers::Layer_2D_Debug, "Cascade01");
-	quad01->SetMaterialNormal((int)MaterialNormalIndex::Material_ShadowMap_01);
-	quad01->SetPositionX(quad00->GetPosition3f().x + quad00->GetScale3f().x);
-	quad01->Set2DWVPMatrix();
-	CQuad* quad02 = AddGameObject<CQuad>((int)RenderLayers::Layer_2D_Debug, "Cascade02");
-	quad02->SetMaterialNormal((int)MaterialNormalIndex::Material_ShadowMap_02);
-	quad02->SetPositionX(quad01->GetPosition3f().x + quad01->GetScale3f().x);
-	quad02->Set2DWVPMatrix();
+	CQuadShadowDebug* shadowDebug00 = AddGameObject<CQuadShadowDebug>((int)RenderLayers::Layer_2D_Debug, "ShadowDebug00");
+	CQuadShadowDebug* shadowDebug01 = AddGameObject<CQuadShadowDebug>((int)RenderLayers::Layer_2D_Debug, "ShadowDebug01");
+	shadowDebug01->SetMaterialNormal((int)MaterialNormalIndex::Material_ShadowMap_01);
+	shadowDebug01->SetPositionX(shadowDebug00->GetPosition3f().x + shadowDebug00->GetScale3f().x);
+	shadowDebug01->SetOrderColNum(1);
+	shadowDebug01->Set2DWVPMatrix();
+	CQuadShadowDebug* shadowDebug02 = AddGameObject<CQuadShadowDebug>((int)RenderLayers::Layer_2D_Debug, "ShadowDebug02");
+	shadowDebug02->SetMaterialNormal((int)MaterialNormalIndex::Material_ShadowMap_02);
+	shadowDebug02->SetPositionX(shadowDebug01->GetPosition3f().x + shadowDebug01->GetScale3f().x);
+	shadowDebug02->SetOrderColNum(2);
+	shadowDebug02->Set2DWVPMatrix();
 
 	SetSceneBounds(meshField->GetBounds());
 	//SetSceneBounds(100.0f, 100.0f, meshField->GetPosition3f());
@@ -104,12 +107,6 @@ void CGame::Draw(const GameTimer& GlobalTimer)
 
 	// CreateShadowMap
 	CRenderer::SetUpNullCubeMapResource();
-	//UpdateShadowPassCB(GlobalTimer);
-	//CRenderer::SetUpBeforeCreateShadowMapReource();
-	//CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque_DynamicReflectors]);
-	//CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque]);
-	//CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque_POM]);
-	//CRenderer::CompleteCreateShadowMapResource();
 
 	// CreateCascadeShadowMap
 	for (UINT i = 0; i < CRenderer::GetCascadNum(); ++i)
@@ -122,7 +119,6 @@ void CGame::Draw(const GameTimer& GlobalTimer)
 		CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque_POM]);
 		CRenderer::CompleteCreateShadowMapResource(i);
 	}
-
 
 	// CreateDynamicCubeMap
 	CRenderer::SetPSO((int)PSOTypeIndex::PSO_Solid_Opaque);
@@ -153,13 +149,19 @@ void CGame::UpdateSceneImGui(const GameTimer& GlobalTimer)
 
 	if (showClose)
 	{
-		ImGui::SetNextWindowPos(ImVec2((float)DX12App::GetApp()->GetWindowWidth() - 420, 220), ImGuiCond_Once);
-		ImGui::SetNextWindowSize(ImVec2(200, 60), ImGuiCond_Once);
+		ImGui::SetNextWindowPos(ImVec2((float)DX12App::GetApp()->GetWindowWidth() - 420, 205), ImGuiCond_Once);
+		ImGui::SetNextWindowSize(ImVec2(200, 65), ImGuiCond_Once);
 
 		ImGuiWindowFlags window_flags = 0;
 		ImGui::Begin(u8"SceneManager", &showClose, window_flags);
 		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.6f);
 		ImGui::Checkbox(u8"ShowCascadeColor", &m_VisualCascade);
+		if (ImGui::DragInt(u8"PCFBlurSize", &m_PCFBlurSize, 0.1f, 1, 5))
+		{
+			m_PCFBlurForLoopStart = m_PCFBlurSize / -2;
+			m_PCFBlurForLoopEnd = m_PCFBlurSize / 2 + 1;
+		}
+		ImGui::DragFloat(u8"ShadowBias", &m_ShadowBias, 0.00001f, -0.1f, 0.01f, "%.4f");
 		ImGui::PopItemWidth();
 		ImGui::End();
 	}

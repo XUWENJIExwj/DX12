@@ -148,7 +148,7 @@ XMMATRIX XM_CALLCONV CDirLight::ComputeShadowTransformWithCameraFrustumForEachCa
 		0.0f,  0.0f, 1.0f, 0.0f,
 		0.5f,  0.5f, 0.0f, 1.0f);
 
-	XMMATRIX S = lightView * lightProj * T;
+	XMMATRIX S = lightProj * T;
 
 	return S;
 }

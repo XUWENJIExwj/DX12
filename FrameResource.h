@@ -4,6 +4,8 @@
 #include "Common\\MathHelper.h"
 #include "Common\\UploadBuffer.h"
 
+#define CASCADE_NUM 3
+
 struct ObjectConstants
 {
     DirectX::XMFLOAT4X4 World = MathHelper::Identity4x4();
@@ -22,8 +24,7 @@ struct PassConstants
     DirectX::XMFLOAT4X4 InvProj = MathHelper::Identity4x4();
     DirectX::XMFLOAT4X4 ViewProj = MathHelper::Identity4x4();
     DirectX::XMFLOAT4X4 InvViewProj = MathHelper::Identity4x4();
-	//DirectX::XMFLOAT4X4 ShadowTransform = MathHelper::Identity4x4();
-	DirectX::XMFLOAT4X4 ShadowTransform[3];
+	DirectX::XMFLOAT4X4 ShadowView;
     DirectX::XMFLOAT3 EyePosW = { 0.0f, 0.0f, 0.0f };
     float cbPerObjectPad1 = 0.0f;
     DirectX::XMFLOAT2 RenderTargetSize = { 0.0f, 0.0f };
@@ -35,7 +36,17 @@ struct PassConstants
 	float MaxBorderPadding = 0.0f;
 	float MinBorderPadding = 0.0f;
 	float ShadowBias = 0.002f;
-	float VitualCascade = 0.0f; // âº
+	float CascadeBlendArea = 0.005f;
+	DirectX::XMFLOAT4 ShadowTexScale[CASCADE_NUM]; // óvëfêî = CascadeNum
+	DirectX::XMFLOAT4 ShadowTexOffset[CASCADE_NUM]; // óvëfêî = CascadeNum
+	int PCFBlurForLoopStart = -1;
+	int PCFBlurForLoopEnd = 2;
+	int cbPerObjectPad2 = 0;
+	int cbPerObjectPad3 = 0;
+	BOOL ViualCascade = false;
+	BOOL cbPerObjectPad4 = false;
+	BOOL cbPerObjectPad5 = false;
+	BOOL cbPerObjectPad6 = false;
     DirectX::XMFLOAT4 AmbientLight = { 0.0f, 0.0f, 0.0f, 1.0f };
 
     // Indices [0, NUM_DIR_LIGHTS) are directional lights;

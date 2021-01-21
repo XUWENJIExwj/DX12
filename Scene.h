@@ -47,6 +47,10 @@ protected:
 
 	DirectX::BoundingSphere m_SceneBounds;
 	DirectX::XMFLOAT4X4     m_ShadowTransform = MathHelper::Identity4x4();
+	int                     m_PCFBlurSize = 3;
+	int                     m_PCFBlurForLoopStart = -1;
+	int                     m_PCFBlurForLoopEnd = 2;
+	float                   m_ShadowBias = 0.001f;
 	bool                    m_VisualCascade = false;
 
 	int m_BeginPSOIndex; // SceneÇÃInitÇ≈ÇÃê›íËÇñYÇÍÇ∏Ç…
