@@ -8,7 +8,8 @@ vector<unique_ptr<Texture>> CTextureManager::m_Textures((int)TextureIndex::Textu
 UINT CTextureManager::m_NullTextureIndex = (int)TextureIndex::Texture_Null_Diffuse;
 UINT CTextureManager::m_SkyCubeMapIndex = (int)TextureIndex::Texture_SkyCube_00_Diffuse;
 UINT CTextureManager::m_ShadowMapIndex = (int)TextureIndex::Texture_Max;
-UINT CTextureManager::m_NullCubeMapIndex = m_ShadowMapIndex + 1;
+UINT CTextureManager::m_ShadowMapNum = 3; // CascadeNum
+UINT CTextureManager::m_NullCubeMapIndex = m_ShadowMapIndex + m_ShadowMapNum;
 UINT CTextureManager::m_DynamicCubeMapIndex = m_NullCubeMapIndex + 1;
 UINT CTextureManager::m_DynamicCubeMapsNum = 4; // DynamicCubeMap‚ª•K—v‚ÈObject‚Ì”‚¾‚¯‘‚â‚µ‚Ä‚¢‚­
 

@@ -46,7 +46,7 @@ void CGame::Init()
 	CMeshField* meshField= AddGameObject<CMeshField>((int)RenderLayers::Layer_3D_Opaque_POM, "MeshField");
 
 	CCube* cube = AddGameObject<CCube>((int)RenderLayers::Layer_3D_Opaque, "Brick");
-	cube->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	cube->SetPosition(XMFLOAT3(0.0f, 50.0f, 300.0f));
 	cube->SetWorldMatrix();
 
 	CSphere* sphere = AddGameObject<CSphere>((int)RenderLayers::Layer_3D_Opaque, "Mirror");
@@ -72,7 +72,15 @@ void CGame::Init()
 	logo01->SetRotation(XMFLOAT3(0.0f, MathHelper::Pi, 0.0f));
 	logo01->SetWorldMatrix();
 
-	CQuad* quad = AddGameObject<CQuad>((int)RenderLayers::Layer_2D_Debug, "ShadowMapDebug");
+	CQuad* quad00 = AddGameObject<CQuad>((int)RenderLayers::Layer_2D_Debug, "Cascade00");
+	CQuad* quad01 = AddGameObject<CQuad>((int)RenderLayers::Layer_2D_Debug, "Cascade01");
+	quad01->SetMaterialNormal((int)MaterialNormalIndex::Material_ShadowMap_01);
+	quad01->SetPositionX(quad00->GetPosition3f().x + quad00->GetScale3f().x);
+	quad01->Set2DWVPMatrix();
+	CQuad* quad02 = AddGameObject<CQuad>((int)RenderLayers::Layer_2D_Debug, "Cascade02");
+	quad02->SetMaterialNormal((int)MaterialNormalIndex::Material_ShadowMap_02);
+	quad02->SetPositionX(quad01->GetPosition3f().x + quad01->GetScale3f().x);
+	quad02->Set2DWVPMatrix();
 
 	SetSceneBounds(meshField->GetBounds());
 	//SetSceneBounds(100.0f, 100.0f, meshField->GetPosition3f());
@@ -101,18 +109,20 @@ void CGame::Draw(const GameTimer& GlobalTimer)
 	//CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque_DynamicReflectors]);
 	//CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque]);
 	//CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque_POM]);
+	//CRenderer::CompleteCreateShadowMapResource();
 
 	// CreateCascadeShadowMap
-	CRenderer::SetUpBeforeCreateCascadeShadowMapReources();
 	for (UINT i = 0; i < CRenderer::GetCascadNum(); ++i)
 	{
+		CRenderer::SetUpBeforeCreateCascadeShadowMapReources(i);
 		UpdateShadowPassCB(GlobalTimer, i);
 		CRenderer::SetUPViewPortAndScissorRectAndPassCBBeforeCreateCascadeShadowMapReources(i);
 		CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque_DynamicReflectors]);
 		CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque]);
 		CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque_POM]);
+		CRenderer::CompleteCreateShadowMapResource(i);
 	}
-	CRenderer::CompleteCreateShadowMapResource();
+
 
 	// CreateDynamicCubeMap
 	CRenderer::SetPSO((int)PSOTypeIndex::PSO_Solid_Opaque);
@@ -133,7 +143,7 @@ void CGame::Draw(const GameTimer& GlobalTimer)
 	//CRenderer::SetPSO((int)PSOTypeIndex::PSO_03_WireFrame_Sky);
 	CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Sky]);
 
-	CRenderer::SetPSO((int)PSOTypeIndex::PSO_LiSPSMDebug);
+	CRenderer::SetPSO((int)PSOTypeIndex::PSO_ShadowMapDebug);
 	CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_2D_Debug]);
 }
 

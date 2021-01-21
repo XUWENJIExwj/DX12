@@ -32,7 +32,7 @@ struct MaterialData
     uint     UseACForPOM;
     uint     MaxSampleCount;
     uint     MinSampleCount;
-    int      IntPad0;
+    uint     CascadeDebugIndex;
     float    HeightScale;
     float    ShadowSoftening;
     float    floatPad0;
@@ -44,16 +44,16 @@ struct MaterialData
 };
 
 TextureCube gCubeMap : register(t0);
-Texture2D gShadowMap : register(t0, space1);
+Texture2D gShadowMap[CASCADE_NUM] : register(t0, space1);
 
 // An array of textures, which is only supported in shader model 5.1+.  Unlike Texture2DArray, the textures
 // in this array can be different sizes and formats, making it more flexible than texture arrays.
 // TextureÇÃêîÇ…ÇÊÇ¡ÇƒÅAîzóÒóvëfêîÇëùÇ‚ÇµÇƒÇ¢Ç≠
-Texture2D gTextureMaps[36] : register(t1);
+Texture2D gTextureMaps[35 + CASCADE_NUM] : register(t1);
 
 // Put in space1, so the texture array does not overlap with these resources.  
-// The texture array will occupy registers t1, ..., t3 in space0. 
-StructuredBuffer<MaterialData> gMaterialData : register(t1, space1);
+// The texture array will occupy registers t0, t1, ..., t3 in space2. 
+StructuredBuffer<MaterialData> gMaterialData : register(t0, space2);
 
 SamplerState gsamPointWrap        : register(s0);
 SamplerState gsamPointClamp       : register(s1);
@@ -136,7 +136,7 @@ float3 NormalSampleToWorldSpace(float3 NormalMapSample, float3 NormalWS, float3 
 //---------------------------------------------------------------------------------------
 // PCF for shadow mapping.
 //---------------------------------------------------------------------------------------
-float CalcShadowFactor(float4 ShadowPosHS)
+float CalcShadowFactor(float4 ShadowPosHS, int CascadeIndex)
 {
     // Complete projection by doing division by w.
     ShadowPosHS.xyz /= ShadowPosHS.w;
@@ -145,7 +145,7 @@ float CalcShadowFactor(float4 ShadowPosHS)
     float depth = ShadowPosHS.z;
 
     uint width, height, numMips;
-    gShadowMap.GetDimensions(0, width, height, numMips);
+    gShadowMap[CascadeIndex].GetDimensions(0, width, height, numMips);
 
     // Texel size.
     float dx = 1.0 / (float)width;
@@ -162,7 +162,7 @@ float CalcShadowFactor(float4 ShadowPosHS)
     [unroll]
     for (int i = 0; i < 9; ++i)
     {
-        percentLit += gShadowMap.SampleCmpLevelZero(gsamShadow,
+        percentLit += gShadowMap[CascadeIndex].SampleCmpLevelZero(gsamShadow,
             ShadowPosHS.xy + offsets[i], depth).r;
     }
     

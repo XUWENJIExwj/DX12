@@ -15,7 +15,7 @@ enum class PSOTypeIndex :int
 	PSO_WireFrame_Sky,
 	PSO_LiSPSM,
 	PSO_LiSPSMWithAlphaTest,
-	PSO_LiSPSMDebug,
+	PSO_ShadowMapDebug,
 	PSO_MAX
 };
 
@@ -73,11 +73,11 @@ private:
 	static int                                        m_CurrentSkyCubeMapIndex;
 
 	// ShadowMap
-	static std::unique_ptr<CShadowMap>   m_ShadowMap;
-	static CD3DX12_GPU_DESCRIPTOR_HANDLE m_ShadowMapDescHandle;
-	static UINT                          m_ShadowMapWidth;
-	static UINT                          m_ShadowMapHeight;
-	static UINT                          m_CascadNum;
+	static UINT                                       m_ShadowMapWidth;
+	static UINT                                       m_ShadowMapHeight;
+	static UINT                                       m_CascadNum;
+	static std::vector<std::unique_ptr<CShadowMap>>   m_ShadowMap;
+	static std::vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> m_ShadowMapDescHandle;
 
 	// DynamicCubeMap
 	static bool                                   m_DynamicCubeMapOn;
@@ -149,8 +149,8 @@ public:
 	static void SetUpCommonResources();
 	static void SetUpNullCubeMapResource();
 	static void SetUpBeforeCreateShadowMapReource();
-	static void CompleteCreateShadowMapResource();
-	static void SetUpBeforeCreateCascadeShadowMapReources();
+	static void CompleteCreateShadowMapResource(int CascadeIndex = 0);
+	static void SetUpBeforeCreateCascadeShadowMapReources(int CascadeIndex);
 	static void SetUPViewPortAndScissorRectAndPassCBBeforeCreateCascadeShadowMapReources(int CascadeIndex);
 	static void SetCurrentSkyCubeMapIndex(int CubeMapIndex) { m_CurrentSkyCubeMapIndex = CubeMapIndex; }
 	static void SetUpSkyCubeMapResources();

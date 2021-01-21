@@ -42,7 +42,9 @@ void CMaterialManager::CreateMaterialNormal()
 		"Material_Plane_02",
 		"Material_Plane_03",
 
-		"Material_ShadowMap",
+		"Material_ShadowMap_00",
+		"Material_ShadowMap_01",
+		"Material_ShadowMap_02",
 	};
 
 	for (int i = 0; i < (int)MaterialNormalIndex::Material_Max; ++i)
@@ -84,9 +86,14 @@ void CMaterialManager::CreateMaterialNormal()
 	m_MaterialNormal[(int)MaterialNormalIndex::Material_Plane_00]->FresnelR0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
 	m_MaterialNormal[(int)MaterialNormalIndex::Material_Plane_00]->Roughness = 0.1f;
 
-	m_MaterialNormal[(int)MaterialNormalIndex::Material_ShadowMap]->DiffuseSrvHeapIndex = CTextureManager::GetShadowMapIndex();
-	m_MaterialNormal[(int)MaterialNormalIndex::Material_ShadowMap]->NormalSrvHeapIndex = (int)TextureIndex::Texture_Null_Normal;
-	m_MaterialNormal[(int)MaterialNormalIndex::Material_ShadowMap]->FresnelR0 = XMFLOAT3(1.0f, 1.0f, 1.0f);
+	for (UINT i = 0; i < CTextureManager::GetShadowMapNum(); ++i)
+	{
+		m_MaterialNormal[(int)MaterialNormalIndex::Material_ShadowMap_00 + i]->DiffuseSrvHeapIndex = CTextureManager::GetShadowMapIndex(i);
+		m_MaterialNormal[(int)MaterialNormalIndex::Material_ShadowMap_00 + i]->NormalSrvHeapIndex = (int)TextureIndex::Texture_Null_Normal;
+		m_MaterialNormal[(int)MaterialNormalIndex::Material_ShadowMap_00 + i]->FresnelR0 = XMFLOAT3(1.0f, 1.0f, 1.0f);
+		m_MaterialNormal[(int)MaterialNormalIndex::Material_ShadowMap_00 + i]->CascadeDebugIndex = i;
+	}
+
 }
 
 void CMaterialManager::CreateMaterialHeight()

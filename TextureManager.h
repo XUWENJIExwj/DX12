@@ -55,6 +55,7 @@ private:
 	static UINT m_NullTextureIndex;
 	static UINT m_SkyCubeMapIndex;
 	static UINT m_ShadowMapIndex;
+	static UINT m_ShadowMapNum;
 	static UINT m_NullCubeMapIndex;
 	static UINT m_DynamicCubeMapIndex;
 	static UINT m_DynamicCubeMapsNum;
@@ -66,7 +67,8 @@ public:
 	static UINT GetTexturesNum() { return (UINT)m_Textures.size(); }
 	static UINT GetNullTextureIndex() { return m_NullTextureIndex; }
 	static UINT GetSkyCubeMapIndex() { return m_SkyCubeMapIndex; }
-	static UINT GetShadowMapIndex() { return m_ShadowMapIndex; }
+	static UINT GetShadowMapIndex(int CascadeIndex = 0) { return m_ShadowMapIndex + CascadeIndex; }
+	static UINT GetShadowMapNum() { return m_ShadowMapNum; }
 	static UINT GetNullCubeMapIndex() { return m_NullCubeMapIndex; }
 	static UINT GetDynamicCubeMapIndex() { return m_DynamicCubeMapIndex; }
 	static UINT GetDynamicCubeMapsNum() { return m_DynamicCubeMapsNum; }

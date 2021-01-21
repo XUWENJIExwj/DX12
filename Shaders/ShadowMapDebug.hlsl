@@ -9,7 +9,7 @@ struct VertexIn
 struct VertexOut
 {
 	float4 PosHS : SV_POSITION;
-	float2 TexC  : TEXCOORD;
+	float2 TexC  : TEXCOORD;   
 };
 
 VertexOut VS(VertexIn vin)
@@ -28,7 +28,8 @@ VertexOut VS(VertexIn vin)
 
 float4 PS(VertexOut pin) : SV_Target
 {
-    return float4(gShadowMap.Sample(gsamLinearWrap, pin.TexC).rrr, 1.0);
+    MaterialData matData = gMaterialData[gMaterialIndex];
+    return float4(gShadowMap[matData.CascadeDebugIndex].Sample(gsamLinearWrap, pin.TexC).rrr, 1.0);
 }
 
 

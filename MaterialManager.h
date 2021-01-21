@@ -17,7 +17,9 @@ enum class MaterialNormalIndex :int
 	Material_Plane_02,
 	Material_Plane_03,
 
-	Material_ShadowMap,
+	Material_ShadowMap_00,
+	Material_ShadowMap_01,
+	Material_ShadowMap_02,
 	Material_Max
 };
 

@@ -55,7 +55,7 @@ VertexOut VS(VertexIn vin)
     vout.TexC = mul(texC, matData.MatTransform).xy;
     
     // Generate projective tex-coords to project shadow map onto scene.
-    vout.ShadowPosHS = mul(posWS, gShadowTransform[1]);
+    vout.ShadowPosHS = mul(posWS, gShadowTransform[0]);
 	
     return vout;
 }
@@ -231,7 +231,8 @@ float4 PS(VertexOut pin) : SV_Target
         }
     }
     
-    shadowFactor[0] *= CalcShadowFactor(pin.ShadowPosHS);
+    // Cascade
+    shadowFactor[0] *= CalcShadowFactor(pin.ShadowPosHS, 0);
     
     float4 directLight = ComputeLighting(gLights, mat, pin.PosWS,
         bumpedNormalWS, toEyeWS, shadowFactor);

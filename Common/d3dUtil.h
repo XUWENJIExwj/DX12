@@ -258,7 +258,7 @@ struct Material
 	int UseACForPOM = 0;
 	int MaxSampleCount = 256; // HeightMap最大サンプル数
 	int MinSampleCount = 8; // HeightMap最小サンプル数
-	int IntPad0 = 1;
+	int CascadeDebugIndex = 0;
 
 	float HeightScale = 0.0f;
 	float ShadowSoftening = 0.9f;

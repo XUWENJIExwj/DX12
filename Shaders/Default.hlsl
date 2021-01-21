@@ -93,8 +93,9 @@ float4 PS(VertexOut pin) : SV_Target
     const float shininess = max(1.0 - roughness, 0.01);
     Material mat = { diffuseAlbedo, fresnelR0, shininess };
 
+    // Cascade
     float3 shadowFactor = float3(1.0, 1.0, 1.0);
-    shadowFactor[0] = CalcShadowFactor(pin.ShadowPosHS);
+    shadowFactor[0] *= CalcShadowFactor(pin.ShadowPosHS, 1);
     
     float4 directLight = ComputeLighting(gLights, mat, pin.PosWS,
         bumpedNormalWS, toEyeWS, shadowFactor);

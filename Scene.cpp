@@ -160,6 +160,7 @@ void CScene::UpdateMaterialBuffer(const GameTimer& GlobalTimer)
 			matData.UseACForPOM = materials[i]->UseACForPOM;
 			matData.MaxSampleCount = materials[i]->MaxSampleCount;
 			matData.MinSampleCount = materials[i]->MinSampleCount;
+			matData.CascadeDebugIndex = materials[i]->CascadeDebugIndex;
 			matData.HeightScale = materials[i]->HeightScale;
 			matData.ShadowSoftening = materials[i]->ShadowSoftening;
 			matData.ShowSelfShadow = materials[i]->ShowSelfShadow;

@@ -56,11 +56,12 @@ vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> CRenderer::m_SkyCubeMapDescHandles;
 int                                   CRenderer::m_CurrentSkyCubeMapIndex = 0;
 
 // ShadowMap
-unique_ptr<CShadowMap>        CRenderer::m_ShadowMap = nullptr;
-CD3DX12_GPU_DESCRIPTOR_HANDLE CRenderer::m_ShadowMapDescHandle;
-UINT                          CRenderer::m_ShadowMapHeight = 2048 * 2;
-UINT                          CRenderer::m_ShadowMapWidth = m_ShadowMapHeight * 3;
-UINT                          CRenderer::m_CascadNum = 3;
+UINT                                  CRenderer::m_ShadowMapHeight = 1024;
+UINT                                  CRenderer::m_ShadowMapWidth = 1024;
+UINT                                  CRenderer::m_CascadNum = CTextureManager::GetShadowMapNum();
+vector<unique_ptr<CShadowMap>>        CRenderer::m_ShadowMap(m_CascadNum);
+vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> CRenderer::m_ShadowMapDescHandle(m_CascadNum);
+
 
 // DynamicCubeMap
 bool                          CRenderer::m_DynamicCubeMapOn = true;
@@ -222,14 +223,17 @@ void CRenderer::CreateRtvAndDsvDescriptorHeaps()
 		&rtvHeapDesc, IID_PPV_ARGS(m_RtvHeap.GetAddressOf())));
 
 	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc;
-	dsvHeapDesc.NumDescriptors = m_DynamicCubeMapOn ? 3 : 2;
+	dsvHeapDesc.NumDescriptors = m_DynamicCubeMapOn ? 2 + m_CascadNum : 1 + m_CascadNum;
 	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
 	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	dsvHeapDesc.NodeMask = 0;
 	ThrowIfFailed(m_D3DDevice->CreateDescriptorHeap(
 		&dsvHeapDesc, IID_PPV_ARGS(m_DsvHeap.GetAddressOf())));
 
-	m_ShadowMap = make_unique<CShadowMap>(m_D3DDevice.Get(), m_ShadowMapWidth, m_ShadowMapHeight, 3);
+	for (UINT i = 0; i < m_CascadNum; ++i)
+	{
+		m_ShadowMap[i] = make_unique<CShadowMap>(m_D3DDevice.Get(), m_ShadowMapWidth, m_ShadowMapHeight);
+	}
 
 	if (m_DynamicCubeMapOn)
 	{
@@ -237,7 +241,7 @@ void CRenderer::CreateRtvAndDsvDescriptorHeaps()
 			m_DynamicCubeMapSize, m_DynamicCubeMapSize, DXGI_FORMAT_R8G8B8A8_UNORM);
 		m_DynamicCubeMapDsvHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
 			m_DsvHeap->GetCPUDescriptorHandleForHeapStart(),
-			2,
+			1 + m_CascadNum,
 			m_DsvDescSize);
 	}
 }
@@ -405,7 +409,7 @@ void CRenderer::CreateRootSignature()
 	cubeMapTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
 
 	CD3DX12_DESCRIPTOR_RANGE shadowMapTable;
-	shadowMapTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 1);
+	shadowMapTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, m_CascadNum, 0, 1);
 
 	CD3DX12_DESCRIPTOR_RANGE texturesTable;
 	texturesTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, CTextureManager::GetTexturesNum() + CTextureManager::GetDynamicCubeMapsNum(), 1, 0);
@@ -416,7 +420,7 @@ void CRenderer::CreateRootSignature()
 	// Perfomance TIP: Order from most frequent to least frequent.
 	slotRootParameter[0].InitAsConstantBufferView(0);
 	slotRootParameter[1].InitAsConstantBufferView(1);
-	slotRootParameter[2].InitAsShaderResourceView(1, 1);
+	slotRootParameter[2].InitAsShaderResourceView(0, 2);
 	slotRootParameter[3].InitAsDescriptorTable(1, &cubeMapTable, D3D12_SHADER_VISIBILITY_PIXEL);
 	slotRootParameter[4].InitAsDescriptorTable(1, &shadowMapTable, D3D12_SHADER_VISIBILITY_PIXEL);
 	slotRootParameter[5].InitAsDescriptorTable(1, &texturesTable, D3D12_SHADER_VISIBILITY_PIXEL);
@@ -451,7 +455,7 @@ void CRenderer::CreateDescriptorHeaps()
 {
 	// Create the SRV heap.
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
-	srvHeapDesc.NumDescriptors = CTextureManager::GetTexturesNum() + 2 + CTextureManager::GetDynamicCubeMapsNum(); // 2 = ShadowMapNum + NullCubeMapNym
+	srvHeapDesc.NumDescriptors = CTextureManager::GetTexturesNum() + m_CascadNum + 1 + CTextureManager::GetDynamicCubeMapsNum(); // 1 = NullCubeMapNym
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	ThrowIfFailed(m_D3DDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_SrvHeap)));
@@ -476,7 +480,7 @@ void CRenderer::CreateDescriptorHeaps()
 	auto textures = CTextureManager::GetTextures().data();
 	UINT skyCubeMap = CTextureManager::GetSkyCubeMapIndex();
 
-	for (unsigned int i = (int)TextureIndex::Texture_Default_00_Diffuse; i < skyCubeMap; ++i)
+	for (UINT i = (int)TextureIndex::Texture_Default_00_Diffuse; i < skyCubeMap; ++i)
 	{
 		auto texture = textures[i]->Resource;
 		srvDesc.Format = texture->GetDesc().Format;
@@ -494,7 +498,7 @@ void CRenderer::CreateDescriptorHeaps()
 
 	UINT shadowMapSrvIndex = CTextureManager::GetShadowMapIndex();
 
-	for (unsigned int i = skyCubeMap; i < shadowMapSrvIndex; ++i)
+	for (UINT i = skyCubeMap; i < shadowMapSrvIndex; ++i)
 	{
 		m_SkyCubeMapDescHandles.push_back(ComputeGpuSrvDescHandle(i));
 		auto texture = textures[i]->Resource;
@@ -511,12 +515,15 @@ void CRenderer::CreateDescriptorHeaps()
 	auto dsvCpuStart = m_DsvHeap->GetCPUDescriptorHandleForHeapStart();
 	m_NullTextureDescHandle = gpuSrvStart;
 
-	m_ShadowMapDescHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(gpuSrvStart, shadowMapSrvIndex, m_CbvSrvUavDescSize);
-	m_ShadowMap->CreateDescriptors(
-		CD3DX12_CPU_DESCRIPTOR_HANDLE(cpuSrvStart, shadowMapSrvIndex, m_CbvSrvUavDescSize),
-		m_ShadowMapDescHandle,
-		CD3DX12_CPU_DESCRIPTOR_HANDLE(dsvCpuStart, 1, m_DsvDescSize));
-	descHandle.Offset(1, m_CbvSrvUavDescSize);
+	for (UINT i = 0; i < m_CascadNum; ++i)
+	{
+		m_ShadowMapDescHandle[i] = CD3DX12_GPU_DESCRIPTOR_HANDLE(gpuSrvStart, shadowMapSrvIndex + i, m_CbvSrvUavDescSize);
+		m_ShadowMap[i]->CreateDescriptors(
+			CD3DX12_CPU_DESCRIPTOR_HANDLE(cpuSrvStart, shadowMapSrvIndex + i, m_CbvSrvUavDescSize),
+			m_ShadowMapDescHandle[i],
+			CD3DX12_CPU_DESCRIPTOR_HANDLE(dsvCpuStart, 1 + i, m_DsvDescSize));
+		descHandle.Offset(1, m_CbvSrvUavDescSize);
+	}
 
 	// NullTextureCube
 	UINT nullCubeSrvIndex = CTextureManager::GetNullCubeMapIndex();
@@ -709,15 +716,15 @@ void CRenderer::CreataPSOs()
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC debugPsoDesc = opaquePsoDesc;
 	debugPsoDesc.VS =
 	{
-		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSMDebug].vertexShader->GetBufferPointer()),
-		shaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSMDebug].vertexShader->GetBufferSize()
+		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapDebug].vertexShader->GetBufferPointer()),
+		shaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapDebug].vertexShader->GetBufferSize()
 	};
 	debugPsoDesc.PS =
 	{
-		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSMDebug].pixelShader->GetBufferPointer()),
-		shaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSMDebug].pixelShader->GetBufferSize()
+		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapDebug].pixelShader->GetBufferPointer()),
+		shaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapDebug].pixelShader->GetBufferSize()
 	};
-	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&debugPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_LiSPSMDebug])));
+	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&debugPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_ShadowMapDebug])));
 }
 
 // ƒQƒbƒ^[
@@ -919,7 +926,7 @@ void CRenderer::SetUpCommonResources()
 	m_CommandList->SetGraphicsRootShaderResourceView(2, matBuffer->GetGPUVirtualAddress());
 
 	// Bind ShadowMap
-	m_CommandList->SetGraphicsRootDescriptorTable(4, m_ShadowMapDescHandle);
+	m_CommandList->SetGraphicsRootDescriptorTable(4, m_ShadowMapDescHandle[0]);
 
 	// Bind all the textures used in this scene.  Observe
 	// that we only have to specify the first descriptor in the table.  
@@ -934,21 +941,21 @@ void CRenderer::SetUpNullCubeMapResource()
 
 void CRenderer::SetUpBeforeCreateShadowMapReource()
 {
-	m_CommandList->RSSetViewports(1, &m_ShadowMap->GetViewport());
-	m_CommandList->RSSetScissorRects(1, &m_ShadowMap->GetScissorRect());
+	m_CommandList->RSSetViewports(1, &m_ShadowMap[0]->GetViewport());
+	m_CommandList->RSSetScissorRects(1, &m_ShadowMap[0]->GetScissorRect());
 
 	// Change to DEPTH_WRITE.
-	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_ShadowMap->GetResource(),
+	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_ShadowMap[0]->GetResource(),
 		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_DEPTH_WRITE));
 
 	// Clear the back buffer and depth buffer.
-	m_CommandList->ClearDepthStencilView(m_ShadowMap->GetDsvHandle(),
+	m_CommandList->ClearDepthStencilView(m_ShadowMap[0]->GetDsvHandle(),
 		D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 	// Set null render target because we are only going to draw to
 	// depth buffer.  Setting a null render target will disable color writes.
 	// Note the active PSO also must specify a render target count of 0.
-	m_CommandList->OMSetRenderTargets(0, nullptr, false, &m_ShadowMap->GetDsvHandle());
+	m_CommandList->OMSetRenderTargets(0, nullptr, false, &m_ShadowMap[0]->GetDsvHandle());
 
 	// Bind the pass constant buffer for the shadow map pass.
 	auto passCB = CFrameResourceManager::GetCurrentFrameResource()->PassCB->Resource();
@@ -956,26 +963,26 @@ void CRenderer::SetUpBeforeCreateShadowMapReource()
 	m_CommandList->SetGraphicsRootConstantBufferView(1, passCBAddress);
 }
 
-void CRenderer::SetUpBeforeCreateCascadeShadowMapReources()
+void CRenderer::SetUpBeforeCreateCascadeShadowMapReources(int CascadeIndex)
 {
 	// Change to DEPTH_WRITE.
-	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_ShadowMap->GetResource(),
+	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_ShadowMap[CascadeIndex]->GetResource(),
 		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_DEPTH_WRITE));
 
 	// Clear the back buffer and depth buffer.
-	m_CommandList->ClearDepthStencilView(m_ShadowMap->GetDsvHandle(),
+	m_CommandList->ClearDepthStencilView(m_ShadowMap[CascadeIndex]->GetDsvHandle(),
 		D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 	// Set null render target because we are only going to draw to
 	// depth buffer.  Setting a null render target will disable color writes.
 	// Note the active PSO also must specify a render target count of 0.
-	m_CommandList->OMSetRenderTargets(0, nullptr, false, &m_ShadowMap->GetDsvHandle());
+	m_CommandList->OMSetRenderTargets(0, nullptr, false, &m_ShadowMap[CascadeIndex]->GetDsvHandle());
 }
 
 void CRenderer::SetUPViewPortAndScissorRectAndPassCBBeforeCreateCascadeShadowMapReources(int CascadeIndex)
 {
-	m_CommandList->RSSetViewports(1, &m_ShadowMap->GetViewport(CascadeIndex));
-	m_CommandList->RSSetScissorRects(1, &m_ShadowMap->GetScissorRect(CascadeIndex));
+	m_CommandList->RSSetViewports(1, &m_ShadowMap[CascadeIndex]->GetViewport());
+	m_CommandList->RSSetScissorRects(1, &m_ShadowMap[CascadeIndex]->GetScissorRect());
 
 	// Bind the pass constant buffer for the shadow map pass.
 	auto passCB = CFrameResourceManager::GetCurrentFrameResource()->PassCB->Resource();
@@ -983,10 +990,10 @@ void CRenderer::SetUPViewPortAndScissorRectAndPassCBBeforeCreateCascadeShadowMap
 	m_CommandList->SetGraphicsRootConstantBufferView(1, passCBAddress);
 }
 
-void CRenderer::CompleteCreateShadowMapResource()
+void CRenderer::CompleteCreateShadowMapResource(int CascadeIndex)
 {
 	// Change back to GENERIC_READ so we can read the texture in a shader.
-	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_ShadowMap->GetResource(),
+	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_ShadowMap[CascadeIndex]->GetResource(),
 		D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ));
 }
 

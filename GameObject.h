@@ -58,12 +58,15 @@ public:
 	void SetRenderLayer(int RenderLayer) { m_RenderLayer = RenderLayer; }
 	void SetName(std::string Name) { m_Name = Name; }
 	void SetPosition(DirectX::XMFLOAT3 Position) { m_Position = m_OldPosition = Position; }
+	void SetPositionX(float PosX) { m_Position.x = m_OldPosition.x = PosX; }
 	void SetRotation(DirectX::XMFLOAT3 Rotation) { m_Rotation = Rotation; }
 	void SetScale(DirectX::XMFLOAT3 Scale) { m_Scale = Scale; }
 	void SetWorldMatrix() { m_World = ComputeWorldMatrix4x4(); }
+	void Set2DWVPMatrix() { m_World = Compute2DWVPMatrix4x4(); }
 	void SetDestroy() { m_Destroy = true; }
 	void SetNumFramesDirty(int NumFramesDirty) { m_NumFramesDirty = NumFramesDirty; }
 	void SetObjCBIndex(UINT ObjCBIndex) { m_ObjCBIndex = ObjCBIndex; }
+	void SetMaterialNormal(int MaterialIndex) { m_Material = CMaterialManager::GetMaterialNormal(MaterialIndex); }
 
 	int GetGameObjectLayer() { return m_RenderLayer; }
 

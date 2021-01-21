@@ -1,25 +1,15 @@
 #include "ShadowMap.h"
  
-CShadowMap::CShadowMap(ID3D12Device* Device, UINT Width, UINT Height, UINT CascadNum)
+CShadowMap::CShadowMap(ID3D12Device* Device, UINT Width, UINT Height)
 {
 	m_D3dDevice = Device;
 
 	m_Width = Width;
 	m_Height = Height;
 
-	m_Viewports.resize(CascadNum);
-	m_ScissorRects.resize(CascadNum);
+	m_Viewport = { 0.0f, 0.0f, (float)Width, (float)Height, 0.0f, 1.0f };
+	m_ScissorRect = { 0, 0, (int)Width, (int)Height };
 	
-	float start, end;
-	float width = (float)Width / CascadNum;
-
-	for (UINT i = 0; i < CascadNum; ++i)
-	{
-		start = i * width;
-		end = start + width;
-		m_Viewports[i] = { start, 0.0f, end, (float)Height, 0.0f, 1.0f };
-		m_ScissorRects[i] = { (int)start, 0, (int)end, (int)Height };
-	}
 
 	CreateResource();
 }

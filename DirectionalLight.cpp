@@ -98,10 +98,10 @@ XMMATRIX XM_CALLCONV CDirLight::ComputeShadowTransformWithCameraFrustum(Bounding
 
 	// Transform NDC space [-1,+1]^2 to texture space [0,1]^2
 	XMMATRIX T(
-		0.5f / 3,  0.0f, 0.0f, 0.0f,
-		0.0f,     -0.5f, 0.0f, 0.0f,
-		0.0f,      0.0f, 1.0f, 0.0f,
-		0.5f / 3,  0.5f, 0.0f, 1.0f);
+		0.5f,  0.0f, 0.0f, 0.0f,
+		0.0f, -0.5f, 0.0f, 0.0f,
+		0.0f,  0.0f, 1.0f, 0.0f,
+		0.5f,  0.5f, 0.0f, 1.0f);
 
 	XMMATRIX S = lightView * lightProj * T;
 
@@ -143,10 +143,10 @@ XMMATRIX XM_CALLCONV CDirLight::ComputeShadowTransformWithCameraFrustumForEachCa
 
 	// Transform NDC space [-1,+1]^2 to texture space [0,1]^2
 	XMMATRIX T(
-		0.5f / m_Proj.size(), 0.0f, 0.0f, 0.0f,
+		0.5f,  0.0f, 0.0f, 0.0f,
 		0.0f, -0.5f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
-		0.5f / m_Proj.size() + 0.5f / m_Proj.size() * CascadeIndex * 2, 0.5f, 0.0f, 1.0f);
+		0.0f,  0.0f, 1.0f, 0.0f,
+		0.5f,  0.5f, 0.0f, 1.0f);
 
 	XMMATRIX S = lightView * lightProj * T;
 

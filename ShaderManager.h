@@ -7,7 +7,7 @@ enum class VertexShaderIndex :int
 	VS_Sky,
 	VS_LiSPSM,
 	VS_LiSPSMWithAlphaTest,
-	VS_LiSPSMMapDebug,
+	VS_ShadowMapDebug,
 	VS_Max
 };
 
@@ -18,7 +18,7 @@ enum class PixelShaderIndex :int
 	PS_Sky,
 	PS_LiSPSM,
 	PS_LiSPSMWithAlphaTest,
-	PS_LiSPSMDebug,
+	PS_ShadowMapDebug,
 	PS_Max
 };
 
@@ -29,7 +29,7 @@ enum class ShaderTypeIndex :int
 	Shader_Type_Sky,
 	Shader_Type_LiSPSM,
 	Shader_Type_LiSPSMWithAlphaTest,
-	Shader_Type_LiSPSMDebug,
+	Shader_Type_ShadowMapDebug,
 	Shader_Type_Max
 };
 

@@ -43,6 +43,6 @@ void CShaderManager::LoadShaders()
 	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSMWithAlphaTest].vertexShader = d3dUtil::CompileShader(L"Shaders\\lightSpacePSM.hlsl", nullptr, "VS", "vs_5_1");
 	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSMWithAlphaTest].pixelShader = d3dUtil::CompileShader(L"Shaders\\lightSpacePSM.hlsl", alphaTestDefines, "PS", "ps_5_1");
 
-	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSMDebug].vertexShader = d3dUtil::CompileShader(L"Shaders\\lightSpacePSMDebug.hlsl", nullptr, "VS", "vs_5_1");
-	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_LiSPSMDebug].pixelShader = d3dUtil::CompileShader(L"Shaders\\lightSpacePSMDebug.hlsl", nullptr, "PS", "ps_5_1");
+	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapDebug].vertexShader = d3dUtil::CompileShader(L"Shaders\\ShadowMapDebug.hlsl", nullptr, "VS", "vs_5_1");
+	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapDebug].pixelShader = d3dUtil::CompileShader(L"Shaders\\ShadowMapDebug.hlsl", nullptr, "PS", "ps_5_1");
 }
