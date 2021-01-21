@@ -31,8 +31,11 @@ struct VertexOut
     float2 TexC        : TEXCOORD;
 };
 
+
 VertexOut VS(VertexIn vin)
 {
+    //int cascadeIndex = 0;
+    
     VertexOut vout = (VertexOut) 0.0;
 
 	// Fetch the material data.
@@ -55,7 +58,7 @@ VertexOut VS(VertexIn vin)
     vout.TexC = mul(texC, matData.MatTransform).xy;
     
     // Generate projective tex-coords to project shadow map onto scene.
-    vout.ShadowPosHS = mul(posWS, gShadowTransform[0]);
+    vout.ShadowPosHS = posWS;
 	
     return vout;
 }
@@ -232,7 +235,24 @@ float4 PS(VertexOut pin) : SV_Target
     }
     
     // Cascade
-    shadowFactor[0] *= CalcShadowFactor(pin.ShadowPosHS, 0);
+    int cascadeFound = 0;
+    int currentCascadeIndex = 0;
+    float4 shadowMapTexHS = 0.0;
+    
+    for (int i = 0; i < CASCADE_NUM && cascadeFound == 0; ++i)
+    {
+        shadowMapTexHS = mul(pin.ShadowPosHS, gShadowTransform[i]);
+ 
+        if (min(shadowMapTexHS.x, shadowMapTexHS.y) > gMinBorderPadding && 
+            max(shadowMapTexHS.x, shadowMapTexHS.y) < gMaxBorderPadding && 
+            shadowMapTexHS.z > 0.0 && gMaxBorderPadding && shadowMapTexHS.z < 1.0)
+        {
+            currentCascadeIndex = i;
+            cascadeFound = 1;
+        }
+    }
+
+    shadowFactor[0] *= CalcShadowFactor(shadowMapTexHS, currentCascadeIndex);
     
     float4 directLight = ComputeLighting(gLights, mat, pin.PosWS,
         bumpedNormalWS, toEyeWS, shadowFactor);
@@ -244,6 +264,14 @@ float4 PS(VertexOut pin) : SV_Target
     float4 reflectionColor = gCubeMap.Sample(gsamLinearWrap, r) * cubeMapDiffuseAlbedo;
     float3 fresnelFactor = SchlickFresnel(fresnelR0, bumpedNormalWS, r);
     litColor.rgb += shininess * fresnelFactor * reflectionColor.rgb;
+    
+    // CascadeVisualOn
+    float4 visualCascadeColor = 1.0f;
+    if(gVisualCascade > 1.0f)
+    {
+        visualCascadeColor = gCascadeColorsMultiplier[currentCascadeIndex];
+    }
+    litColor *= visualCascadeColor;
 
     // Common convention to take alpha from diffuse albedo.
     litColor.a = diffuseAlbedo.a;

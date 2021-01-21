@@ -33,6 +33,8 @@ struct VertexOut
 
 VertexOut VS(VertexIn vin)
 {
+    //int cascadeIndex = 0;
+    
 	VertexOut vout = (VertexOut)0.0f;
 
 	// Fetch the material data.
@@ -55,13 +57,16 @@ VertexOut VS(VertexIn vin)
 	vout.TexC = mul(texC, matData.MatTransform).xy;
     
     // Generate projective tex-coords to project shadow map onto scene.
-    vout.ShadowPosHS = mul(posWS, gShadowTransform[0]);
+    //vout.ShadowPosHS = mul(posWS, gShadowTransform[cascadeIndex]);
+    vout.ShadowPosHS = posWS;
 	
     return vout;
 }
 
 float4 PS(VertexOut pin) : SV_Target
 {
+    int cascadeIndex = 0;
+    
 	// Fetch the material data.
 	MaterialData matData = gMaterialData[gMaterialIndex];
 	float4 diffuseAlbedo = matData.DiffuseAlbedo;
@@ -95,7 +100,7 @@ float4 PS(VertexOut pin) : SV_Target
 
     // Cascade
     float3 shadowFactor = float3(1.0, 1.0, 1.0);
-    shadowFactor[0] *= CalcShadowFactor(pin.ShadowPosHS, 1);
+    shadowFactor[0] *= CalcShadowFactor(pin.ShadowPosHS, cascadeIndex);
     
     float4 directLight = ComputeLighting(gLights, mat, pin.PosWS,
         bumpedNormalWS, toEyeWS, shadowFactor);

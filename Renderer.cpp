@@ -56,8 +56,8 @@ vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> CRenderer::m_SkyCubeMapDescHandles;
 int                                   CRenderer::m_CurrentSkyCubeMapIndex = 0;
 
 // ShadowMap
-UINT                                  CRenderer::m_ShadowMapHeight = 1024;
-UINT                                  CRenderer::m_ShadowMapWidth = 1024;
+UINT                                  CRenderer::m_ShadowMapHeight = 512;
+UINT                                  CRenderer::m_ShadowMapWidth = m_ShadowMapHeight;
 UINT                                  CRenderer::m_CascadNum = CTextureManager::GetShadowMapNum();
 vector<unique_ptr<CShadowMap>>        CRenderer::m_ShadowMap(m_CascadNum);
 vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> CRenderer::m_ShadowMapDescHandle(m_CascadNum);
@@ -680,8 +680,8 @@ void CRenderer::CreataPSOs()
 
 	// PSO for shadow map pass
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC shadowMapPsoDesc = opaquePsoDesc;
-	shadowMapPsoDesc.RasterizerState.DepthBias = 4500;
-	shadowMapPsoDesc.RasterizerState.DepthBiasClamp = 0.0f;
+	//shadowMapPsoDesc.RasterizerState.DepthBias = 4500;
+	//shadowMapPsoDesc.RasterizerState.DepthBiasClamp = 0.0f;
 	shadowMapPsoDesc.RasterizerState.SlopeScaledDepthBias = 1.0f;
 	shadowMapPsoDesc.VS =
 	{

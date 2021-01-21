@@ -32,7 +32,10 @@ struct PassConstants
     float FarZ = 0.0f;
     float TotalTime = 0.0f;
     float DeltaTime = 0.0f;
-
+	float MaxBorderPadding = 0.0f;
+	float MinBorderPadding = 0.0f;
+	float ShadowBias = 0.002f;
+	float VitualCascade = 0.0f; // ‰¼
     DirectX::XMFLOAT4 AmbientLight = { 0.0f, 0.0f, 0.0f, 1.0f };
 
     // Indices [0, NUM_DIR_LIGHTS) are directional lights;

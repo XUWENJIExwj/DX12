@@ -93,6 +93,10 @@ cbuffer cbPass : register(b1)
     float    gFarZ;
     float    gTotalTime;
     float    gDeltaTime;
+    float    gMaxBorderPadding;
+    float    gMinBorderPadding;
+    float    gShadowBias;
+    float    gVisualCascade; // ‰¼
     float4   gAmbientLight;
 
     // Indices [0, NUM_DIR_LIGHTS) are directional lights;
@@ -106,6 +110,19 @@ cbuffer cbCascadeShadow : register(b2)
 {
     float4x4 gCSMProj[CASCADE_NUM];
 };
+
+static const float4 gCascadeColorsMultiplier[8] =
+{
+    float4(1.5f, 0.0f, 0.0f, 1.0f),
+	float4(0.0f, 1.5f, 0.0f, 1.0f),
+	float4(0.0f, 0.0f, 5.5f, 1.0f),
+	float4(1.5f, 0.0f, 5.5f, 1.0f),
+	float4(1.5f, 1.5f, 0.0f, 1.0f),
+	float4(1.0f, 1.0f, 1.0f, 1.0f),
+	float4(0.0f, 1.0f, 5.5f, 1.0f),
+	float4(0.5f, 3.5f, 0.75f, 1.0f)
+};
+
 
 float3x3 ComputeTBN(float3 NormalWS, float3 TangentWS, int BitangentSign)
 {
@@ -142,7 +159,7 @@ float CalcShadowFactor(float4 ShadowPosHS, int CascadeIndex)
     ShadowPosHS.xyz /= ShadowPosHS.w;
 
     // Depth in NDC space.
-    float depth = ShadowPosHS.z;
+    //float depth = ShadowPosHS.z;
 
     uint width, height, numMips;
     gShadowMap[CascadeIndex].GetDimensions(0, width, height, numMips);
@@ -162,6 +179,8 @@ float CalcShadowFactor(float4 ShadowPosHS, int CascadeIndex)
     [unroll]
     for (int i = 0; i < 9; ++i)
     {
+        float depth = ShadowPosHS.z;
+        depth -= gShadowBias * pow((CascadeIndex + 1), 2);
         percentLit += gShadowMap[CascadeIndex].SampleCmpLevelZero(gsamShadow,
             ShadowPosHS.xy + offsets[i], depth).r;
     }

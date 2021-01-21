@@ -47,6 +47,7 @@ protected:
 
 	DirectX::BoundingSphere m_SceneBounds;
 	DirectX::XMFLOAT4X4     m_ShadowTransform = MathHelper::Identity4x4();
+	bool                    m_VisualCascade = false;
 
 	int m_BeginPSOIndex; // SceneÇÃInitÇ≈ÇÃê›íËÇñYÇÍÇ∏Ç…
 
@@ -63,6 +64,7 @@ public:
 	virtual void Draw(const GameTimer& GlobalTimer) = 0;
 
 	virtual void UpdateImGui(const GameTimer& GlobalTimer);
+	virtual void UpdateSceneImGui(const GameTimer& GlobalTimer) {}
 	virtual void UpdateGameObjectsCB(const GameTimer& GlobalTimer);
 	virtual void UpdateMaterialBuffer(const GameTimer& GlobalTimer);
 	virtual void UpdateMainPassCB(const GameTimer& GlobalTimer);

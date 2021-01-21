@@ -92,8 +92,10 @@ void CScene::LateUpdate(const GameTimer& GlobalTimer)
 	}
 }
 
-void CScene::UpdateImGui(const GameTimer & GlobalTimer)
+void CScene::UpdateImGui(const GameTimer& GlobalTimer)
 {
+	UpdateSceneImGui(GlobalTimer);
+
 	for (int i = 0; i < (int)RenderLayers::Layer_Max; ++i)
 	{
 		for (CGameObject* gameObject : m_AllRenderLayers[i])
@@ -202,6 +204,16 @@ void CScene::UpdateMainPassCB(const GameTimer& GlobalTimer)
 	m_MainPassCB.TotalTime = GlobalTimer.TotalTime();
 	m_MainPassCB.DeltaTime = GlobalTimer.DeltaTime();
 
+	float shadowMapSize = (float)CRenderer::GetShadowMapWidth();
+	m_MainPassCB.MaxBorderPadding = (shadowMapSize - 0.1f) / shadowMapSize;
+	m_MainPassCB.MinBorderPadding = 1.0f / shadowMapSize;
+	m_MainPassCB.ShadowBias = 0.002f;
+	m_MainPassCB.VitualCascade = 0.0f;
+	if (m_VisualCascade)
+	{
+		m_MainPassCB.VitualCascade = 2.0f;
+	}
+
 	// Light
 	if (m_DirLights.size() > 0)
 	{
@@ -215,10 +227,11 @@ void CScene::UpdateMainPassCB(const GameTimer& GlobalTimer)
 		//XMStoreFloat4x4(&m_ShadowTransform, shadowTransform);
 
 		// CSM
-		vector<vector<XMVECTOR>> vfrustumPoints(CRenderer::GetCascadNum());
-		m_MainCamera->ComputeFrustumPointsInWorldSpace(vfrustumPoints, invView);
+		vector<vector<XMVECTOR>> frustumPoints(CRenderer::GetCascadNum());
+		m_MainCamera->ComputeFrustumPointsInWorldSpace(frustumPoints, invView);
 		vector<XMMATRIX> shadowTransforms(CRenderer::GetCascadNum());
-		m_DirLights[0]->ComputeShadowTransformWithCameraFrustum(shadowTransforms, &m_SceneBounds, vfrustumPoints);
+		m_DirLights[0]->ComputeShadowTransformWithCameraFrustum(shadowTransforms, &m_SceneBounds, frustumPoints);
+
 		for (UINT i = 0; i < shadowTransforms.size(); ++i)
 		{
 			XMStoreFloat4x4(&m_MainPassCB.ShadowTransform[i], XMMatrixTranspose(shadowTransforms[i]));

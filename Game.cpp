@@ -55,17 +55,17 @@ void CGame::Init()
 	// è„éÆÇèÌÇ…ê¨ÇËóßÇΩÇπÇÈïKóvÇ™Ç†ÇÈ
 	CSphere* sphereDR0 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror00");
 
-	CSphere* sphereDR1 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror01");
-	sphereDR1->SetPosition(XMFLOAT3(-3.0f, 1.0f, 0.0f));
-	sphereDR1->SetWorldMatrix();
+	//CSphere* sphereDR1 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror01");
+	//sphereDR1->SetPosition(XMFLOAT3(-3.0f, 1.0f, 0.0f));
+	//sphereDR1->SetWorldMatrix();
 
-	CSphere* sphereDR2 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror02");
-	sphereDR2->SetPosition(XMFLOAT3(0.0f, 2.0f, 3.0f));
-	sphereDR2->SetWorldMatrix();
+	//CSphere* sphereDR2 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror02");
+	//sphereDR2->SetPosition(XMFLOAT3(0.0f, 2.0f, 3.0f));
+	//sphereDR2->SetWorldMatrix();
 
-	CSphere* sphereDR3 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror03");
-	sphereDR3->SetPosition(XMFLOAT3(0.0f, 0.5f, 2.0f));
-	sphereDR3->SetWorldMatrix();
+	//CSphere* sphereDR3 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror03");
+	//sphereDR3->SetPosition(XMFLOAT3(0.0f, 0.5f, 2.0f));
+	//sphereDR3->SetWorldMatrix();
 
 	CLogo* logo00 = AddGameObject<CLogo>((int)RenderLayers::Layer_3D_Opaque, "Logo00");
 	CLogo* logo01 = AddGameObject<CLogo>((int)RenderLayers::Layer_3D_Opaque, "Logo01");
@@ -145,6 +145,24 @@ void CGame::Draw(const GameTimer& GlobalTimer)
 
 	CRenderer::SetPSO((int)PSOTypeIndex::PSO_ShadowMapDebug);
 	CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_2D_Debug]);
+}
+
+void CGame::UpdateSceneImGui(const GameTimer& GlobalTimer)
+{
+	static bool showClose = true;
+
+	if (showClose)
+	{
+		ImGui::SetNextWindowPos(ImVec2((float)DX12App::GetApp()->GetWindowWidth() - 420, 220), ImGuiCond_Once);
+		ImGui::SetNextWindowSize(ImVec2(200, 60), ImGuiCond_Once);
+
+		ImGuiWindowFlags window_flags = 0;
+		ImGui::Begin(u8"SceneManager", &showClose, window_flags);
+		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.6f);
+		ImGui::Checkbox(u8"ShowCascadeColor", &m_VisualCascade);
+		ImGui::PopItemWidth();
+		ImGui::End();
+	}
 }
 
 void CGame::OnResize()

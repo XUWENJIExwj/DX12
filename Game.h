@@ -13,5 +13,7 @@ public:
 	void UpdateAll(const GameTimer& GlobalTimer)override;
 	void Draw(const GameTimer& GlobalTimer)override;
 
+	void UpdateSceneImGui(const GameTimer& GlobalTimer)override;
+
 	void OnResize()override;
 };
