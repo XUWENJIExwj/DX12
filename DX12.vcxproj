@@ -145,6 +145,7 @@
   <ItemGroup>
     <ClInclude Include="Common\Keyboard.h" />
     <ClInclude Include="Common\Mouse.h" />
+    <ClInclude Include="CSMManager.h" />
     <ClInclude Include="Cube.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CameraDynamicCubeMap.h" />
@@ -193,6 +194,7 @@
   <ItemGroup>
     <ClCompile Include="Common\Keyboard.cpp" />
     <ClCompile Include="Common\Mouse.cpp" />
+    <ClCompile Include="CSMManager.cpp" />
     <ClCompile Include="Cube.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CameraDynamicCubeMap.cpp" />

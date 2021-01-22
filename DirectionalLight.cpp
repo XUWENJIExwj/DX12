@@ -17,7 +17,7 @@ XMFLOAT3 CDirLight::ComputeDirection3f()
 	return m_Direction;
 }
 
-DirectX::XMVECTOR XM_CALLCONV CDirLight::ComputeDirection()
+XMVECTOR XM_CALLCONV CDirLight::ComputeDirection()
 {
 	XMVECTOR direction = XMLoadFloat3(&m_BaseDirection);
 	direction = XMVector3TransformNormal(direction, XMMatrixRotationY(m_Rotation.y));
@@ -25,7 +25,7 @@ DirectX::XMVECTOR XM_CALLCONV CDirLight::ComputeDirection()
 	return direction;
 }
 
-DirectX::XMMATRIX XM_CALLCONV CDirLight::ComputeLightView(DirectX::BoundingSphere * SceneBounds)
+XMMATRIX XM_CALLCONV CDirLight::ComputeLightView(BoundingSphere* SceneBounds)
 {
 	XMVECTOR lightDir = ComputeDirection();
 	XMVECTOR lightPos = -2.0f * SceneBounds->Radius * lightDir;
@@ -41,8 +41,7 @@ DirectX::XMMATRIX XM_CALLCONV CDirLight::ComputeLightView(DirectX::BoundingSpher
 
 XMMATRIX XM_CALLCONV CDirLight::ComputeShadowTransformWithSceneBounds(BoundingSphere* SceneBounds)
 {
-	// Only the first "main" light casts a shadow.
-	XMMATRIX lightView = ComputeLightView(SceneBounds);
+	XMMATRIX lightView = GetView();
 
 	// Transform bounding sphere to light space.
 	XMFLOAT3 sphereCenterLS;
@@ -76,11 +75,10 @@ XMMATRIX XM_CALLCONV CDirLight::ComputeShadowTransformWithSceneBounds(BoundingSp
 
 XMMATRIX XM_CALLCONV CDirLight::ComputeShadowTransformWithCameraFrustum(BoundingSphere* SceneBounds, XMVECTOR FrustumPoints[8])
 {
-	// SceneÇÃãÖñ è„ÇÃlightView
-	XMMATRIX lightView = ComputeLightView(SceneBounds);
+	XMMATRIX lightView = GetView();
 
 	XMVECTOR min, max;
-	min = max = FrustumPoints[0] = XMVector3TransformCoord(FrustumPoints[0], lightView);
+	min = max = FrustumPoints[0] = XMVector3TransformCoord(FrustumPoints[0], GetView());
 
 	for (int i = 1; i < 8; ++i)
 	{
@@ -110,9 +108,6 @@ XMMATRIX XM_CALLCONV CDirLight::ComputeShadowTransformWithCameraFrustum(Bounding
 
 void CDirLight::ComputeShadowTransformWithCameraFrustum(vector<XMMATRIX>& ShadowTransforms, BoundingSphere* SceneBounds, vector<vector<XMVECTOR>>& FrustumPoints)
 {
-	// SceneÇÃãÖñ è„ÇÃlightView
-	XMMATRIX lightView = ComputeLightView(SceneBounds);
-
 	for (UINT i = 0; i < ShadowTransforms.size(); ++i)
 	{
 		ShadowTransforms[i] = ComputeShadowTransformWithCameraFrustumForEachCascade(FrustumPoints[i], i);

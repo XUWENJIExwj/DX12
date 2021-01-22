@@ -45,13 +45,15 @@ protected:
 	std::vector<CCamera*>   m_DCMCameras;
 	std::vector<CDirLight*> m_DirLights;
 
-	DirectX::BoundingSphere m_SceneBounds;
+	DirectX::BoundingSphere m_SceneBoundingSphere;
+	DirectX::BoundingBox    m_SceneBoundingBox;
 	DirectX::XMFLOAT4X4     m_ShadowTransform = MathHelper::Identity4x4();
 	int                     m_PCFBlurSize = 3;
 	int                     m_PCFBlurForLoopStart = -1;
 	int                     m_PCFBlurForLoopEnd = 2;
 	float                   m_ShadowBias = 0.001f;
 	bool                    m_VisualCascade = false;
+	bool                    m_BlendCascade = true;
 
 	int m_BeginPSOIndex; // SceneÇÃInitÇ≈ÇÃê›íËÇñYÇÍÇ∏Ç…
 
@@ -82,9 +84,13 @@ public:
 	void SetUpDynamicCubeMapCamera(DirectX::XMFLOAT3 Center);
 	void CheckNecessaryCBBufferSize();
 
-	void SetSceneBounds(DirectX::BoundingBox* Bounds);
-	void SetSceneBounds(DirectX::BoundingSphere* Bounds) { m_SceneBounds = *Bounds; }
-	void SetSceneBounds(float Width, float Height, DirectX::XMFLOAT3 Center = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f));
+	void SetSceneBoundingSphere(DirectX::BoundingBox* Bounds);
+	void SetSceneBoundingSphere(DirectX::BoundingSphere* Bounds) { m_SceneBoundingSphere = *Bounds; }
+	void SetSceneBoundingSphere(float Width, float Height, DirectX::XMFLOAT3 Center = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f));
+	void CreateSceneAABBPoints(DirectX::XMVECTOR* SceneAABBPoints, const DirectX::BoundingBox* SceneBoundingBox);
+
+	void XM_CALLCONV ComputeCSMPassCB(DirectX::XMMATRIX& CameraInvView);
+	void XM_CALLCONV ComputeNearAndFarInCSM(float& Near, float& Far, DirectX::XMVECTOR LightOrthographicMin, DirectX::XMVECTOR LightOrthographicMax, DirectX::XMVECTOR* SceneAABBPointsLis);
 
 	template<typename T>
 	T* AddGameObject(int Layer, std::string Name = "")
@@ -153,7 +159,8 @@ public:
 	std::list<CGameObject*>* GetAllRenderLayers() { return m_AllRenderLayers; }
 	AllGameObjectsListEmptyReference* GetListEmptyReference() { return &m_ListEmptyReference; }
 	UINT GetAllGameObjectsCount() { return (UINT)m_AllGameObjects.size(); }
-	DirectX::BoundingSphere* GetSceneBounds() { return &m_SceneBounds; }
+	DirectX::BoundingSphere* GetSceneBoundingSphere() { return &m_SceneBoundingSphere; }
+	DirectX::BoundingBox*    GetSceneBoundingBox() { return &m_SceneBoundingBox; }
 	std::vector<CCamera*>& GetDynamicCubeMapCameras() { return m_DCMCameras; }
 	int GetBeginPSOIndex() { return m_BeginPSOIndex; }
 };

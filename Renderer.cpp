@@ -232,7 +232,7 @@ void CRenderer::CreateRtvAndDsvDescriptorHeaps()
 	for (UINT i = 0; i < m_CascadNum; ++i)
 	{
 		UINT size = m_ShadowMapSize / (UINT)pow(2, i);
-		 size = m_ShadowMapSize;
+		size = m_ShadowMapSize;
 		m_ShadowMap[i] = make_unique<CShadowMap>(m_D3DDevice.Get(), size, size);
 	}
 

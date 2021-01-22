@@ -23,7 +23,7 @@ protected:
 	DirectX::XMFLOAT4X4 m_View = MathHelper::Identity4x4();
 	DirectX::XMFLOAT4X4 m_Proj = MathHelper::Identity4x4();
 
-	DirectX::BoundingFrustum m_Bounds;
+	DirectX::BoundingFrustum m_BoundingFrustum;
 
 public:
 	CCamera() = default;
@@ -34,8 +34,7 @@ public:
 	virtual void UpdateViewMatrix();
 
 	void CreateFrustumBounds();
-	void ComputeFrustumPointsInWorldSpace(DirectX::XMVECTOR FrustumPoints[8]); // LiSPSM用
-	void ComputeFrustumPointsInWorldSpace(DirectX::XMVECTOR FrustumPoints[8], const DirectX::XMMATRIX& InvView); // LiSPSM用
+	void ComputeFrustumPointsFromCascadeInterval(DirectX::XMVECTOR* FrustumPoints, float CascadeIntervalBegin, float CascadeIntervalEnd);
 	void ComputeFrustumPointsInWorldSpace(std::vector<std::vector<DirectX::XMVECTOR>>& FrustumPoints); // CSM用
 	void ComputeFrustumPointsInWorldSpace(std::vector<std::vector<DirectX::XMVECTOR>>& FrustumPoints, const DirectX::XMMATRIX& InvView); // CSM用
 	void ComputeFrustumPointsInWorldSpaceForEachCascade(std::vector<DirectX::XMVECTOR>& FrustumPoints, const DirectX::XMMATRIX& InvView, float Near, float Far); // CSM用

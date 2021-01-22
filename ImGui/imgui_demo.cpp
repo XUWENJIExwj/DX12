@@ -2646,7 +2646,7 @@ static void ShowDemoWindowLayout()
                 ImGui::SetScrollY(scroll_to_off_px);
             if (scroll_to_pos)
                 ImGui::SetScrollFromPosY(ImGui::GetCursorStartPos().y + scroll_to_pos_px, i * 0.25f);
-            if (child_is_visible) // Avoid calling SetScrollHereY when running with culled items
+            if (child_is_visible) // Avoid calling SetScrollHereY when running with Culled items
             {
                 for (int item = 0; item < 100; item++)
                 {
@@ -2687,7 +2687,7 @@ static void ShowDemoWindowLayout()
                 ImGui::SetScrollX(scroll_to_off_px);
             if (scroll_to_pos)
                 ImGui::SetScrollFromPosX(ImGui::GetCursorStartPos().x + scroll_to_pos_px, i * 0.25f);
-            if (child_is_visible) // Avoid calling SetScrollHereY when running with culled items
+            if (child_is_visible) // Avoid calling SetScrollHereY when running with Culled items
             {
                 for (int item = 0; item < 100; item++)
                 {

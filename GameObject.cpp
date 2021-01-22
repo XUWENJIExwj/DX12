@@ -58,6 +58,20 @@ void CGameObject::CreateDynamicCubeMapResources(const GameTimer & GlobalTimer, i
 	CRenderer::CompleteCreateDynamicCubeMapResources(DCMResourcesIndex);
 }
 
+void CGameObject::UpdateBoundingBox()
+{
+	if (m_NumFramesDirty > 0)
+	{
+		ComputeBoundingBox();
+	}
+}
+
+void CGameObject::ComputeBoundingBox()
+{
+	m_BoundingBox = CGeoShapeManager::GetBoxBounds(m_BoundsName);
+	m_BoundingBox.Transform(m_BoundingBox, GetWorldMatrix());
+}
+
 XMFLOAT3 CGameObject::GetRightWithRotation3f()const
 {
 	XMMATRIX rot;

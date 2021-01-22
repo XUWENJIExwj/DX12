@@ -15,11 +15,16 @@ void CMeshField::Init()
 	m_StartIndexLocation = m_MeshGeometry->DrawArgs["grid"].StartIndexLocation;
 	m_BaseVertexLocation = m_MeshGeometry->DrawArgs["grid"].BaseVertexLocation;
 
-	m_Bounds = CGeoShapeManager::GetBoxBounds("grid");
-	m_Bounds.Transform(m_Bounds, GetWorldMatrix());
+	m_BoundsName = "grid";
+	ComputeBoundingBox();
 }
 
-void CMeshField::UpdateImGui(const GameTimer & GlobalTimer)
+void CMeshField::LateUpdate(const GameTimer& GlobalTimer)
+{
+	UpdateBoundingBox();
+}
+
+void CMeshField::UpdateImGui(const GameTimer& GlobalTimer)
 {
 	static bool showClose = true;
 	static int index = (int)MaterialHeightIndex::Material_Plane_00;

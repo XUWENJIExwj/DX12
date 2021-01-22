@@ -19,8 +19,8 @@ private:
 public:
 	static void CreateGeoShapes();
 	static MeshGeometry* GetMeshGeometry(int GeoType) { return m_Geometries[GeoType].get(); }
-	static DirectX::BoundingBox         GetBoxBounds(std::string Name) { return m_BoxBounds[Name]; }
-	static DirectX::BoundingOrientedBox GetOrientedBoxBounds(std::string Name) { return m_OrientedBoxBounds[Name]; }
-	static DirectX::BoundingSphere      GetSphereBounds(std::string Name) { return m_SphereBounds[Name]; }
-	static DirectX::BoundingFrustum     GetFrustumBounds(std::string Name) { return m_FrustumBounds[Name]; }
+	static DirectX::BoundingBox         GetBoxBounds(std::string SubMeshName) { return m_BoxBounds[SubMeshName]; }
+	static DirectX::BoundingOrientedBox GetOrientedBoxBounds(std::string SubMeshName) { return m_OrientedBoxBounds[SubMeshName]; }
+	static DirectX::BoundingSphere      GetSphereBounds(std::string SubMeshName) { return m_SphereBounds[SubMeshName]; }
+	static DirectX::BoundingFrustum     GetFrustumBounds(std::string SubMeshName) { return m_FrustumBounds[SubMeshName]; }
 };

@@ -56,6 +56,7 @@ void CGeoShapeManager::CreateGeoShapes()
 	sphereSubmesh.StartIndexLocation = sphereIndexOffset;
 	sphereSubmesh.BaseVertexLocation = sphereVertexOffset;
 	BoundingSphere::CreateFromPoints(m_SphereBounds["sphere"], sphere.Vertices.size(), &sphere.Vertices[0].Position, sizeof(GeometryGenerator::Vertex));
+	BoundingBox::CreateFromSphere(m_BoxBounds["sphere"], m_SphereBounds["sphere"]);
 
 	SubmeshGeometry cylinderSubmesh;
 	cylinderSubmesh.IndexCount = (UINT)cylinder.Indices32.size();

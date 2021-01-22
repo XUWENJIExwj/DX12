@@ -34,6 +34,9 @@ protected:
 	UINT m_StartIndexLocation = 0;
 	int  m_BaseVertexLocation = 0;
 
+	std::string          m_BoundsName;
+	DirectX::BoundingBox m_BoundingBox;
+
 public:
 	CGameObject();
 	virtual ~CGameObject() = default;
@@ -68,6 +71,9 @@ public:
 	void SetObjCBIndex(UINT ObjCBIndex) { m_ObjCBIndex = ObjCBIndex; }
 	void SetMaterialNormal(int MaterialIndex) { m_Material = CMaterialManager::GetMaterialNormal(MaterialIndex); }
 
+	void UpdateBoundingBox();
+	void ComputeBoundingBox();
+
 	int GetGameObjectLayer() { return m_RenderLayer; }
 
 	DirectX::XMFLOAT3   GetPosition3f()const { return m_Position; }
@@ -99,6 +105,8 @@ public:
 	DirectX::XMMATRIX XM_CALLCONV GetTexTransformMatrix()const { return XMLoadFloat4x4(&m_TexTransform); }
 	DirectX::XMMATRIX XM_CALLCONV ComputeWorldMatrix()const;
 	DirectX::XMMATRIX XM_CALLCONV Compute2DWVPMatrix()const;
+
+	DirectX::BoundingBox* GetBoundingBox() { return &m_BoundingBox; }
 
 	int  GetNumFramesDirty() { return m_NumFramesDirty; }
 	UINT GetObjCBIndex() { return m_ObjCBIndex; }

@@ -83,7 +83,6 @@ cbuffer cbPass : register(b1)
     float4x4 gInvProj;
     float4x4 gViewProj;
     float4x4 gInvViewProj;
-    float4x4 gShadowView;
     float3   gEyePosWS;
     float    cbPerObjectPad1;
     float2   gRenderTargetSize;
@@ -92,6 +91,16 @@ cbuffer cbPass : register(b1)
     float    gFarZ;
     float    gTotalTime;
     float    gDeltaTime;
+    float4   gAmbientLight;
+
+    // Indices [0, NUM_DIR_LIGHTS) are directional lights;
+    // indices [NUM_DIR_LIGHTS, NUM_DIR_LIGHTS+NUM_POINT_LIGHTS) are point lights;
+    // indices [NUM_DIR_LIGHTS+NUM_POINT_LIGHTS, NUM_DIR_LIGHTS+NUM_POINT_LIGHT+NUM_SPOT_LIGHTS)
+    // are spot lights for a maximum of MaxLights per object.
+    Light gLights[MaxLights];
+    
+    // CSM
+    float4x4 gShadowView;
     float    gMaxBorderPadding;
     float    gMinBorderPadding;
     float    gShadowBias;
@@ -103,16 +112,9 @@ cbuffer cbPass : register(b1)
     int      cbPerObjectPad2;
     int      cbPerObjectPad3;
     bool     gVisualCascade;
-    bool     cbPerObjectPad4;
+    bool     gBlendCascade;
     bool     cbPerObjectPad5;
     bool     cbPerObjectPad6;
-    float4   gAmbientLight;
-
-    // Indices [0, NUM_DIR_LIGHTS) are directional lights;
-    // indices [NUM_DIR_LIGHTS, NUM_DIR_LIGHTS+NUM_POINT_LIGHTS) are point lights;
-    // indices [NUM_DIR_LIGHTS+NUM_POINT_LIGHTS, NUM_DIR_LIGHTS+NUM_POINT_LIGHT+NUM_SPOT_LIGHTS)
-    // are spot lights for a maximum of MaxLights per object.
-    Light gLights[MaxLights];
 };
 
 static const float4 gCascadeColorsMultiplier[8] =
@@ -205,8 +207,7 @@ void ComputeCascadeIndex(in float4 ShadowPosLiS, out float4 ShadowMapTexHS, out 
         ShadowMapTexHS = ComputeShadowTexCoord(ShadowPosLiS, i);
  
         if (min(ShadowMapTexHS.x, ShadowMapTexHS.y) > gMinBorderPadding &&
-            max(ShadowMapTexHS.x, ShadowMapTexHS.y) < gMaxBorderPadding &&
-            ShadowMapTexHS.z > 0.0 && gMaxBorderPadding && ShadowMapTexHS.z < 1.0)
+            max(ShadowMapTexHS.x, ShadowMapTexHS.y) < gMaxBorderPadding)//  && ShadowMapTexHS.z > 0.0 && gMaxBorderPadding && ShadowMapTexHS.z < 1.0)
         {
             CasecadeIndex = i;
             cascadeFound = 1;

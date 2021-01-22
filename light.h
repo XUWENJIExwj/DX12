@@ -40,4 +40,5 @@ public:
 	virtual DirectX::XMMATRIX XM_CALLCONV ComputeShadowTransformWithSceneBounds(DirectX::BoundingSphere* SceneBounds) { return XMLoadFloat4x4(&MathHelper::Identity4x4()); }
 	virtual DirectX::XMMATRIX XM_CALLCONV ComputeShadowTransformWithCameraFrustum(DirectX::BoundingSphere* SceneBounds, DirectX::XMVECTOR FrustumPoints[8]) { return XMLoadFloat4x4(&MathHelper::Identity4x4()); }
 	virtual void              XM_CALLCONV ComputeShadowTransformWithCameraFrustum(std::vector<DirectX::XMMATRIX>& ShadowTransforms, DirectX::BoundingSphere* SceneBounds, std::vector<std::vector<DirectX::XMVECTOR>>& FrustumPoints) {}
+	virtual DirectX::XMMATRIX XM_CALLCONV ComputeShadowTransformFromLightOrthographicAndNearFar(int CascadeIndex, float Near, float Far, DirectX::XMVECTOR LightOrthographicMin, DirectX::XMVECTOR LightOrthographicMax);
 };

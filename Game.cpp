@@ -47,8 +47,6 @@ void CGame::Init()
 	CMeshField* meshField= AddGameObject<CMeshField>((int)RenderLayers::Layer_3D_Opaque_POM, "MeshField");
 
 	CCube* cube = AddGameObject<CCube>((int)RenderLayers::Layer_3D_Opaque, "Brick");
-	cube->SetPosition(XMFLOAT3(0.0f, 50.0f, 300.0f));
-	cube->SetWorldMatrix();
 
 	CSphere* sphere = AddGameObject<CSphere>((int)RenderLayers::Layer_3D_Opaque, "Mirror");
 
@@ -85,8 +83,11 @@ void CGame::Init()
 	shadowDebug02->SetOrderColNum(2);
 	shadowDebug02->Set2DWVPMatrix();
 
-	SetSceneBounds(meshField->GetBounds());
-	//SetSceneBounds(100.0f, 100.0f, meshField->GetPosition3f());
+	SetSceneBoundingSphere(meshField->GetBoundingBox());
+
+	// SceneのBoundingBoxの生成（全てのObjのBoundingBoxをマージすべきだが、Demoの中では、MeshFieldとCubeのサイズをもって、Objを網羅できるので、それでいく）
+	BoundingBox::CreateMerged(m_SceneBoundingBox, *meshField->GetBoundingBox(), *cube->GetBoundingBox());
+	//SetSceneBoundingSphere(100.0f, 100.0f, meshField->GetPosition3f());
 	CFrameResourceManager::CreateFrameResources();
 }
 
@@ -149,13 +150,15 @@ void CGame::UpdateSceneImGui(const GameTimer& GlobalTimer)
 
 	if (showClose)
 	{
-		ImGui::SetNextWindowPos(ImVec2((float)DX12App::GetApp()->GetWindowWidth() - 420, 205), ImGuiCond_Once);
-		ImGui::SetNextWindowSize(ImVec2(200, 65), ImGuiCond_Once);
+		ImGui::SetNextWindowPos(ImVec2(20, 340), ImGuiCond_Once);
+		ImGui::SetNextWindowSize(ImVec2(200, 120), ImGuiCond_Once);
 
 		ImGuiWindowFlags window_flags = 0;
 		ImGui::Begin(u8"SceneManager", &showClose, window_flags);
-		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.6f);
-		ImGui::Checkbox(u8"ShowCascadeColor", &m_VisualCascade);
+		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.3f);
+		ImGui::Checkbox(u8"VisualCascade", &m_VisualCascade);
+		ImGui::SameLine();
+		ImGui::Checkbox(u8"BlendCascade", &m_BlendCascade);
 		if (ImGui::DragInt(u8"PCFBlurSize", &m_PCFBlurSize, 0.1f, 1, 5))
 		{
 			m_PCFBlurForLoopStart = m_PCFBlurSize / -2;

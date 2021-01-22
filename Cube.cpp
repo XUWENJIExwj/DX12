@@ -5,6 +5,7 @@ using namespace DirectX;
 
 void CCube::Init()
 {
+	m_Position = XMFLOAT3(0.0f, 50.0f, 300.0f);
 	m_Scale = XMFLOAT3(100.0f, 200.0f, 100.0f);
 	m_World = ComputeWorldMatrix4x4();
 	m_Material = CMaterialManager::GetMaterialNormal((int)MaterialNormalIndex::Material_Tile_00);
@@ -12,6 +13,9 @@ void CCube::Init()
 	m_IndexCount = m_MeshGeometry->DrawArgs["cube"].IndexCount;
 	m_StartIndexLocation = m_MeshGeometry->DrawArgs["cube"].StartIndexLocation;
 	m_BaseVertexLocation = m_MeshGeometry->DrawArgs["cube"].BaseVertexLocation;
+
+	m_BoundsName = "cube";
+	ComputeBoundingBox();
 }
 
 void CCube::Update(const GameTimer& GlobalTimer)
@@ -23,7 +27,12 @@ void CCube::Update(const GameTimer& GlobalTimer)
 	//m_NumFramesDirty = gNumFrameResources;
 }
 
-void CCube::UpdateImGui(const GameTimer & GlobalTimer)
+void CCube::LateUpdate(const GameTimer& GlobalTimer)
+{
+	UpdateBoundingBox();
+}
+
+void CCube::UpdateImGui(const GameTimer& GlobalTimer)
 {
 	static bool showClose = true;
 	static int index = (int)MaterialNormalIndex::Material_Tile_00;
