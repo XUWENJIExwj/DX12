@@ -54,6 +54,7 @@ protected:
 	float                   m_ShadowBias = 0.001f;
 	bool                    m_VisualCascade = false;
 	bool                    m_BlendCascade = true;
+	float                   m_CascadePartitionsFrustum[3];
 
 	int m_BeginPSOIndex; // SceneÇÃInitÇ≈ÇÃê›íËÇñYÇÍÇ∏Ç…
 
@@ -89,8 +90,8 @@ public:
 	void SetSceneBoundingSphere(float Width, float Height, DirectX::XMFLOAT3 Center = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f));
 	void CreateSceneAABBPoints(DirectX::XMVECTOR* SceneAABBPoints, const DirectX::BoundingBox* SceneBoundingBox);
 
-	void XM_CALLCONV ComputeCSMPassCB(DirectX::XMMATRIX& CameraInvView);
-	void XM_CALLCONV ComputeNearAndFarInCSM(float& Near, float& Far, DirectX::XMVECTOR LightOrthographicMin, DirectX::XMVECTOR LightOrthographicMax, DirectX::XMVECTOR* SceneAABBPointsLis);
+	void XM_CALLCONV ComputeFitCascadeCSMPassCB(DirectX::XMMATRIX& CameraInvView);
+	void XM_CALLCONV ComputeNearAndFarInCSM(float& Near, float& Far, DirectX::XMVECTOR LightOrthographicMin, DirectX::XMVECTOR LightOrthographicMax, DirectX::XMVECTOR* SceneAABBPointsLiS);
 
 	template<typename T>
 	T* AddGameObject(int Layer, std::string Name = "")

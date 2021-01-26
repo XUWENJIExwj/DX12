@@ -7,7 +7,7 @@ using namespace DirectX;
 
 void CSphereDR::Init()
 {
-	m_Position = XMFLOAT3(3.0f, 0.0f, 0.0f);
+	m_Position = XMFLOAT3(3.0f, 3.0f, 0.0f);
 	m_World = ComputeWorldMatrix4x4();
 	m_Material = CMaterialManager::GetMaterialNormal((int)MaterialNormalIndex::Material_Mirror_00);
 	m_MeshGeometry = CGeoShapeManager::GetMeshGeometry((int)GeoShapeType::Type_GeoShapes);

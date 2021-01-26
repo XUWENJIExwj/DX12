@@ -56,6 +56,8 @@ struct PassConstants
 	BOOL BlendCascade = true;
 	BOOL cbPerObjectPad5 = false;
 	BOOL cbPerObjectPad6 = false;
+	DirectX::XMFLOAT4 CascadeFrustumsEyeSpaceDepthsFloat;
+	DirectX::XMFLOAT4 CascadeFrustumsEyeSpaceDepthsFloat4[CASCADE_NUM];
 };
 
 struct MaterialData

@@ -100,7 +100,7 @@ void CCamera::ComputeFrustumPointsInWorldSpace(vector<vector<XMVECTOR>>& Frustum
 
 void CCamera::ComputeFrustumPointsInWorldSpace(vector<vector<XMVECTOR>>& FrustumPoints, const XMMATRIX& InvView)
 {
-	vector<float> n = { m_BoundingFrustum.Near, m_BoundingFrustum.Far * 0.01f, m_BoundingFrustum.Far * 0.15f };
+	vector<float> n = { m_BoundingFrustum.Near, m_BoundingFrustum.Far * 0.01f, m_BoundingFrustum.Far * 0.5f };
 	vector<float> f = { n[1], n[2], m_BoundingFrustum.Far };
 	//vector<float> n = { m_BoundingFrustum.Near, m_BoundingFrustum.Near, m_BoundingFrustum.Near };
 	//vector<float> f = { m_BoundingFrustum.Far * 0.02f, m_BoundingFrustum.Far * 0.15f, m_BoundingFrustum.Far };

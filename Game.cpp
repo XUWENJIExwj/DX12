@@ -46,7 +46,11 @@ void CGame::Init()
 
 	CMeshField* meshField= AddGameObject<CMeshField>((int)RenderLayers::Layer_3D_Opaque_POM, "MeshField");
 
-	CCube* cube = AddGameObject<CCube>((int)RenderLayers::Layer_3D_Opaque, "Brick");
+	CCube* cube0 = AddGameObject<CCube>((int)RenderLayers::Layer_3D_Opaque, "Brick00");
+	CCube* cube1 = AddGameObject<CCube>((int)RenderLayers::Layer_3D_Opaque, "Brick01");
+	cube1->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	cube1->SetScale(XMFLOAT3(2.0f, 1.0f, 2.0f));
+	cube1->SetWorldMatrix();
 
 	CSphere* sphere = AddGameObject<CSphere>((int)RenderLayers::Layer_3D_Opaque, "Mirror");
 
@@ -55,7 +59,7 @@ void CGame::Init()
 	CSphere* sphereDR0 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror00");
 
 	CSphere* sphereDR1 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror01");
-	sphereDR1->SetPosition(XMFLOAT3(-3.0f, 1.0f, 0.0f));
+	sphereDR1->SetPosition(XMFLOAT3(-3.0f, 1.5f, 0.0f));
 	sphereDR1->SetWorldMatrix();
 
 	CSphere* sphereDR2 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror02");
@@ -63,7 +67,7 @@ void CGame::Init()
 	sphereDR2->SetWorldMatrix();
 
 	CSphere* sphereDR3 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror03");
-	sphereDR3->SetPosition(XMFLOAT3(0.0f, 0.5f, 2.0f));
+	sphereDR3->SetPosition(XMFLOAT3(0.0f, 1.5f, 2.0f));
 	sphereDR3->SetWorldMatrix();
 
 	CLogo* logo00 = AddGameObject<CLogo>((int)RenderLayers::Layer_3D_Opaque, "Logo00");
@@ -86,8 +90,12 @@ void CGame::Init()
 	SetSceneBoundingSphere(meshField->GetBoundingBox());
 
 	// SceneのBoundingBoxの生成（全てのObjのBoundingBoxをマージすべきだが、Demoの中では、MeshFieldとCubeのサイズをもって、Objを網羅できるので、それでいく）
-	BoundingBox::CreateMerged(m_SceneBoundingBox, *meshField->GetBoundingBox(), *cube->GetBoundingBox());
-	//SetSceneBoundingSphere(100.0f, 100.0f, meshField->GetPosition3f());
+	//m_SceneBoundingBox = *meshField->GetBoundingBox();
+	BoundingBox::CreateMerged(m_SceneBoundingBox, *meshField->GetBoundingBox(), *cube0->GetBoundingBox());
+	XMVECTOR length = XMLoadFloat3(&m_SceneBoundingBox.Extents);
+	XMVECTOR cameraFar = XMVectorSet(m_MainCamera->GetFarZ(), m_MainCamera->GetFarZ(), m_MainCamera->GetFarZ(), m_MainCamera->GetFarZ());
+	length = XMVectorMin(length, cameraFar);
+	XMStoreFloat3(&m_SceneBoundingBox.Extents, length);
 	CFrameResourceManager::CreateFrameResources();
 }
 
@@ -159,7 +167,7 @@ void CGame::UpdateSceneImGui(const GameTimer& GlobalTimer)
 		ImGui::Checkbox(u8"VisualCascade", &m_VisualCascade);
 		ImGui::SameLine();
 		ImGui::Checkbox(u8"BlendCascade", &m_BlendCascade);
-		if (ImGui::DragInt(u8"PCFBlurSize", &m_PCFBlurSize, 0.1f, 1, 5))
+		if (ImGui::DragInt(u8"PCFBlurSize", &m_PCFBlurSize, 0.1f, 1, 10))
 		{
 			m_PCFBlurForLoopStart = m_PCFBlurSize / -2;
 			m_PCFBlurForLoopEnd = m_PCFBlurSize / 2 + 1;

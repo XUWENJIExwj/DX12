@@ -1,34 +1,6 @@
-﻿  Camera.cpp
-  CameraDynamicCubeMap.cpp
-  CameraFP.cpp
-  Cube.cpp
-  DirectionalLight.cpp
-  FrameResource.cpp
+﻿  DirectionalLight.cpp
   Game.cpp
-  GameObject.cpp
-  GeoShapeManager.cpp
-  ImGuiManager.cpp
-  imgui.cpp
-  imgui_demo.cpp
-  imgui_draw.cpp
-  imgui_impl_dx12.cpp
-  imgui_impl_win32.cpp
-  imgui_widgets.cpp
   Light.cpp
-  Logo.cpp
-  Manager.cpp
-  MaterialManager.cpp
-  コードを生成中...
-  コンパイル中...
-  MeshField.cpp
-  Quad.cpp
-  QuadShadowDebug.cpp
-  Renderer.cpp
   Scene.cpp
-  ShaderManager.cpp
-  Sky.cpp
-  Sphere.cpp
-  SphereDR.cpp
-  TextureManager.cpp
   コードを生成中...
   DX12.vcxproj -> D:\HAL\GM31\DX12\x64\Debug\DX12.exe

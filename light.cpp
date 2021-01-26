@@ -6,6 +6,7 @@ using namespace DirectX;
 
 void CLight::Init()
 {
+	//m_View.resize(CRenderer::GetCascadNum());
 	m_Proj.resize(CRenderer::GetCascadNum());
 }
 
@@ -31,10 +32,10 @@ XMMATRIX XM_CALLCONV CLight::ComputeShadowTransformFromLightOrthographicAndNearF
 	XMStoreFloat4x4(&m_Proj[CascadeIndex], lightProj);
 
 	XMMATRIX T(
-		0.5f, 0.0f, 0.0f, 0.0f,
+		0.5f,  0.0f, 0.0f, 0.0f,
 		0.0f, -0.5f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
-		0.5f, 0.5f, 0.0f, 1.0f);
+		0.0f,  0.0f, 1.0f, 0.0f,
+		0.5f,  0.5f, 0.0f, 1.0f);
 
 	XMMATRIX S = lightProj * T;
 

@@ -18,7 +18,7 @@ void CCameraFP::Init()
 
 	Pitch(0.1f * MathHelper::Pi);
 
-	ComputeProjectionMatrix(0.25f * MathHelper::Pi, DX12App::GetApp()->GetAspectRatio(), 1.0f, 1000.0f);
+	ComputeProjectionMatrix(0.25f * MathHelper::Pi, DX12App::GetApp()->GetAspectRatio(), 0.1f, 1000.0f);
 }
 
 void CCameraFP::Update(const GameTimer& GlobalTimer)

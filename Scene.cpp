@@ -215,29 +215,30 @@ void CScene::UpdateMainPassCB(const GameTimer& GlobalTimer)
 		}
 
 		// CSM
-		ComputeCSMPassCB(invView);
-
-		vector<vector<XMVECTOR>> frustumPoints(CRenderer::GetCascadNum());
-		m_MainCamera->ComputeFrustumPointsInWorldSpace(frustumPoints, invView);
-		vector<XMMATRIX> shadowTransforms(CRenderer::GetCascadNum());
 		XMMATRIX lightView = m_DirLights[0]->ComputeLightView(&m_SceneBoundingSphere);
-		m_DirLights[0]->ComputeShadowTransformWithCameraFrustum(shadowTransforms, &m_SceneBoundingSphere, frustumPoints);
 		XMStoreFloat4x4(&m_MainPassCB.ShadowView, XMMatrixTranspose(lightView));
 
-		XMFLOAT4X4 shadowTransform;
-		for (UINT i = 0; i < shadowTransforms.size(); ++i)
-		{
-			XMStoreFloat4x4(&shadowTransform, shadowTransforms[i]);
-			m_MainPassCB.ShadowTexScale[i].x = shadowTransform(0, 0);
-			m_MainPassCB.ShadowTexScale[i].y = shadowTransform(1, 1);
-			m_MainPassCB.ShadowTexScale[i].z = shadowTransform(2, 2);
-			m_MainPassCB.ShadowTexScale[i].w = 1.0f;
+		ComputeFitCascadeCSMPassCB(invView);
 
-			m_MainPassCB.ShadowTexOffset[i].x = shadowTransform(3, 0);
-			m_MainPassCB.ShadowTexOffset[i].y = shadowTransform(3, 1);
-			m_MainPassCB.ShadowTexOffset[i].z = shadowTransform(3, 2);
-			m_MainPassCB.ShadowTexOffset[i].w = 0.0f;
-		}
+		//vector<vector<XMVECTOR>> frustumPoints(CRenderer::GetCascadNum());
+		//m_MainCamera->ComputeFrustumPointsInWorldSpace(frustumPoints, invView);
+		//vector<XMMATRIX> shadowTransforms(CRenderer::GetCascadNum());
+		//m_DirLights[0]->ComputeShadowTransformWithCameraFrustum(shadowTransforms, &m_SceneBoundingSphere, frustumPoints);
+
+		//XMFLOAT4X4 shadowTransform;
+		//for (UINT i = 0; i < shadowTransforms.size(); ++i)
+		//{
+		//	XMStoreFloat4x4(&shadowTransform, shadowTransforms[i]);
+		//	m_MainPassCB.ShadowTexScale[i].x = shadowTransform(0, 0);
+		//	m_MainPassCB.ShadowTexScale[i].y = shadowTransform(1, 1);
+		//	m_MainPassCB.ShadowTexScale[i].z = shadowTransform(2, 2);
+		//	m_MainPassCB.ShadowTexScale[i].w = 1.0f;
+
+		//	m_MainPassCB.ShadowTexOffset[i].x = shadowTransform(3, 0);
+		//	m_MainPassCB.ShadowTexOffset[i].y = shadowTransform(3, 1);
+		//	m_MainPassCB.ShadowTexOffset[i].z = shadowTransform(3, 2);
+		//	m_MainPassCB.ShadowTexOffset[i].w = 0.0f;
+		//}
 
 		float shadowMapSize = (float)CRenderer::GetShadowMapSize();
 		m_MainPassCB.MaxBorderPadding = (shadowMapSize - 1.0f) / shadowMapSize;
@@ -384,12 +385,12 @@ void CScene::SetUpDynamicCubeMapCamera(XMFLOAT3 Center)
 	// are looking down +Y or -Y, so we need a different "up" vector.
 	XMFLOAT3 ups[6] =
 	{
-		XMFLOAT3(0.0f, 1.0f, 0.0f),  // +X
-		XMFLOAT3(0.0f, 1.0f, 0.0f),  // -X
+		XMFLOAT3(0.0f, 1.0f,  0.0f), // +X
+		XMFLOAT3(0.0f, 1.0f,  0.0f), // -X
 		XMFLOAT3(0.0f, 0.0f, -1.0f), // +Y
 		XMFLOAT3(0.0f, 0.0f, +1.0f), // -Y
-		XMFLOAT3(0.0f, 1.0f, 0.0f),	 // +Z
-		XMFLOAT3(0.0f, 1.0f, 0.0f)	 // -Z
+		XMFLOAT3(0.0f, 1.0f,  0.0f), // +Z
+		XMFLOAT3(0.0f, 1.0f,  0.0f)	 // -Z
 	};
 
 	for (int i = 0; i < (int)m_DCMCameras.size(); ++i)
@@ -447,10 +448,9 @@ void CScene::CreateSceneAABBPoints(XMVECTOR* SceneAABBPoints, const BoundingBox*
 	}
 }
 
-void XM_CALLCONV CScene::ComputeCSMPassCB(XMMATRIX& CameraInvView)
+void XM_CALLCONV CScene::ComputeFitCascadeCSMPassCB(XMMATRIX& CameraInvView)
 {
-	XMMATRIX lightView = m_DirLights[0]->ComputeLightView(&m_SceneBoundingSphere);
-	XMStoreFloat4x4(&m_MainPassCB.ShadowView, XMMatrixTranspose(lightView));
+	XMMATRIX lightView = m_DirLights[0]->GetView();
 
 	XMVECTOR sceneAABBPointsLiS[8];
 	CreateSceneAABBPoints(sceneAABBPointsLiS, &m_SceneBoundingBox);
@@ -465,16 +465,16 @@ void XM_CALLCONV CScene::ComputeCSMPassCB(XMMATRIX& CameraInvView)
 	float cameraNearFarRange = m_MainCamera->GetFarZ() - m_MainCamera->GetNearZ();
 	XMVECTOR worldUnitsPerTexel = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 
-	static int cascadePartitionsZeroToOne[] = { 5, 15,100 }; // óvëfêî = CASCADE_NUM
+	static int cascadePartitionsZeroToOne[] = { 3, 15,100 }; // óvëfêî = CASCADE_NUM
 	static int cascadePartitionsMax = 100;
 
 	for (UINT i = 0; i < CRenderer::GetCascadNum(); ++i)
 	{
-		if (i == 0) frustumIntervalBegin = (float)cascadePartitionsZeroToOne[i];
+		if (i == 0) frustumIntervalBegin = 0.0f;
 		else frustumIntervalBegin = (float)cascadePartitionsZeroToOne[i - 1];
 		frustumIntervalEnd = (float)cascadePartitionsZeroToOne[i];
-		frustumIntervalBegin /= cascadePartitionsMax;
-		frustumIntervalEnd /= cascadePartitionsMax;
+		frustumIntervalBegin /= (float)cascadePartitionsMax;
+		frustumIntervalEnd /= (float)cascadePartitionsMax;
 		frustumIntervalBegin *= cameraNearFarRange;
 		frustumIntervalEnd *= cameraNearFarRange;
 
@@ -482,13 +482,13 @@ void XM_CALLCONV CScene::ComputeCSMPassCB(XMMATRIX& CameraInvView)
 		m_MainCamera->ComputeFrustumPointsFromCascadeInterval(frustumPoints, frustumIntervalBegin, frustumIntervalEnd);
 		lightOrthographicMin = XMVectorSet(FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX);
 		lightOrthographicMax = XMVectorSet(-FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX);
-		XMVECTOR tempfrustumPoint;
+		XMVECTOR tempfrustumPoint[8];
 		for (int j = 0; j < 8; ++j)
 		{
 			frustumPoints[j] = XMVector4Transform(frustumPoints[j], CameraInvView); // FrustumPointsÇWorldãÛä‘Ç÷ì]ä∑
-			tempfrustumPoint = XMVector4Transform(frustumPoints[j], lightView);  // FrustumPointÇLightãÛä‘Ç÷ì]ä∑
-			lightOrthographicMin = XMVectorMin(tempfrustumPoint, lightOrthographicMin);
-			lightOrthographicMax = XMVectorMax(tempfrustumPoint, lightOrthographicMax);
+			tempfrustumPoint[j] = XMVector4Transform(frustumPoints[j], lightView);  // FrustumPointÇLightãÛä‘Ç÷ì]ä∑
+			lightOrthographicMin = XMVectorMin(tempfrustumPoint[j], lightOrthographicMin);
+			lightOrthographicMax = XMVectorMax(tempfrustumPoint[j], lightOrthographicMax);
 		}
 
 		float scaleDueToBlureAMT1f = (float)(m_PCFBlurSize * 2 + 1) / (float)CRenderer::GetShadowMapSize();
@@ -502,18 +502,24 @@ void XM_CALLCONV CScene::ComputeCSMPassCB(XMMATRIX& CameraInvView)
 		lightOrthographicMin -= boarderOffset;
 		worldUnitsPerTexel = lightOrthographicMax - lightOrthographicMin;
 		worldUnitsPerTexel *= normalizeByShadowMapSize;
-		//float lightOrthographicMinZ = XMVectorGetZ(lightOrthographicMin);
 
-		lightOrthographicMin /= worldUnitsPerTexel;
-		lightOrthographicMin = XMVectorFloor(lightOrthographicMin);
-		lightOrthographicMin *= worldUnitsPerTexel;
-		lightOrthographicMax /= worldUnitsPerTexel;
-		lightOrthographicMax = XMVectorFloor(lightOrthographicMax);
-		lightOrthographicMax *= worldUnitsPerTexel;
+		float lightOrthographicMinZ, lightOrthographicMaxZ;
+		lightOrthographicMinZ = XMVectorGetZ(lightOrthographicMin);
+		lightOrthographicMaxZ = XMVectorGetZ(lightOrthographicMax);
+		//lightOrthographicMin /= worldUnitsPerTexel;
+		//lightOrthographicMin = XMVectorFloor(lightOrthographicMin);
+		//lightOrthographicMin *= worldUnitsPerTexel;
+		//lightOrthographicMax /= worldUnitsPerTexel;
+		//lightOrthographicMax = XMVectorFloor(lightOrthographicMax);
+		//lightOrthographicMax *= worldUnitsPerTexel;
 
 		float nearPlane = 0.0f;
 		float farPlane = 10000.0f;
 		ComputeNearAndFarInCSM(nearPlane, farPlane, lightOrthographicMin, lightOrthographicMax, sceneAABBPointsLiS);
+		//nearPlane = nearPlane * (i + 1) / 2 + lightOrthographicMinZ;
+		//farPlane = farPlane * (i + 1) / 2 + lightOrthographicMaxZ;
+		nearPlane = nearPlane + lightOrthographicMinZ;
+		farPlane = farPlane + lightOrthographicMaxZ;
 		XMMATRIX shadowTransform = m_DirLights[0]->ComputeShadowTransformFromLightOrthographicAndNearFar(i, nearPlane, farPlane, lightOrthographicMin, lightOrthographicMax);
 		XMFLOAT4X4 shadowTransform4x4;
 		XMStoreFloat4x4(&shadowTransform4x4, shadowTransform);
@@ -526,7 +532,13 @@ void XM_CALLCONV CScene::ComputeCSMPassCB(XMMATRIX& CameraInvView)
 		m_MainPassCB.ShadowTexOffset[i].y = shadowTransform4x4(3, 1);
 		m_MainPassCB.ShadowTexOffset[i].z = shadowTransform4x4(3, 2);
 		m_MainPassCB.ShadowTexOffset[i].w = 0.0f;
+
+		m_CascadePartitionsFrustum[i] = frustumIntervalEnd;
+		m_MainPassCB.CascadeFrustumsEyeSpaceDepthsFloat4[i].x = m_CascadePartitionsFrustum[i];
 	}
+	m_MainPassCB.CascadeFrustumsEyeSpaceDepthsFloat.x = m_CascadePartitionsFrustum[0];
+	m_MainPassCB.CascadeFrustumsEyeSpaceDepthsFloat.y = m_CascadePartitionsFrustum[1];
+	m_MainPassCB.CascadeFrustumsEyeSpaceDepthsFloat.z = m_CascadePartitionsFrustum[2];
 }
 
 struct Triangle
@@ -535,7 +547,7 @@ struct Triangle
 	BOOL Culled;
 };
 
-void XM_CALLCONV CScene::ComputeNearAndFarInCSM(float& Near, float& Far, XMVECTOR LightOrthographicMin, XMVECTOR LightOrthographicMax, XMVECTOR* SceneAABBPointsLis)
+void XM_CALLCONV CScene::ComputeNearAndFarInCSM(float& Near, float& Far, XMVECTOR LightOrthographicMin, XMVECTOR LightOrthographicMax, XMVECTOR* SceneAABBPointsLiS)
 {
 	// Initialize the near and far planes
 	Near = FLT_MAX;
@@ -544,9 +556,9 @@ void XM_CALLCONV CScene::ComputeNearAndFarInCSM(float& Near, float& Far, XMVECTO
 	Triangle triangleList[16];
 	int triangleCnt = 1;
 
-	triangleList[0].Point[0] = SceneAABBPointsLis[0];
-	triangleList[0].Point[1] = SceneAABBPointsLis[1];
-	triangleList[0].Point[2] = SceneAABBPointsLis[2];
+	triangleList[0].Point[0] = SceneAABBPointsLiS[0];
+	triangleList[0].Point[1] = SceneAABBPointsLiS[1];
+	triangleList[0].Point[2] = SceneAABBPointsLiS[2];
 	triangleList[0].Culled = false;
 
 	// These are the indices used to tesselate an AABB into a list of triangles.
@@ -577,9 +589,9 @@ void XM_CALLCONV CScene::ComputeNearAndFarInCSM(float& Near, float& Far, XMVECTO
 	for (int aabbTriIter = 0; aabbTriIter < 12; ++aabbTriIter)
 	{
 
-		triangleList[0].Point[0] = SceneAABBPointsLis[aabbTriIndexes[aabbTriIter * 3 + 0]];
-		triangleList[0].Point[1] = SceneAABBPointsLis[aabbTriIndexes[aabbTriIter * 3 + 1]];
-		triangleList[0].Point[2] = SceneAABBPointsLis[aabbTriIndexes[aabbTriIter * 3 + 2]];
+		triangleList[0].Point[0] = SceneAABBPointsLiS[aabbTriIndexes[aabbTriIter * 3 + 0]];
+		triangleList[0].Point[1] = SceneAABBPointsLiS[aabbTriIndexes[aabbTriIter * 3 + 1]];
+		triangleList[0].Point[2] = SceneAABBPointsLiS[aabbTriIndexes[aabbTriIter * 3 + 2]];
 		triangleCnt = 1;
 		triangleList[0].Culled = FALSE;
 
@@ -588,7 +600,7 @@ void XM_CALLCONV CScene::ComputeNearAndFarInCSM(float& Near, float& Far, XMVECTO
 		for (int frustumPlaneIter = 0; frustumPlaneIter < 4; ++frustumPlaneIter)
 		{
 
-			FLOAT edge;
+			float edge;
 			int component;
 
 			if (frustumPlaneIter == 0)

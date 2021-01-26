@@ -4,7 +4,7 @@ using namespace DirectX;
 
 void CLogo::Init()
 {
-	m_Position = XMFLOAT3(0.0f, 0.9f - 0.5f, 5.0f);
+	m_Position = XMFLOAT3(0.0f, 2.0f, 5.0f);
 	m_Rotation = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_Scale = XMFLOAT3(3.2f, 1.8f, 0.0f);
 	m_World = ComputeWorldMatrix4x4();

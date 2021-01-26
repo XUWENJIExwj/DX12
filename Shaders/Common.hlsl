@@ -115,6 +115,8 @@ cbuffer cbPass : register(b1)
     bool     gBlendCascade;
     bool     cbPerObjectPad5;
     bool     cbPerObjectPad6;
+    float4   gCascadeFrustumsEyeSpaceDepthsFloat;
+    float4   gCascadeFrustumsEyeSpaceDepthsFloat4[CASCADE_NUM];
 };
 
 static const float4 gCascadeColorsMultiplier[8] =
@@ -179,7 +181,7 @@ float CalcShadowFactor(float4 ShadowPosHS, float PCFBlurSize, int CascadeIndex)
         {
             // Depth in NDC space.
             float depth = ShadowPosHS.z;
-            depth -= gShadowBias * pow((CascadeIndex + 1), 2);
+            depth -= gShadowBias * pow(CascadeIndex, 2);
             percentLit += gShadowMap[CascadeIndex].SampleCmpLevelZero(gsamShadow, float2(ShadowPosHS.x + x * dx, ShadowPosHS.y + y * dy), depth).r;
         }
     }
@@ -194,9 +196,9 @@ float4 ComputeShadowTexCoord(float4 ShadowPosLiS, int CasecadeIndex)
     return texC;
 }
 
-void ComputeCascadeIndex(in float4 ShadowPosLiS, out float4 ShadowMapTexHS, out int CasecadeIndex)
+void ComputeCascadeIndex(float4 ShadowPosLiS, out float4 ShadowMapTexHS, out int CascadeIndex)
 {
-    CasecadeIndex = 0;
+    CascadeIndex = 0;
     ShadowMapTexHS = 0.0;
     
     int cascadeFound = 0;
@@ -207,9 +209,9 @@ void ComputeCascadeIndex(in float4 ShadowPosLiS, out float4 ShadowMapTexHS, out 
         ShadowMapTexHS = ComputeShadowTexCoord(ShadowPosLiS, i);
  
         if (min(ShadowMapTexHS.x, ShadowMapTexHS.y) > gMinBorderPadding &&
-            max(ShadowMapTexHS.x, ShadowMapTexHS.y) < gMaxBorderPadding)//  && ShadowMapTexHS.z > 0.0 && gMaxBorderPadding && ShadowMapTexHS.z < 1.0)
+            max(ShadowMapTexHS.x, ShadowMapTexHS.y) < gMaxBorderPadding)//&& ShadowMapTexHS.z > 0.0 && gMaxBorderPadding && ShadowMapTexHS.z < 1.0)
         {
-            CasecadeIndex = i;
+            CascadeIndex = i;
             cascadeFound = 1;
         }
     }
@@ -225,5 +227,26 @@ void CalculateBlendAmountForMap(float4 ShadowMapTexHS, in out float CurrentPixel
     CurrentPixelsBlendBandLocation = min(ShadowMapTexHS.x, ShadowMapTexHS.y);
     float CurrentPixelsBlendBandLocation2 = min(distanceToOne.x, distanceToOne.y);
     CurrentPixelsBlendBandLocation = min(CurrentPixelsBlendBandLocation, CurrentPixelsBlendBandLocation2);
+    BlendBetweenCascadesAmount = CurrentPixelsBlendBandLocation / gCascadeBlendArea;
+}
+
+//--------------------------------------------------------------------------------------
+// Calculate amount to blend between two cascades and the band where blending will occure.
+//--------------------------------------------------------------------------------------
+void CalculateBlendAmountForInterval(int CurrentCascadeIndex, in out float PixelDepth, in out float CurrentPixelsBlendBandLocation, out float BlendBetweenCascadesAmount)
+{
+    // We need to calculate the band of the current shadow map where it will fade into the next cascade.
+    // We can then early out of the expensive PCF for loop.
+    // 
+    float blendInterval = gCascadeFrustumsEyeSpaceDepthsFloat4[CurrentCascadeIndex].x;
+    //if( iNextCascadeIndex > 1 ) 
+    int blendIntervalbelowIndex = min(0, CurrentCascadeIndex - 1);
+    PixelDepth -= gCascadeFrustumsEyeSpaceDepthsFloat4[blendIntervalbelowIndex].x;
+    blendInterval -= gCascadeFrustumsEyeSpaceDepthsFloat4[blendIntervalbelowIndex].x;
+    
+    // The current pixel's blend band location will be used to determine when we need to blend and by how much.
+    CurrentPixelsBlendBandLocation = PixelDepth / blendInterval;
+    CurrentPixelsBlendBandLocation = 1.0f - CurrentPixelsBlendBandLocation;
+    // The fBlendBetweenCascadesAmount is our location in the blend band.
     BlendBetweenCascadesAmount = CurrentPixelsBlendBandLocation / gCascadeBlendArea;
 }

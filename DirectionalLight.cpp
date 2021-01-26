@@ -8,7 +8,7 @@ using namespace DirectX;
 
 void CDirLight::Update(const GameTimer& GlobalTimer)
 {
-	//m_Rotation.y += 0.2f * GlobalTimer.DeltaTime();
+	m_Rotation.y += 0.2f * GlobalTimer.DeltaTime();
 }
 
 XMFLOAT3 CDirLight::ComputeDirection3f()
@@ -120,8 +120,25 @@ XMMATRIX XM_CALLCONV CDirLight::ComputeShadowTransformWithCameraFrustumForEachCa
 	XMMATRIX lightView = GetView();
 
 	XMVECTOR min, max;
-	min = max = FrustumPoints[0] = XMVector3TransformCoord(FrustumPoints[0], lightView);
+	//XMVECTOR frustumCenter = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+	//for (int i = 0; i < 8; ++i)
+	//{
+	//	FrustumPoints[i] = XMVector3TransformCoord(FrustumPoints[i], lightView);
+	//	frustumCenter += FrustumPoints[i];
+	//}
+	//frustumCenter /= 8.0f;
 
+	//XMVECTOR radius = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+	//for (UINT j = 0; j < 8; ++j)
+	//{
+	//	XMVECTOR distance = XMVector3Length(FrustumPoints[j] - frustumCenter);
+	//	radius = XMVectorMax(radius, distance);
+	//}
+	//radius = XMVectorCeiling(radius * 16.0f) / 16.0f;
+	//max = frustumCenter + radius;
+	//min = frustumCenter - radius;
+
+	min = max = FrustumPoints[0] = XMVector3TransformCoord(FrustumPoints[0], lightView);
 	for (int i = 1; i < 8; ++i)
 	{
 		FrustumPoints[i] = XMVector3TransformCoord(FrustumPoints[i], lightView);
@@ -129,11 +146,19 @@ XMMATRIX XM_CALLCONV CDirLight::ComputeShadowTransformWithCameraFrustumForEachCa
 		max = XMVectorMax(max, FrustumPoints[i]);
 	}
 
+	float minZ = XMVectorGetZ(min);
+	float maxZ = XMVectorGetZ(max);
 	// lightProj
 	XMMATRIX lightProj = XMMatrixOrthographicOffCenterLH(
 		XMVectorGetX(min), XMVectorGetX(max),
 		XMVectorGetY(min), XMVectorGetY(max),
-		XMVectorGetZ(min), XMVectorGetZ(max));
+		minZ, maxZ);
+		//XMVectorGetZ(min), XMVectorGetZ(max));
+	//lightProj = XMMatrixOrthographicOffCenterLH(
+	//	-57.4f, 7.3f,
+	//	-27.6f, 40.3f,
+	//	XMVectorGetZ(min), XMVectorGetZ(max));
+		//-149.5f, -23.2f);
 	XMStoreFloat4x4(&m_Proj[CascadeIndex], lightProj);
 
 	// Transform NDC space [-1,+1]^2 to texture space [0,1]^2

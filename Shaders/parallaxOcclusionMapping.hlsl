@@ -242,21 +242,26 @@ float4 PS(VertexOut pin) : SV_Target
     pcfBlursize *= pcfBlursize;
     float4 shadowMapTexHS = 0.0;
     int currentCascadeIndex = 0;
-    float currentPixelDepth = pin.DepthCamS;
+    float currentPixelDepth1f = pin.DepthCamS;
     float4 shadowPosLiS = pin.ShadowPosLiS;
-    ComputeCascadeIndex(shadowPosLiS, shadowMapTexHS, currentCascadeIndex);
-    shadowFactor[0] *= CalcShadowFactor(shadowMapTexHS, pcfBlursize, currentCascadeIndex);
     
+    // ForInterval
+    float4 currentPixelDepth = currentPixelDepth1f;
+    float4 comparison = (currentPixelDepth > gCascadeFrustumsEyeSpaceDepthsFloat);
+    float index = dot(float4(CASCADE_NUM > 0, CASCADE_NUM > 1, CASCADE_NUM > 2, CASCADE_NUM > 3), comparison);
+    index = min(index, CASCADE_NUM - 1);
+    currentCascadeIndex = (int) index;
+    shadowMapTexHS = ComputeShadowTexCoord(shadowPosLiS, currentCascadeIndex);
+    float shadowFactor_blend0 = CalcShadowFactor(shadowMapTexHS, pcfBlursize, currentCascadeIndex);
+    // Blend
     if (gBlendCascade)
     {
-        // Blend Between Cascade Layers
         int nextCascadeIndex = 1;
         nextCascadeIndex = min(CASCADE_NUM - 1, currentCascadeIndex + 1);
         float blendBetweenCascadesAmount = 1.0;
         float currentPixelsBlendBandLocation = 1.0;
-        CalculateBlendAmountForMap(shadowMapTexHS, currentPixelsBlendBandLocation, blendBetweenCascadesAmount);
-        
-        float shadowFactor_blend = 1.0;
+        CalculateBlendAmountForInterval(currentCascadeIndex, currentPixelDepth1f, currentPixelsBlendBandLocation, blendBetweenCascadesAmount);
+        float shadowFactor_blend1 = 1.0;
         float4 shadowMapTexHS_blend = 0.0;
         if (currentPixelsBlendBandLocation < gCascadeBlendArea)
         {
@@ -264,11 +269,39 @@ float4 PS(VertexOut pin) : SV_Target
         
             if (currentPixelsBlendBandLocation < gCascadeBlendArea)
             {
-                shadowFactor_blend = CalcShadowFactor(shadowMapTexHS_blend, pcfBlursize, nextCascadeIndex);
-                shadowFactor[0] = lerp(shadowFactor_blend, shadowFactor[0], blendBetweenCascadesAmount);
+                shadowFactor_blend1 = CalcShadowFactor(shadowMapTexHS_blend, pcfBlursize, nextCascadeIndex);
+                shadowFactor_blend0 = lerp(shadowFactor_blend1, shadowFactor_blend0, blendBetweenCascadesAmount);
             }
         }
     }
+    shadowFactor[0] *= shadowFactor_blend0;
+    
+    // ForMap
+    //ComputeCascadeIndex(shadowPosLiS, shadowMapTexHS, currentCascadeIndex);
+    //shadowFactor[0] *= CalcShadowFactor(shadowMapTexHS, pcfBlursize, currentCascadeIndex);
+    
+    //if (gBlendCascade)
+    //{
+    //    // Blend Between Cascade Layers
+    //    int nextCascadeIndex = 1;
+    //    nextCascadeIndex = min(CASCADE_NUM - 1, currentCascadeIndex + 1);
+    //    float blendBetweenCascadesAmount = 1.0;
+    //    float currentPixelsBlendBandLocation = 1.0;
+    //    CalculateBlendAmountForMap(shadowMapTexHS, currentPixelsBlendBandLocation, blendBetweenCascadesAmount);
+        
+    //    float shadowFactor_blend = 1.0;
+    //    float4 shadowMapTexHS_blend = 0.0;
+    //    if (currentPixelsBlendBandLocation < gCascadeBlendArea)
+    //    {
+    //        shadowMapTexHS_blend = ComputeShadowTexCoord(shadowPosLiS, nextCascadeIndex);
+        
+    //        if (currentPixelsBlendBandLocation < gCascadeBlendArea)
+    //        {
+    //            shadowFactor_blend = CalcShadowFactor(shadowMapTexHS_blend, pcfBlursize, nextCascadeIndex);
+    //            shadowFactor[0] = lerp(shadowFactor_blend, shadowFactor[0], blendBetweenCascadesAmount);
+    //        }
+    //    }
+    //}
     
     float4 directLight = ComputeLighting(gLights, mat, pin.PosWS,
         bumpedNormalWS, toEyeWS, shadowFactor);

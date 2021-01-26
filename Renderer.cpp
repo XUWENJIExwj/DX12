@@ -56,7 +56,7 @@ vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> CRenderer::m_SkyCubeMapDescHandles;
 int                                   CRenderer::m_CurrentSkyCubeMapIndex = 0;
 
 // ShadowMap
-UINT                                  CRenderer::m_ShadowMapSize = 2048;
+UINT                                  CRenderer::m_ShadowMapSize = 1024;
 UINT                                  CRenderer::m_CascadNum = CTextureManager::GetShadowMapNum();
 vector<unique_ptr<CShadowMap>>        CRenderer::m_ShadowMap(m_CascadNum);
 vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> CRenderer::m_ShadowMapDescHandle(m_CascadNum);
