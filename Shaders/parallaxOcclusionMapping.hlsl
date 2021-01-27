@@ -254,26 +254,26 @@ float4 PS(VertexOut pin) : SV_Target
     shadowMapTexHS = ComputeShadowTexCoord(shadowPosLiS, currentCascadeIndex);
     float shadowFactor_blend0 = CalcShadowFactor(shadowMapTexHS, pcfBlursize, currentCascadeIndex);
     // Blend
-    if (gBlendCascade)
-    {
-        int nextCascadeIndex = 1;
-        nextCascadeIndex = min(CASCADE_NUM - 1, currentCascadeIndex + 1);
-        float blendBetweenCascadesAmount = 1.0;
-        float currentPixelsBlendBandLocation = 1.0;
-        CalculateBlendAmountForInterval(currentCascadeIndex, currentPixelDepth1f, currentPixelsBlendBandLocation, blendBetweenCascadesAmount);
-        float shadowFactor_blend1 = 1.0;
-        float4 shadowMapTexHS_blend = 0.0;
-        if (currentPixelsBlendBandLocation < gCascadeBlendArea)
-        {
-            shadowMapTexHS_blend = ComputeShadowTexCoord(shadowPosLiS, nextCascadeIndex);
+    //if (gBlendCascade)
+    //{
+    //    int nextCascadeIndex = 1;
+    //    nextCascadeIndex = min(CASCADE_NUM - 1, currentCascadeIndex + 1);
+    //    float blendBetweenCascadesAmount = 1.0;
+    //    float currentPixelsBlendBandLocation = 1.0;
+    //    CalculateBlendAmountForInterval(currentCascadeIndex, currentPixelDepth1f, currentPixelsBlendBandLocation, blendBetweenCascadesAmount);
+    //    float shadowFactor_blend1 = 1.0;
+    //    float4 shadowMapTexHS_blend = 0.0;
+    //    if (currentPixelsBlendBandLocation < gCascadeBlendArea)
+    //    {
+    //        shadowMapTexHS_blend = ComputeShadowTexCoord(shadowPosLiS, nextCascadeIndex);
         
-            if (currentPixelsBlendBandLocation < gCascadeBlendArea)
-            {
-                shadowFactor_blend1 = CalcShadowFactor(shadowMapTexHS_blend, pcfBlursize, nextCascadeIndex);
-                shadowFactor_blend0 = lerp(shadowFactor_blend1, shadowFactor_blend0, blendBetweenCascadesAmount);
-            }
-        }
-    }
+    //        if (currentPixelsBlendBandLocation < gCascadeBlendArea)
+    //        {
+    //            shadowFactor_blend1 = CalcShadowFactor(shadowMapTexHS_blend, pcfBlursize, nextCascadeIndex);
+    //            shadowFactor_blend0 = lerp(shadowFactor_blend1, shadowFactor_blend0, blendBetweenCascadesAmount);
+    //        }
+    //    }
+    //}
     shadowFactor[0] *= shadowFactor_blend0;
     
     // ForMap

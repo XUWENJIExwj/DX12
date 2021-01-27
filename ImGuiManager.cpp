@@ -97,7 +97,7 @@ void CImGuiManager::Draw()
 	static bool showCloseb = true;
 
 	ImGui::SetNextWindowPos(ImVec2((app->GetWindowWidth() - 500) * 0.5f, 20), ImGuiCond_Once);
-	ImGui::SetNextWindowSize(ImVec2(420, 150), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(420, 170), ImGuiCond_Once);
 
 	if (showClose)
 	{
@@ -107,6 +107,7 @@ void CImGuiManager::Draw()
 		ImGui::Text(u8"・MaterialManagerを作って、それぞれのMaterialを管理する機能の実装");
 		ImGui::Text(u8"　・フレネル反射、Roughness、凹凸具合などの調整");
 		ImGui::Text(u8"　・環境マッピングの色変化によるObjectの色変化の確認");
+		ImGui::Text(u8"　CacadeShadowMappingの実装");
 		ImGui::End();
 	}
 

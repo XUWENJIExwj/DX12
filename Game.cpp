@@ -165,8 +165,8 @@ void CGame::UpdateSceneImGui(const GameTimer& GlobalTimer)
 		ImGui::Begin(u8"SceneManager", &showClose, window_flags);
 		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.3f);
 		ImGui::Checkbox(u8"VisualCascade", &m_VisualCascade);
-		ImGui::SameLine();
-		ImGui::Checkbox(u8"BlendCascade", &m_BlendCascade);
+		//ImGui::SameLine();
+		//ImGui::Checkbox(u8"BlendCascade", &m_BlendCascade);
 		if (ImGui::DragInt(u8"PCFBlurSize", &m_PCFBlurSize, 0.1f, 1, 10))
 		{
 			m_PCFBlurForLoopStart = m_PCFBlurSize / -2;
