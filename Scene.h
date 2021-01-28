@@ -45,6 +45,7 @@ protected:
 	std::vector<CCamera*>   m_DCMCameras;
 	std::vector<CDirLight*> m_DirLights;
 
+	// CSM óp
 	DirectX::BoundingSphere m_SceneBoundingSphere;
 	DirectX::BoundingBox    m_SceneBoundingBox;
 	DirectX::XMFLOAT4X4     m_ShadowTransform = MathHelper::Identity4x4();
@@ -54,6 +55,8 @@ protected:
 	float                   m_ShadowBias = 0.001f;
 	bool                    m_VisualCascade = false;
 	bool                    m_BlendCascade = true;
+	bool                    m_CancelJitter = true;
+	bool                    m_NearFarCorrection = true;
 	float                   m_CascadePartitionsFrustum[3];
 
 	int m_BeginPSOIndex; // SceneÇÃInitÇ≈ÇÃê›íËÇñYÇÍÇ∏Ç…

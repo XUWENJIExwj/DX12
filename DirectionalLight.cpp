@@ -8,7 +8,10 @@ using namespace DirectX;
 
 void CDirLight::Update(const GameTimer& GlobalTimer)
 {
-	m_Rotation.y += 0.2f * GlobalTimer.DeltaTime();
+	if (m_Move)
+	{
+		m_Rotation.y += 0.2f * GlobalTimer.DeltaTime();
+	}
 }
 
 XMFLOAT3 CDirLight::ComputeDirection3f()
@@ -171,4 +174,22 @@ XMMATRIX XM_CALLCONV CDirLight::ComputeShadowTransformWithCameraFrustumForEachCa
 	XMMATRIX S = lightProj * T;
 
 	return S;
+}
+
+void CDirLight::UpdateImGui(const GameTimer& GlobalTimer)
+{
+	static bool showClose = true;
+
+	if (showClose && m_Name == "DirLight00")
+	{
+		ImGui::SetNextWindowPos(ImVec2((float)DX12App::GetApp()->GetWindowWidth() - 420, 205), ImGuiCond_Once);
+		ImGui::SetNextWindowSize(ImVec2(200, 65), ImGuiCond_Once);
+
+		ImGuiWindowFlags window_flags = 0;
+		ImGui::Begin(u8"DirLight", &showClose, window_flags);
+		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.3f);
+		ImGui::Checkbox(u8"Move", &m_Move);
+		ImGui::PopItemWidth();
+		ImGui::End();
+	}
 }

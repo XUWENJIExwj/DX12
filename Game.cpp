@@ -58,17 +58,17 @@ void CGame::Init()
 	// è„éÆÇèÌÇ…ê¨ÇËóßÇΩÇπÇÈïKóvÇ™Ç†ÇÈ
 	CSphere* sphereDR0 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror00");
 
-	CSphere* sphereDR1 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror01");
-	sphereDR1->SetPosition(XMFLOAT3(-3.0f, 1.5f, 0.0f));
-	sphereDR1->SetWorldMatrix();
+	//CSphere* sphereDR1 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror01");
+	//sphereDR1->SetPosition(XMFLOAT3(-3.0f, 1.5f, 0.0f));
+	//sphereDR1->SetWorldMatrix();
 
-	CSphere* sphereDR2 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror02");
-	sphereDR2->SetPosition(XMFLOAT3(0.0f, 2.0f, 3.0f));
-	sphereDR2->SetWorldMatrix();
+	//CSphere* sphereDR2 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror02");
+	//sphereDR2->SetPosition(XMFLOAT3(0.0f, 2.0f, 3.0f));
+	//sphereDR2->SetWorldMatrix();
 
-	CSphere* sphereDR3 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror03");
-	sphereDR3->SetPosition(XMFLOAT3(0.0f, 1.5f, 2.0f));
-	sphereDR3->SetWorldMatrix();
+	//CSphere* sphereDR3 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror03");
+	//sphereDR3->SetPosition(XMFLOAT3(0.0f, 1.5f, 2.0f));
+	//sphereDR3->SetWorldMatrix();
 
 	CLogo* logo00 = AddGameObject<CLogo>((int)RenderLayers::Layer_3D_Opaque, "Logo00");
 	CLogo* logo01 = AddGameObject<CLogo>((int)RenderLayers::Layer_3D_Opaque, "Logo01");
@@ -108,6 +108,85 @@ void CGame::Uninit()
 void CGame::UpdateAll(const GameTimer& GlobalTimer)
 {
 	CScene::UpdateAll(GlobalTimer);
+}
+
+void CGame::UpdateMainPassCB(const GameTimer & GlobalTimer)
+{
+	DX12App* app = DX12App::GetApp();
+	int windowWidth = app->GetWindowWidth();
+	int windowHeight = app->GetWindowHeight();
+
+	// Camera
+	XMMATRIX view = m_MainCamera->GetView();
+	XMMATRIX proj = m_MainCamera->GetProj();
+	XMMATRIX viewProj = XMMatrixMultiply(view, proj);
+	XMMATRIX invView = XMMatrixInverse(&XMMatrixDeterminant(view), view);
+	XMMATRIX invProj = XMMatrixInverse(&XMMatrixDeterminant(proj), proj);
+	XMMATRIX invViewProj = XMMatrixInverse(&XMMatrixDeterminant(viewProj), viewProj);
+	XMStoreFloat4x4(&m_MainPassCB.View, XMMatrixTranspose(view));
+	XMStoreFloat4x4(&m_MainPassCB.InvView, XMMatrixTranspose(invView));
+	XMStoreFloat4x4(&m_MainPassCB.Proj, XMMatrixTranspose(proj));
+	XMStoreFloat4x4(&m_MainPassCB.InvProj, XMMatrixTranspose(invProj));
+	XMStoreFloat4x4(&m_MainPassCB.ViewProj, XMMatrixTranspose(viewProj));
+	XMStoreFloat4x4(&m_MainPassCB.InvViewProj, XMMatrixTranspose(invViewProj));
+
+	m_MainPassCB.EyePosW = m_MainCamera->GetPosition3f();
+	m_MainPassCB.RenderTargetSize = XMFLOAT2((float)windowWidth, (float)windowHeight);
+	m_MainPassCB.InvRenderTargetSize = XMFLOAT2(1.0f / windowWidth, 1.0f / windowHeight);
+	m_MainPassCB.NearZ = m_MainCamera->GetNearZ();
+	m_MainPassCB.FarZ = m_MainCamera->GetFarZ();
+
+	// Time
+	m_MainPassCB.TotalTime = GlobalTimer.TotalTime();
+	m_MainPassCB.DeltaTime = GlobalTimer.DeltaTime();
+
+	// Light
+	m_MainPassCB.AmbientLight = { 0.25f, 0.25f, 0.35f, 1.0f };
+
+	for (UINT i = 0; i < m_DirLights.size(); ++i)
+	{
+		m_MainPassCB.Lights[i].Direction = m_DirLights[i]->GetDirection3f();
+		m_MainPassCB.Lights[i].Strength = m_DirLights[i]->GetStrength3f();
+	}
+
+	// CSM
+	XMMATRIX lightView = m_DirLights[0]->ComputeLightView(&m_SceneBoundingSphere);
+	XMStoreFloat4x4(&m_MainPassCB.ShadowView, XMMatrixTranspose(lightView));
+
+	ComputeFitCascadeCSMPassCB(invView);
+
+	//vector<vector<XMVECTOR>> frustumPoints(CRenderer::GetCascadNum());
+	//m_MainCamera->ComputeFrustumPointsInWorldSpace(frustumPoints, invView);
+	//vector<XMMATRIX> shadowTransforms(CRenderer::GetCascadNum());
+	//m_DirLights[0]->ComputeShadowTransformWithCameraFrustum(shadowTransforms, &m_SceneBoundingSphere, frustumPoints);
+
+	//XMFLOAT4X4 shadowTransform;
+	//for (UINT i = 0; i < shadowTransforms.size(); ++i)
+	//{
+	//	XMStoreFloat4x4(&shadowTransform, shadowTransforms[i]);
+	//	m_MainPassCB.ShadowTexScale[i].x = shadowTransform(0, 0);
+	//	m_MainPassCB.ShadowTexScale[i].y = shadowTransform(1, 1);
+	//	m_MainPassCB.ShadowTexScale[i].z = shadowTransform(2, 2);
+	//	m_MainPassCB.ShadowTexScale[i].w = 1.0f;
+
+	//	m_MainPassCB.ShadowTexOffset[i].x = shadowTransform(3, 0);
+	//	m_MainPassCB.ShadowTexOffset[i].y = shadowTransform(3, 1);
+	//	m_MainPassCB.ShadowTexOffset[i].z = shadowTransform(3, 2);
+	//	m_MainPassCB.ShadowTexOffset[i].w = 0.0f;
+	//}
+
+	float shadowMapSize = (float)CRenderer::GetShadowMapSize();
+	m_MainPassCB.MaxBorderPadding = (shadowMapSize - 1.0f) / shadowMapSize;
+	m_MainPassCB.MinBorderPadding = 1.0f / shadowMapSize;
+	m_MainPassCB.ShadowBias = m_ShadowBias;
+	m_MainPassCB.CascadeBlendArea = 0.005f;
+	m_MainPassCB.ViualCascade = m_VisualCascade;
+	m_MainPassCB.BlendCascade = m_BlendCascade;
+	m_MainPassCB.PCFBlurForLoopStart = m_PCFBlurForLoopStart;
+	m_MainPassCB.PCFBlurForLoopEnd = m_PCFBlurForLoopEnd;
+
+	auto currPassCB = CFrameResourceManager::GetCurrentFrameResource()->PassCB.get();
+	currPassCB->CopyData(0, m_MainPassCB);
 }
 
 void CGame::Draw(const GameTimer& GlobalTimer)
@@ -159,20 +238,22 @@ void CGame::UpdateSceneImGui(const GameTimer& GlobalTimer)
 	if (showClose)
 	{
 		ImGui::SetNextWindowPos(ImVec2(20, 340), ImGuiCond_Once);
-		ImGui::SetNextWindowSize(ImVec2(200, 120), ImGuiCond_Once);
+		ImGui::SetNextWindowSize(ImVec2(300, 120), ImGuiCond_Once);
 
 		ImGuiWindowFlags window_flags = 0;
 		ImGui::Begin(u8"SceneManager", &showClose, window_flags);
 		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.3f);
 		ImGui::Checkbox(u8"VisualCascade", &m_VisualCascade);
-		//ImGui::SameLine();
+		ImGui::SameLine();
+		ImGui::Checkbox(u8"CancelJitter", &m_CancelJitter);
+		ImGui::Checkbox(u8"NearFarCorrection", &m_NearFarCorrection);
 		//ImGui::Checkbox(u8"BlendCascade", &m_BlendCascade);
 		if (ImGui::DragInt(u8"PCFBlurSize", &m_PCFBlurSize, 0.1f, 1, 10))
 		{
 			m_PCFBlurForLoopStart = m_PCFBlurSize / -2;
 			m_PCFBlurForLoopEnd = m_PCFBlurSize / 2 + 1;
 		}
-		ImGui::DragFloat(u8"ShadowBias", &m_ShadowBias, 0.00001f, -0.1f, 0.01f, "%.4f");
+		ImGui::DragFloat(u8"ShadowBias", &m_ShadowBias, 0.00001f, -0.1f, 0.1f, "%.4f");
 		ImGui::PopItemWidth();
 		ImGui::End();
 	}

@@ -197,8 +197,8 @@ void CScene::UpdateMainPassCB(const GameTimer& GlobalTimer)
 	m_MainPassCB.EyePosW = m_MainCamera->GetPosition3f();
 	m_MainPassCB.RenderTargetSize = XMFLOAT2((float)windowWidth, (float)windowHeight);
 	m_MainPassCB.InvRenderTargetSize = XMFLOAT2(1.0f / windowWidth, 1.0f / windowHeight);
-	m_MainPassCB.NearZ = 1.0f;
-	m_MainPassCB.FarZ = 1000.0f;
+	m_MainPassCB.NearZ = m_MainCamera->GetNearZ();
+	m_MainPassCB.FarZ = m_MainCamera->GetFarZ();
 
 	// Time
 	m_MainPassCB.TotalTime = GlobalTimer.TotalTime();
@@ -206,60 +206,14 @@ void CScene::UpdateMainPassCB(const GameTimer& GlobalTimer)
 
 	// Light
 	m_MainPassCB.AmbientLight = { 0.25f, 0.25f, 0.35f, 1.0f };
-	if (m_DirLights.size() > 0)
-	{
-		for (UINT i = 0; i < m_DirLights.size(); ++i)
-		{
-			m_MainPassCB.Lights[i].Direction = m_DirLights[i]->GetDirection3f();
-			m_MainPassCB.Lights[i].Strength = m_DirLights[i]->GetStrength3f();
-		}
-
-		// CSM
-		XMMATRIX lightView = m_DirLights[0]->ComputeLightView(&m_SceneBoundingSphere);
-		XMStoreFloat4x4(&m_MainPassCB.ShadowView, XMMatrixTranspose(lightView));
-
-		ComputeFitCascadeCSMPassCB(invView);
-
-		//vector<vector<XMVECTOR>> frustumPoints(CRenderer::GetCascadNum());
-		//m_MainCamera->ComputeFrustumPointsInWorldSpace(frustumPoints, invView);
-		//vector<XMMATRIX> shadowTransforms(CRenderer::GetCascadNum());
-		//m_DirLights[0]->ComputeShadowTransformWithCameraFrustum(shadowTransforms, &m_SceneBoundingSphere, frustumPoints);
-
-		//XMFLOAT4X4 shadowTransform;
-		//for (UINT i = 0; i < shadowTransforms.size(); ++i)
-		//{
-		//	XMStoreFloat4x4(&shadowTransform, shadowTransforms[i]);
-		//	m_MainPassCB.ShadowTexScale[i].x = shadowTransform(0, 0);
-		//	m_MainPassCB.ShadowTexScale[i].y = shadowTransform(1, 1);
-		//	m_MainPassCB.ShadowTexScale[i].z = shadowTransform(2, 2);
-		//	m_MainPassCB.ShadowTexScale[i].w = 1.0f;
-
-		//	m_MainPassCB.ShadowTexOffset[i].x = shadowTransform(3, 0);
-		//	m_MainPassCB.ShadowTexOffset[i].y = shadowTransform(3, 1);
-		//	m_MainPassCB.ShadowTexOffset[i].z = shadowTransform(3, 2);
-		//	m_MainPassCB.ShadowTexOffset[i].w = 0.0f;
-		//}
-
-		float shadowMapSize = (float)CRenderer::GetShadowMapSize();
-		m_MainPassCB.MaxBorderPadding = (shadowMapSize - 1.0f) / shadowMapSize;
-		m_MainPassCB.MinBorderPadding = 1.0f / shadowMapSize;
-		m_MainPassCB.ShadowBias = m_ShadowBias;
-		m_MainPassCB.CascadeBlendArea = 0.005f;
-		m_MainPassCB.ViualCascade = m_VisualCascade;
-		m_MainPassCB.BlendCascade = m_BlendCascade;
-		m_MainPassCB.PCFBlurForLoopStart = m_PCFBlurForLoopStart;
-		m_MainPassCB.PCFBlurForLoopEnd = m_PCFBlurForLoopEnd;
-	}
-	else
-	{
-		m_MainPassCB.ShadowView = m_ShadowTransform;
-		m_MainPassCB.Lights[0].Direction = { 0.57735f, -0.57735f, 0.57735f };
-		m_MainPassCB.Lights[0].Strength = { 0.8f, 0.8f, 0.8f };
-		m_MainPassCB.Lights[1].Direction = { -0.57735f, -0.57735f, 0.57735f };
-		m_MainPassCB.Lights[1].Strength = { 0.4f, 0.4f, 0.4f };
-		m_MainPassCB.Lights[2].Direction = { 0.0f, -0.707f, -0.707f };
-		m_MainPassCB.Lights[2].Strength = { 0.2f, 0.2f, 0.2f };
-	}
+	
+	//m_MainPassCB.ShadowView = m_ShadowTransform;
+	m_MainPassCB.Lights[0].Direction = { 0.57735f, -0.57735f, 0.57735f };
+	m_MainPassCB.Lights[0].Strength = { 0.8f, 0.8f, 0.8f };
+	m_MainPassCB.Lights[1].Direction = { -0.57735f, -0.57735f, 0.57735f };
+	m_MainPassCB.Lights[1].Strength = { 0.4f, 0.4f, 0.4f };
+	m_MainPassCB.Lights[2].Direction = { 0.0f, -0.707f, -0.707f };
+	m_MainPassCB.Lights[2].Strength = { 0.2f, 0.2f, 0.2f };
 
 	auto currPassCB = CFrameResourceManager::GetCurrentFrameResource()->PassCB.get();
 	currPassCB->CopyData(0, m_MainPassCB);
@@ -465,7 +419,7 @@ void XM_CALLCONV CScene::ComputeFitCascadeCSMPassCB(XMMATRIX& CameraInvView)
 	float cameraNearFarRange = m_MainCamera->GetFarZ() - m_MainCamera->GetNearZ();
 	XMVECTOR worldUnitsPerTexel = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 
-	static int cascadePartitionsZeroToOne[] = { 3, 15,100 }; // óvëfêî = CASCADE_NUM
+	static int cascadePartitionsZeroToOne[] = { 3, 15, 100 }; // óvëfêî = CASCADE_NUM
 	static int cascadePartitionsMax = 100;
 
 	for (UINT i = 0; i < CRenderer::GetCascadNum(); ++i)
@@ -482,13 +436,13 @@ void XM_CALLCONV CScene::ComputeFitCascadeCSMPassCB(XMMATRIX& CameraInvView)
 		m_MainCamera->ComputeFrustumPointsFromCascadeInterval(frustumPoints, frustumIntervalBegin, frustumIntervalEnd);
 		lightOrthographicMin = XMVectorSet(FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX);
 		lightOrthographicMax = XMVectorSet(-FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX);
-		XMVECTOR tempfrustumPoint[8];
+		XMVECTOR tempfrustumPoint;
 		for (int j = 0; j < 8; ++j)
 		{
 			frustumPoints[j] = XMVector4Transform(frustumPoints[j], CameraInvView); // FrustumPointsÇWorldãÛä‘Ç÷ì]ä∑
-			tempfrustumPoint[j] = XMVector4Transform(frustumPoints[j], lightView);  // FrustumPointÇLightãÛä‘Ç÷ì]ä∑
-			lightOrthographicMin = XMVectorMin(tempfrustumPoint[j], lightOrthographicMin);
-			lightOrthographicMax = XMVectorMax(tempfrustumPoint[j], lightOrthographicMax);
+			tempfrustumPoint = XMVector4Transform(frustumPoints[j], lightView);  // FrustumPointÇLightãÛä‘Ç÷ì]ä∑
+			lightOrthographicMin = XMVectorMin(tempfrustumPoint, lightOrthographicMin);
+			lightOrthographicMax = XMVectorMax(tempfrustumPoint, lightOrthographicMax);
 		}
 
 		float scaleDueToBlureAMT1f = (float)(m_PCFBlurSize * 2 + 1) / (float)CRenderer::GetShadowMapSize();
@@ -506,20 +460,34 @@ void XM_CALLCONV CScene::ComputeFitCascadeCSMPassCB(XMMATRIX& CameraInvView)
 		float lightOrthographicMinZ, lightOrthographicMaxZ;
 		lightOrthographicMinZ = XMVectorGetZ(lightOrthographicMin);
 		lightOrthographicMaxZ = XMVectorGetZ(lightOrthographicMax);
-		//lightOrthographicMin /= worldUnitsPerTexel;
-		//lightOrthographicMin = XMVectorFloor(lightOrthographicMin);
-		//lightOrthographicMin *= worldUnitsPerTexel;
-		//lightOrthographicMax /= worldUnitsPerTexel;
-		//lightOrthographicMax = XMVectorFloor(lightOrthographicMax);
-		//lightOrthographicMax *= worldUnitsPerTexel;
+
+		if (m_CancelJitter)
+		{
+			lightOrthographicMin /= worldUnitsPerTexel;
+			lightOrthographicMin = XMVectorFloor(lightOrthographicMin);
+			lightOrthographicMin *= worldUnitsPerTexel;
+			lightOrthographicMax /= worldUnitsPerTexel;
+			lightOrthographicMax = XMVectorFloor(lightOrthographicMax);
+			lightOrthographicMax *= worldUnitsPerTexel;
+		}
 
 		float nearPlane = 0.0f;
 		float farPlane = 10000.0f;
 		ComputeNearAndFarInCSM(nearPlane, farPlane, lightOrthographicMin, lightOrthographicMax, sceneAABBPointsLiS);
 		//nearPlane = nearPlane * (i + 1) / 2 + lightOrthographicMinZ;
 		//farPlane = farPlane * (i + 1) / 2 + lightOrthographicMaxZ;
-		nearPlane = nearPlane + lightOrthographicMinZ;
-		farPlane = farPlane + lightOrthographicMaxZ;
+
+		if (m_NearFarCorrection)
+		{
+			nearPlane = nearPlane + lightOrthographicMinZ;
+			farPlane = farPlane + lightOrthographicMaxZ;
+		}
+		else
+		{
+			nearPlane = lightOrthographicMinZ;
+			farPlane = lightOrthographicMaxZ;
+		}
+
 		XMMATRIX shadowTransform = m_DirLights[0]->ComputeShadowTransformFromLightOrthographicAndNearFar(i, nearPlane, farPlane, lightOrthographicMin, lightOrthographicMax);
 		XMFLOAT4X4 shadowTransform4x4;
 		XMStoreFloat4x4(&shadowTransform4x4, shadowTransform);

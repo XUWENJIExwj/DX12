@@ -11,6 +11,7 @@ public:
 	void Init()override;
 	void Uninit()override;
 	void UpdateAll(const GameTimer& GlobalTimer)override;
+	void UpdateMainPassCB(const GameTimer& GlobalTimer)override;
 	void Draw(const GameTimer& GlobalTimer)override;
 
 	void UpdateSceneImGui(const GameTimer& GlobalTimer)override;
