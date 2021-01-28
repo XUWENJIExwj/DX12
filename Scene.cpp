@@ -474,11 +474,11 @@ void XM_CALLCONV CScene::ComputeFitCascadeCSMPassCB(XMMATRIX& CameraInvView)
 		float nearPlane = 0.0f;
 		float farPlane = 10000.0f;
 		ComputeNearAndFarInCSM(nearPlane, farPlane, lightOrthographicMin, lightOrthographicMax, sceneAABBPointsLiS);
-		//nearPlane = nearPlane * (i + 1) / 2 + lightOrthographicMinZ;
-		//farPlane = farPlane * (i + 1) / 2 + lightOrthographicMaxZ;
 
 		if (m_NearFarCorrection)
 		{
+			//nearPlane = nearPlane * (i + 1) / 2 + lightOrthographicMinZ;
+			//farPlane = farPlane * (i + 1) / 2 + lightOrthographicMaxZ;
 			nearPlane = nearPlane + lightOrthographicMinZ;
 			farPlane = farPlane + lightOrthographicMaxZ;
 		}

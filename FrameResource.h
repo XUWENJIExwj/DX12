@@ -44,8 +44,9 @@ struct PassConstants
 	DirectX::XMFLOAT4X4 ShadowView = MathHelper::Identity4x4();
 	float MaxBorderPadding = 0.0f;
 	float MinBorderPadding = 0.0f;
-	float ShadowBias = 0.002f;
 	float CascadeBlendArea = 0.005f;
+	float cbPerObjectPad0 = 0.0f;
+	DirectX::XMFLOAT4 ShadowBias;
 	DirectX::XMFLOAT4 ShadowTexScale[CASCADE_NUM]; // óvëfêî = CascadeNum
 	DirectX::XMFLOAT4 ShadowTexOffset[CASCADE_NUM]; // óvëfêî = CascadeNum
 	int PCFBlurForLoopStart = -1;

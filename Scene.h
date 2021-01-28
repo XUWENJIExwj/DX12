@@ -52,7 +52,7 @@ protected:
 	int                     m_PCFBlurSize = 3;
 	int                     m_PCFBlurForLoopStart = -1;
 	int                     m_PCFBlurForLoopEnd = 2;
-	float                   m_ShadowBias = 0.001f;
+	DirectX::XMFLOAT3       m_ShadowBias = DirectX::XMFLOAT3(0.000f, 0.0001f, 0.00001f);
 	bool                    m_VisualCascade = false;
 	bool                    m_BlendCascade = true;
 	bool                    m_CancelJitter = true;

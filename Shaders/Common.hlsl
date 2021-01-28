@@ -103,8 +103,12 @@ cbuffer cbPass : register(b1)
     float4x4 gShadowView;
     float    gMaxBorderPadding;
     float    gMinBorderPadding;
-    float    gShadowBias;
     float    gCascadeBlendArea;
+    float    cbPerObjectPad0;
+    float4   gShadowBias;
+    //float    gShadowBias[3];
+    //float    cbPerObjectPad7;
+    //float    gShadowBias;
     float4   gShadowTexScale[CASCADE_NUM];
     float4   gShadowTexOffset[CASCADE_NUM];
     int      gPCFBlurForLoopStart;
@@ -181,7 +185,7 @@ float CalcShadowFactor(float4 ShadowPosHS, float PCFBlurSize, int CascadeIndex)
         {
             // Depth in NDC space.
             float depth = ShadowPosHS.z;
-            depth -= gShadowBias * pow(CascadeIndex, 2);
+            depth -= gShadowBias[CascadeIndex];
             percentLit += gShadowMap[CascadeIndex].SampleCmpLevelZero(gsamShadow, float2(ShadowPosHS.x + x * dx, ShadowPosHS.y + y * dy), depth).r;
         }
     }

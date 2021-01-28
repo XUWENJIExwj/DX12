@@ -178,8 +178,10 @@ void CGame::UpdateMainPassCB(const GameTimer & GlobalTimer)
 	float shadowMapSize = (float)CRenderer::GetShadowMapSize();
 	m_MainPassCB.MaxBorderPadding = (shadowMapSize - 1.0f) / shadowMapSize;
 	m_MainPassCB.MinBorderPadding = 1.0f / shadowMapSize;
-	m_MainPassCB.ShadowBias = m_ShadowBias;
 	m_MainPassCB.CascadeBlendArea = 0.005f;
+	m_MainPassCB.ShadowBias.x = m_ShadowBias.x;
+	m_MainPassCB.ShadowBias.y = m_ShadowBias.y;
+	m_MainPassCB.ShadowBias.z = m_ShadowBias.z;
 	m_MainPassCB.ViualCascade = m_VisualCascade;
 	m_MainPassCB.BlendCascade = m_BlendCascade;
 	m_MainPassCB.PCFBlurForLoopStart = m_PCFBlurForLoopStart;
@@ -253,7 +255,9 @@ void CGame::UpdateSceneImGui(const GameTimer& GlobalTimer)
 			m_PCFBlurForLoopStart = m_PCFBlurSize / -2;
 			m_PCFBlurForLoopEnd = m_PCFBlurSize / 2 + 1;
 		}
-		ImGui::DragFloat(u8"ShadowBias", &m_ShadowBias, 0.00001f, -0.1f, 0.1f, "%.4f");
+		ImGui::DragFloat(u8"ShadowBiasForCascade0", &m_ShadowBias.x, 0.00001f, -0.1f, 0.01f, "%.4f");
+		ImGui::DragFloat(u8"ShadowBiasForCascade1", &m_ShadowBias.y, 0.00001f, -0.1f, 0.01f, "%.4f");
+		ImGui::DragFloat(u8"ShadowBiasForCascade2", &m_ShadowBias.z, 0.00001f, -0.1f, 0.01f, "%.4f");
 		ImGui::PopItemWidth();
 		ImGui::End();
 	}
