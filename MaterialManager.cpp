@@ -176,14 +176,10 @@ void CMaterialManager::CreateMaterialCubeMap()
 	}
 }
 
-void CMaterialManager::UpdateMaterial()
+void CMaterialManager::UpdateMaterialImGui()
 {
 	static DX12App* app = DX12App::GetApp();
 	static bool showClose = true;
-	static int normalMapIndex = (int)MaterialNormalIndex::Material_Tile_00;
-	static int heightMapIndex = (int)MaterialHeightIndex::Material_Plane_00;
-	static int cubeMapIndex = (int)MaterialCubeMapIndex::Material_SkyCube_00;
-
 	static bool alpha_preview = true;
 	static bool alpha_half_preview = false;
 	static bool drag_and_drop = true;
@@ -195,79 +191,91 @@ void CMaterialManager::UpdateMaterial()
 		(alpha_half_preview ? ImGuiColorEditFlags_AlphaPreviewHalf : (alpha_preview ? ImGuiColorEditFlags_AlphaPreview : 0)) |
 		(options_menu ? 0 : ImGuiColorEditFlags_NoOptions);
 
-	static bool reverseBitangentNormalMap;
-	static bool reverseBitangentHeightMap;
-	static bool showSelfShadow;
-
 	if (showClose)
 	{
-		ImGui::SetNextWindowPos(ImVec2((float)app->GetWindowWidth() - 420, (float)app->GetWindowHeight() - 440), ImGuiCond_Once);
-		ImGui::SetNextWindowSize(ImVec2(400, 420), ImGuiCond_Once);
+		ImGui::SetNextWindowPos(ImVec2((float)app->GetWindowWidth() - 420, 210), ImGuiCond_Once);
+		ImGui::SetNextWindowSize(ImVec2(400, 270), ImGuiCond_Once);
 
 		ImGuiWindowFlags window_flags = 0;
 		ImGui::Begin(u8"MaterialManager", &showClose, window_flags);
 
-		// MaterialNormal
-		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.5f);
-		ImGui::Combo(u8"MaterialNormalList", &normalMapIndex, m_MaterialNormalNames.data(), GetMaterialNormalCount());
-		ImGui::PopItemWidth();
-		reverseBitangentNormalMap = m_MaterialNormal[normalMapIndex]->BitangentSign > 0 ? false : true;
-		if (ImGui::ColorEdit4(u8"DiffuseAlbedo##0", (float*)&m_MaterialNormal[normalMapIndex]->DiffuseAlbedo, ImGuiColorEditFlags_Float | misc_flags)) m_MaterialNormal[normalMapIndex]->NumFramesDirty = gNumFrameResources;
-		if (ImGui::ColorEdit3(u8"FresnelR0##0", (float*)&m_MaterialNormal[normalMapIndex]->FresnelR0, ImGuiColorEditFlags_Float | misc_flags)) m_MaterialNormal[normalMapIndex]->NumFramesDirty = gNumFrameResources;
-		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.2f);
-		if (ImGui::SliderFloat(u8"Roughness##0", &m_MaterialNormal[normalMapIndex]->Roughness, 0.0f, 1.0f)) m_MaterialNormal[normalMapIndex]->NumFramesDirty = gNumFrameResources;
-		ImGui::PopItemWidth();
-		ImGui::SameLine();
-		if (ImGui::Checkbox(u8"ReverseBitangent##0", &reverseBitangentNormalMap))
+		if (ImGui::BeginTabBar("##Materials", ImGuiTabBarFlags_None))
 		{
-			m_MaterialNormal[normalMapIndex]->BitangentSign = reverseBitangentNormalMap ? -1 : 1;
-			m_MaterialNormal[normalMapIndex]->NumFramesDirty = gNumFrameResources;
-		}
-		ImGui::Separator();
-
-		// MaterialHeight
-		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.5f);
-		ImGui::Combo(u8"MaterialHeightList", &heightMapIndex, m_MaterialHeightNames.data(), GetMaterialHeightCount());
-		ImGui::PopItemWidth();
-		reverseBitangentHeightMap = m_MaterialHeight[heightMapIndex]->BitangentSign > 0 ? false : true;
-		if (ImGui::ColorEdit4(u8"DiffuseAlbedo##1", (float*)&m_MaterialHeight[heightMapIndex]->DiffuseAlbedo, ImGuiColorEditFlags_Float | misc_flags)) m_MaterialHeight[heightMapIndex]->NumFramesDirty = gNumFrameResources;
-		if (ImGui::ColorEdit3(u8"FresnelR0##1", (float*)&m_MaterialHeight[heightMapIndex]->FresnelR0, ImGuiColorEditFlags_Float | misc_flags)) m_MaterialHeight[heightMapIndex]->NumFramesDirty = gNumFrameResources;
-		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.2f);
-		if (ImGui::SliderFloat(u8"Roughness##1", &m_MaterialHeight[heightMapIndex]->Roughness, 0.0f, 1.0f)) m_MaterialHeight[heightMapIndex]->NumFramesDirty = gNumFrameResources;
-		ImGui::PopItemWidth();
-		ImGui::SameLine();
-		if (ImGui::Checkbox(u8"ReverseBitangent##1", &reverseBitangentHeightMap))
-		{
-			m_MaterialHeight[heightMapIndex]->BitangentSign = reverseBitangentHeightMap ? -1 : 1;
-			m_MaterialHeight[heightMapIndex]->NumFramesDirty = gNumFrameResources;
-		}
-		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.2f);
-		if (ImGui::SliderInt(u8"MinSampleCount##1", &m_MaterialHeight[heightMapIndex]->MinSampleCount, 8, 64)) m_MaterialHeight[heightMapIndex]->NumFramesDirty = gNumFrameResources;
-		ImGui::SameLine();
-		if (ImGui::SliderInt(u8"MaxSampleCount##1", &m_MaterialHeight[heightMapIndex]->MaxSampleCount, 64, 256)) m_MaterialHeight[heightMapIndex]->NumFramesDirty = gNumFrameResources;
-		if (ImGui::SliderFloat(u8"HeightScale##1", &m_MaterialHeight[heightMapIndex]->HeightScale, 0.0f, 0.1f)) m_MaterialHeight[heightMapIndex]->NumFramesDirty = gNumFrameResources;
-		showSelfShadow = m_MaterialHeight[heightMapIndex]->ShowSelfShadow;
-		if (ImGui::Checkbox(u8"ShowSelfShadow##1", &showSelfShadow))
-		{
-			m_MaterialHeight[heightMapIndex]->ShowSelfShadow = showSelfShadow;
-			m_MaterialHeight[heightMapIndex]->NumFramesDirty = gNumFrameResources;
-		}
-		ImGui::SameLine();
-		if (ImGui::SliderFloat(u8"ShadowSoftening##1", &m_MaterialHeight[heightMapIndex]->ShadowSoftening, 0.0f, 2.0f)) m_MaterialHeight[heightMapIndex]->NumFramesDirty = gNumFrameResources;
-		ImGui::PopItemWidth();
-		ImGui::Separator();
-
-		// MaterialCubeMap
-		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.5f);
-		ImGui::Combo(u8"MaterialCubeMapList", &cubeMapIndex, m_MaterialCubeMapNames.data(), GetMaterialCubeMapCount());
-		ImGui::PopItemWidth();
-		if (ImGui::ColorEdit4(u8"DiffuseAlbedo##2", (float*)&m_MaterialCubeMap[cubeMapIndex]->DiffuseAlbedo, ImGuiColorEditFlags_Float | misc_flags) &&
-			CRenderer::GetCurrentSkyCubeMapIndex() == cubeMapIndex)
-		{
-			for (int i = 1; i < (int)m_AllMaterials.size(); ++i)
+			if (ImGui::BeginTabItem("MaterialNormal"))
 			{
-				m_AllMaterials[i]->CubeMapDiffuseAlbedo = m_MaterialCubeMap[cubeMapIndex]->DiffuseAlbedo;
-				m_AllMaterials[i]->NumFramesDirty = gNumFrameResources;
+				static int normalMapIndex = (int)MaterialNormalIndex::Material_Tile_00;
+				static bool reverseBitangentNormalMap;
+				ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.5f);
+				ImGui::Combo(u8"MaterialNormalList", &normalMapIndex, m_MaterialNormalNames.data(), GetMaterialNormalCount());
+				ImGui::PopItemWidth();
+				reverseBitangentNormalMap = m_MaterialNormal[normalMapIndex]->BitangentSign > 0 ? false : true;
+				if (ImGui::ColorEdit4(u8"DiffuseAlbedo##0", (float*)&m_MaterialNormal[normalMapIndex]->DiffuseAlbedo, ImGuiColorEditFlags_Float | misc_flags)) m_MaterialNormal[normalMapIndex]->NumFramesDirty = gNumFrameResources;
+				if (ImGui::ColorEdit3(u8"FresnelR0##0", (float*)&m_MaterialNormal[normalMapIndex]->FresnelR0, ImGuiColorEditFlags_Float | misc_flags)) m_MaterialNormal[normalMapIndex]->NumFramesDirty = gNumFrameResources;
+				ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.2f);
+				if (ImGui::SliderFloat(u8"Roughness##0", &m_MaterialNormal[normalMapIndex]->Roughness, 0.0f, 1.0f)) m_MaterialNormal[normalMapIndex]->NumFramesDirty = gNumFrameResources;
+				ImGui::PopItemWidth();
+				ImGui::SameLine();
+				if (ImGui::Checkbox(u8"ReverseBitangent##0", &reverseBitangentNormalMap))
+				{
+					m_MaterialNormal[normalMapIndex]->BitangentSign = reverseBitangentNormalMap ? -1 : 1;
+					m_MaterialNormal[normalMapIndex]->NumFramesDirty = gNumFrameResources;
+				}
+				ImGui::EndTabItem();
+			}
+
+			if (ImGui::BeginTabItem("MaterialHeight"))
+			{
+				static int heightMapIndex = (int)MaterialHeightIndex::Material_Plane_00;
+				static bool reverseBitangentHeightMap;
+				static bool showSelfShadow;
+				ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.5f);
+				ImGui::Combo(u8"MaterialHeightList", &heightMapIndex, m_MaterialHeightNames.data(), GetMaterialHeightCount());
+				ImGui::PopItemWidth();
+				reverseBitangentHeightMap = m_MaterialHeight[heightMapIndex]->BitangentSign > 0 ? false : true;
+				if (ImGui::ColorEdit4(u8"DiffuseAlbedo##1", (float*)&m_MaterialHeight[heightMapIndex]->DiffuseAlbedo, ImGuiColorEditFlags_Float | misc_flags)) m_MaterialHeight[heightMapIndex]->NumFramesDirty = gNumFrameResources;
+				if (ImGui::ColorEdit3(u8"FresnelR0##1", (float*)&m_MaterialHeight[heightMapIndex]->FresnelR0, ImGuiColorEditFlags_Float | misc_flags)) m_MaterialHeight[heightMapIndex]->NumFramesDirty = gNumFrameResources;
+				ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.2f);
+				if (ImGui::SliderFloat(u8"Roughness##1", &m_MaterialHeight[heightMapIndex]->Roughness, 0.0f, 1.0f)) m_MaterialHeight[heightMapIndex]->NumFramesDirty = gNumFrameResources;
+				ImGui::PopItemWidth();
+				ImGui::SameLine();
+				if (ImGui::Checkbox(u8"ReverseBitangent##1", &reverseBitangentHeightMap))
+				{
+					m_MaterialHeight[heightMapIndex]->BitangentSign = reverseBitangentHeightMap ? -1 : 1;
+					m_MaterialHeight[heightMapIndex]->NumFramesDirty = gNumFrameResources;
+				}
+				ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.2f);
+				if (ImGui::SliderInt(u8"MinSampleCount##1", &m_MaterialHeight[heightMapIndex]->MinSampleCount, 8, 64)) m_MaterialHeight[heightMapIndex]->NumFramesDirty = gNumFrameResources;
+				ImGui::SameLine();
+				if (ImGui::SliderInt(u8"MaxSampleCount##1", &m_MaterialHeight[heightMapIndex]->MaxSampleCount, 64, 256)) m_MaterialHeight[heightMapIndex]->NumFramesDirty = gNumFrameResources;
+				if (ImGui::SliderFloat(u8"HeightScale##1", &m_MaterialHeight[heightMapIndex]->HeightScale, 0.0f, 0.1f)) m_MaterialHeight[heightMapIndex]->NumFramesDirty = gNumFrameResources;
+				showSelfShadow = m_MaterialHeight[heightMapIndex]->ShowSelfShadow;
+				if (ImGui::Checkbox(u8"ShowSelfShadow##1", &showSelfShadow))
+				{
+					m_MaterialHeight[heightMapIndex]->ShowSelfShadow = showSelfShadow;
+					m_MaterialHeight[heightMapIndex]->NumFramesDirty = gNumFrameResources;
+				}
+				ImGui::SameLine();
+				if (ImGui::SliderFloat(u8"ShadowSoftening##1", &m_MaterialHeight[heightMapIndex]->ShadowSoftening, 0.0f, 2.0f)) m_MaterialHeight[heightMapIndex]->NumFramesDirty = gNumFrameResources;
+				ImGui::PopItemWidth();
+				ImGui::EndTabItem();
+			}
+
+			if (ImGui::BeginTabItem("MaterialCubeMap"))
+			{
+				static int cubeMapIndex = (int)MaterialCubeMapIndex::Material_SkyCube_00;
+				ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.5f);
+				ImGui::Combo(u8"MaterialCubeMapList", &cubeMapIndex, m_MaterialCubeMapNames.data(), GetMaterialCubeMapCount());
+				ImGui::PopItemWidth();
+				if (ImGui::ColorEdit4(u8"DiffuseAlbedo##2", (float*)&m_MaterialCubeMap[cubeMapIndex]->DiffuseAlbedo, ImGuiColorEditFlags_Float | misc_flags) &&
+					CRenderer::GetCurrentSkyCubeMapIndex() == cubeMapIndex)
+				{
+					for (int i = 1; i < (int)m_AllMaterials.size(); ++i)
+					{
+						m_AllMaterials[i]->CubeMapDiffuseAlbedo = m_MaterialCubeMap[cubeMapIndex]->DiffuseAlbedo;
+						m_AllMaterials[i]->NumFramesDirty = gNumFrameResources;
+					}
+				}
+				ImGui::EndTabItem();
 			}
 		}
 		

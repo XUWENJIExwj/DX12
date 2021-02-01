@@ -250,10 +250,11 @@ float4 PS(VertexOut pin) : SV_Target
     float4 comparison = (currentPixelDepth > gCascadeFrustumsEyeSpaceDepthsFloat);
     float index = dot(float4(CASCADE_NUM > 0, CASCADE_NUM > 1, CASCADE_NUM > 2, CASCADE_NUM > 3), comparison);
     index = min(index, CASCADE_NUM - 1);
-    currentCascadeIndex = (int) index;
+    currentCascadeIndex = (int)index;
     shadowMapTexHS = ComputeShadowTexCoord(shadowPosLiS, currentCascadeIndex);
     float shadowFactor_blend0 = CalcShadowFactor(shadowMapTexHS, pcfBlursize, currentCascadeIndex);
-    // Blend
+    
+    ////Blend
     //if (gBlendCascade)
     //{
     //    int nextCascadeIndex = 1;

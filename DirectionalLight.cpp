@@ -182,8 +182,8 @@ void CDirLight::UpdateImGui(const GameTimer& GlobalTimer)
 
 	if (showClose && m_Name == "DirLight00")
 	{
-		ImGui::SetNextWindowPos(ImVec2((float)DX12App::GetApp()->GetWindowWidth() - 420, 205), ImGuiCond_Once);
-		ImGui::SetNextWindowSize(ImVec2(200, 65), ImGuiCond_Once);
+		ImGui::SetNextWindowPos(ImVec2((float)DX12App::GetApp()->GetWindowWidth() - 120, 500), ImGuiCond_Once);
+		ImGui::SetNextWindowSize(ImVec2(100, 65), ImGuiCond_Once);
 
 		ImGuiWindowFlags window_flags = 0;
 		ImGui::Begin(u8"DirLight", &showClose, window_flags);

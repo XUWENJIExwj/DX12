@@ -63,7 +63,7 @@ public:
 	static void CreateMaterialHeight();
 	static void CreateMaterialCubeMap();
 	static void CreateMaterials();
-	static void UpdateMaterial();
+	static void UpdateMaterialImGui();
 
 	static const char**            GetMaterialNormalNames() { return m_MaterialNormalNames.data(); }
 	static std::vector<Material*>& GetMaterialNormal() { return m_MaterialNormal; }

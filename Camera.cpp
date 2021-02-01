@@ -159,8 +159,8 @@ void CCamera::ComputeProjectionMatrix(float fovY, float aspect, float zn, float 
 	m_NearZ = zn;
 	m_FarZ = zf;
 
-	m_NearWindowHeight = 2.0f * m_NearZ * tanf( 0.5f * m_FovY );
-	m_FarWindowHeight  = 2.0f * m_FarZ * tanf( 0.5f * m_FovY );
+	m_NearWindowHeight = 2.0f * m_NearZ * tanf(0.5f * m_FovY);
+	m_FarWindowHeight = 2.0f * m_FarZ * tanf(0.5f * m_FovY);
 
 	XMMATRIX P = XMMatrixPerspectiveFovLH(m_FovY, m_Aspect, m_NearZ, m_FarZ);
 	XMStoreFloat4x4(&m_Proj, P);

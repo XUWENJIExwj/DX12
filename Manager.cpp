@@ -66,7 +66,7 @@ void CManager::Update(const GameTimer& GlobalTimer)
 
 	CImGuiManager::Update();
 
-	CMaterialManager::UpdateMaterial();
+	CMaterialManager::UpdateMaterialImGui();
 
 	m_Scene->UpdateAll(GlobalTimer);
 }

@@ -58,17 +58,17 @@ void CGame::Init()
 	// è„éÆÇèÌÇ…ê¨ÇËóßÇΩÇπÇÈïKóvÇ™Ç†ÇÈ
 	CSphere* sphereDR0 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror00");
 
-	//CSphere* sphereDR1 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror01");
-	//sphereDR1->SetPosition(XMFLOAT3(-3.0f, 1.5f, 0.0f));
-	//sphereDR1->SetWorldMatrix();
+	CSphere* sphereDR1 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror01");
+	sphereDR1->SetPosition(XMFLOAT3(-3.0f, 1.5f, 0.0f));
+	sphereDR1->SetWorldMatrix();
 
-	//CSphere* sphereDR2 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror02");
-	//sphereDR2->SetPosition(XMFLOAT3(0.0f, 2.0f, 3.0f));
-	//sphereDR2->SetWorldMatrix();
+	CSphere* sphereDR2 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror02");
+	sphereDR2->SetPosition(XMFLOAT3(0.0f, 2.0f, 3.0f));
+	sphereDR2->SetWorldMatrix();
 
-	//CSphere* sphereDR3 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror03");
-	//sphereDR3->SetPosition(XMFLOAT3(0.0f, 1.5f, 2.0f));
-	//sphereDR3->SetWorldMatrix();
+	CSphere* sphereDR3 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror03");
+	sphereDR3->SetPosition(XMFLOAT3(0.0f, 1.5f, 2.0f));
+	sphereDR3->SetWorldMatrix();
 
 	CLogo* logo00 = AddGameObject<CLogo>((int)RenderLayers::Layer_3D_Opaque, "Logo00");
 	CLogo* logo01 = AddGameObject<CLogo>((int)RenderLayers::Layer_3D_Opaque, "Logo01");
@@ -239,11 +239,11 @@ void CGame::UpdateSceneImGui(const GameTimer& GlobalTimer)
 
 	if (showClose)
 	{
-		ImGui::SetNextWindowPos(ImVec2(20, 340), ImGuiCond_Once);
-		ImGui::SetNextWindowSize(ImVec2(300, 120), ImGuiCond_Once);
+		ImGui::SetNextWindowPos(ImVec2((float)DX12App::GetApp()->GetWindowWidth() - 420, 500), ImGuiCond_Once);
+		ImGui::SetNextWindowSize(ImVec2(300, 210), ImGuiCond_Once);
 
 		ImGuiWindowFlags window_flags = 0;
-		ImGui::Begin(u8"SceneManager", &showClose, window_flags);
+		ImGui::Begin(u8"CSM", &showClose, window_flags);
 		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.3f);
 		ImGui::Checkbox(u8"VisualCascade", &m_VisualCascade);
 		ImGui::SameLine();

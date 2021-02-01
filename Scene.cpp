@@ -419,16 +419,13 @@ void XM_CALLCONV CScene::ComputeFitCascadeCSMPassCB(XMMATRIX& CameraInvView)
 	float cameraNearFarRange = m_MainCamera->GetFarZ() - m_MainCamera->GetNearZ();
 	XMVECTOR worldUnitsPerTexel = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 
-	static int cascadePartitionsZeroToOne[] = { 3, 15, 100 }; // óvëfêî = CASCADE_NUM
-	static int cascadePartitionsMax = 100;
+	static float cascadePartitions[] = { 0.03f, 0.20f, 1.0f }; // óvëfêî = CASCADE_NUM
 
 	for (UINT i = 0; i < CRenderer::GetCascadNum(); ++i)
 	{
 		if (i == 0) frustumIntervalBegin = 0.0f;
-		else frustumIntervalBegin = (float)cascadePartitionsZeroToOne[i - 1];
-		frustumIntervalEnd = (float)cascadePartitionsZeroToOne[i];
-		frustumIntervalBegin /= (float)cascadePartitionsMax;
-		frustumIntervalEnd /= (float)cascadePartitionsMax;
+		else frustumIntervalBegin = cascadePartitions[i - 1];
+		frustumIntervalEnd = cascadePartitions[i];
 		frustumIntervalBegin *= cameraNearFarRange;
 		frustumIntervalEnd *= cameraNearFarRange;
 

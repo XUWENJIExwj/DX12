@@ -99,7 +99,7 @@ void CImGuiManager::Draw()
 	ImGui::SetNextWindowPos(ImVec2((app->GetWindowWidth() - 500) * 0.5f, 20), ImGuiCond_Once);
 	ImGui::SetNextWindowSize(ImVec2(420, 170), ImGuiCond_Once);
 
-	if (showClose)
+	if (showCloseb)
 	{
 		ImGui::Begin(u8"アピールポイント", &showCloseb, window_flags);
 		ImGui::Text(u8"・DX12で複数のオブジェクトに動的環境マッピングの実装");
