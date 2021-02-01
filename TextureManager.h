@@ -56,6 +56,9 @@ private:
 	static UINT m_SkyCubeMapIndex;
 	static UINT m_ShadowMapIndex;
 	static UINT m_ShadowMapNum;
+	static UINT m_RadialBlurNum;
+	static UINT m_PostProcessIndex;
+	static UINT m_PostProcessNum;
 	static UINT m_NullCubeMapIndex;
 	static UINT m_DynamicCubeMapIndex;
 	static UINT m_DynamicCubeMapsNum;
@@ -69,6 +72,8 @@ public:
 	static UINT GetSkyCubeMapIndex() { return m_SkyCubeMapIndex; }
 	static UINT GetShadowMapIndex(int CascadeIndex = 0) { return m_ShadowMapIndex + CascadeIndex; }
 	static UINT GetShadowMapNum() { return m_ShadowMapNum; }
+	static UINT GetPostProcessIndex() { return m_PostProcessIndex; }
+	static UINT GetPostProcessNum() { return m_PostProcessNum; }
 	static UINT GetNullCubeMapIndex() { return m_NullCubeMapIndex; }
 	static UINT GetDynamicCubeMapIndex() { return m_DynamicCubeMapIndex; }
 	static UINT GetDynamicCubeMapsNum() { return m_DynamicCubeMapsNum; }

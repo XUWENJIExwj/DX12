@@ -192,6 +192,9 @@
     <ClInclude Include="CSMManager.h">
       <Filter>ソース ファイル\System\Manager</Filter>
     </ClInclude>
+    <ClInclude Include="RadialBlur.h">
+      <Filter>ソース ファイル\System\Renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DX12App.cpp">
@@ -319,6 +322,9 @@
     </ClCompile>
     <ClCompile Include="CSMManager.cpp">
       <Filter>ソース ファイル\System\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="RadialBlur.cpp">
+      <Filter>ソース ファイル\System\Renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

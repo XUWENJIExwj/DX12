@@ -3,6 +3,7 @@
 #include "DX12App.h"
 #include "CubeRenderTarget.h"
 #include "ShadowMap.h"
+#include "RadialBlur.h"
 #include "GameObject.h"
 #include "FrameResource.h"
 
@@ -60,6 +61,7 @@ private:
 
 	// CommonResourcesê∂ê¨
 	static Microsoft::WRL::ComPtr<ID3D12RootSignature>              m_RootSignature;
+	static Microsoft::WRL::ComPtr<ID3D12RootSignature>              m_PostProcessRootSignature;
 	static Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>             m_SrvHeap;
 	static std::vector<Microsoft::WRL::ComPtr<ID3D12PipelineState>> m_PSOs;
 	static int                                                      m_CurrentPSO;
@@ -85,6 +87,9 @@ private:
 	static UINT                                   m_DynamicCubeMapSize;
 	static Microsoft::WRL::ComPtr<ID3D12Resource> m_DynamicCubeMapDepthStencilBuffer;
 
+	// RadialBlur
+	static std::unique_ptr<CRadialBlur> m_RadialBlur;
+
 public:
 	// DX12èâä˙âª
 	static bool Init();
@@ -104,6 +109,7 @@ public:
 	// CommonResourcesê∂ê¨
 	static void CreateCommonResources();
 	static void CreateRootSignature();
+	static void CreatePostProcessRootSignature();
 	static void CreateDescriptorHeaps();
 	static void CreateCubeDepthStencil();
 	static void CreataPSOs();

@@ -181,6 +181,7 @@
     <ClInclude Include="MaterialManager.h" />
     <ClInclude Include="MeshField.h" />
     <ClInclude Include="Quad.h" />
+    <ClInclude Include="RadialBlur.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="ShaderManager.h" />
@@ -225,6 +226,7 @@
     <ClCompile Include="MaterialManager.cpp" />
     <ClCompile Include="MeshField.cpp" />
     <ClCompile Include="Quad.cpp" />
+    <ClCompile Include="RadialBlur.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
