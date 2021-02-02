@@ -23,7 +23,7 @@ ComPtr<ID3D12CommandAllocator>    CRenderer::m_DirectCmdListAlloc = nullptr;
 ComPtr<ID3D12GraphicsCommandList> CRenderer::m_CommandList = nullptr;
 
 const int CRenderer::m_SwapChainBufferCount = 2;
-int       CRenderer::m_CurrentBackBuffer = 0;
+int       CRenderer::m_CurrentBackBufferIndex = 0;
 ComPtr<ID3D12Resource> CRenderer::m_SwapChainBuffer[m_SwapChainBufferCount];
 ComPtr<ID3D12Resource> CRenderer::m_DepthStencilBuffer = nullptr;
 
@@ -275,7 +275,7 @@ void CRenderer::OnResize()
 		m_BackBufferFormat,
 		DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH));
 
-	m_CurrentBackBuffer = 0;
+	m_CurrentBackBufferIndex = 0;
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHeapHandle(m_RtvHeap->GetCPUDescriptorHandleForHeapStart());
 	for (UINT i = 0; i < m_SwapChainBufferCount; i++)
@@ -781,6 +781,17 @@ void CRenderer::CreataPSOs()
 		shaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapDebug].pixelShader->GetBufferSize()
 	};
 	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&debugPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_ShadowMapDebug])));
+
+	// RadialBlur
+	D3D12_COMPUTE_PIPELINE_STATE_DESC radialBlurPsoDesc = {};
+	radialBlurPsoDesc.pRootSignature = m_PostProcessRootSignature.Get();
+	radialBlurPsoDesc.CS =
+	{
+		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_RadialBlur].computeShader->GetBufferPointer()),
+		shaderTypes[(int)ShaderTypeIndex::Shader_Type_RadialBlur].computeShader->GetBufferSize()
+	};
+	radialBlurPsoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+	ThrowIfFailed(m_D3DDevice->CreateComputePipelineState(&radialBlurPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_RadialBlur])));
 }
 
 // ƒQƒbƒ^[
@@ -788,7 +799,7 @@ D3D12_CPU_DESCRIPTOR_HANDLE CRenderer::GetCurrentBackBufferView()
 {
 	return CD3DX12_CPU_DESCRIPTOR_HANDLE(
 		m_RtvHeap->GetCPUDescriptorHandleForHeapStart(),
-		m_CurrentBackBuffer,
+		m_CurrentBackBufferIndex,
 		m_RtvDescSize);
 }
 
@@ -1176,6 +1187,14 @@ void CRenderer::DrawSingleGameObject(CGameObject* GameObject, ID3D12Resource* Ob
 	m_CommandList->DrawIndexedInstanced(GameObject->GetIndexCount(), 1, GameObject->GetStartIndexLocation(), GameObject->GetBaseVertexLocation(), 0);
 }
 
+void CRenderer::DoRadialBlur(RadialBlurCB& RadialBlurCBuffer)
+{
+	if (RadialBlurCBuffer.RadialBlurOn)
+	{
+		m_RadialBlur->Execute(m_CommandList.Get(), m_PostProcessRootSignature.Get(), m_PSOs[(int)PSOTypeIndex::PSO_RadialBlur].Get(), m_SwapChainBuffer[m_CurrentBackBufferIndex].Get(), RadialBlurCBuffer);
+	}
+}
+
 void CRenderer::End()
 {
 	// Indicate a state transition on the resource usage.
@@ -1186,7 +1205,7 @@ void CRenderer::End()
 
 	// Swap the back and front buffers
 	ThrowIfFailed(m_SwapChain->Present(0, 0));
-	m_CurrentBackBuffer = (m_CurrentBackBuffer + 1) % m_SwapChainBufferCount;
+	m_CurrentBackBufferIndex = (m_CurrentBackBufferIndex + 1) % m_SwapChainBufferCount;
 
 	// Advance the fence value to mark commands up to this fence point.
 	CFrameResourceManager::GetCurrentFrameResource()->Fence = ++m_CurrentFence;

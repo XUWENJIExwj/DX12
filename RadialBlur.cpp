@@ -1,5 +1,7 @@
 #include "RadialBlur.h"
 
+using namespace std;
+
 CRadialBlur::CRadialBlur(ID3D12Device* Device, UINT Width, UINT Height, DXGI_FORMAT Format)
 {
 	m_D3DDevice = Device;
@@ -12,15 +14,15 @@ CRadialBlur::CRadialBlur(ID3D12Device* Device, UINT Width, UINT Height, DXGI_FOR
 
 void CRadialBlur::CreateDescriptors(CD3DX12_CPU_DESCRIPTOR_HANDLE CpuSrvHandle, CD3DX12_GPU_DESCRIPTOR_HANDLE GpuSrvHandle, UINT DescSize)
 {
-	m_CpuSrvHandleIn = CpuSrvHandle;
-	m_CpuUavHandleIn = CpuSrvHandle.Offset(1, DescSize);
-	m_CpuSrvHandleOut = CpuSrvHandle.Offset(1, DescSize);
-	m_CpuUavHandleOut = CpuSrvHandle.Offset(1, DescSize);
+	m_CpuSrvHandleA = CpuSrvHandle;
+	m_CpuUavHandleA = CpuSrvHandle.Offset(1, DescSize);
+	m_CpuSrvHandleB = CpuSrvHandle.Offset(1, DescSize);
+	m_CpuUavHandleB = CpuSrvHandle.Offset(1, DescSize);
 
-	m_GpuSrvHandleIn = GpuSrvHandle;
-	m_GpuUavHandleIn = GpuSrvHandle.Offset(1, DescSize);
-	m_GpuSrvHandleOut = GpuSrvHandle.Offset(1, DescSize);
-	m_GpuUavHandleOut = GpuSrvHandle.Offset(1, DescSize);
+	m_GpuSrvHandleA = GpuSrvHandle;
+	m_GpuUavHandleA = GpuSrvHandle.Offset(1, DescSize);
+	m_GpuSrvHandleB = GpuSrvHandle.Offset(1, DescSize);
+	m_GpuUavHandleB = GpuSrvHandle.Offset(1, DescSize);
 
 	CreateDescriptors();
 }
@@ -39,25 +41,47 @@ void CRadialBlur::OnResize(UINT NewWidth, UINT NewHeight)
 	}
 }
 
-void CRadialBlur::Execute(ID3D12GraphicsCommandList* CommandList, ID3D12RootSignature* RootSignature, ID3D12PipelineState* RadialBlurPSO, ID3D12Resource* ResourceIn)
+void CRadialBlur::Execute(ID3D12GraphicsCommandList* CommandList, ID3D12RootSignature* RootSignature, ID3D12PipelineState* RadialBlurPSO, ID3D12Resource* ResourceIn, RadialBlurCB& RadialBlurCBuffer)
 {
 	CommandList->SetComputeRootSignature(RootSignature);
 
 	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(ResourceIn,
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE));
-	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_RadialBlurIn.Get(),
+	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_RadialBlurA.Get(),
 		D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST));
-	CommandList->CopyResource(m_RadialBlurIn.Get(), ResourceIn);
-	CommandList->ResourceBarrier(1,&CD3DX12_RESOURCE_BARRIER::Transition(m_RadialBlurIn.Get(),
+	CommandList->CopyResource(m_RadialBlurA.Get(), ResourceIn);
+	CommandList->ResourceBarrier(1,&CD3DX12_RESOURCE_BARRIER::Transition(m_RadialBlurA.Get(),
 		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ));
-	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_RadialBlurOut.Get(),
+	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_RadialBlurB.Get(),
 		D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_UNORDERED_ACCESS));
 
+	UINT numGroupsX = (UINT)ceilf(m_Width / 16.0f);
+	UINT numGroupsY = (UINT)ceilf(m_Height / 16.0f);
+
 	CommandList->SetPipelineState(RadialBlurPSO);
-	CommandList->SetComputeRootDescriptorTable(1, m_GpuSrvHandleOut);
-	CommandList->SetComputeRootDescriptorTable(2, m_GpuUavHandleOut);
+	vector<int> cb = 
+	{
+		(int)m_Width, (int)m_Height, 
+		RadialBlurCBuffer.CenterX, RadialBlurCBuffer.CenterY,
+		RadialBlurCBuffer.SampleDistance, RadialBlurCBuffer.SampleStrength
+	};
+	CommandList->SetComputeRoot32BitConstants(0, (UINT)cb.size(), cb.data(), 0);
+	CommandList->SetComputeRootDescriptorTable(1, m_GpuSrvHandleA);
+	CommandList->SetComputeRootDescriptorTable(2, m_GpuUavHandleB);
 
+	CommandList->Dispatch(numGroupsX, numGroupsY, 1);
 
+	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_RadialBlurA.Get(),
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_COMMON));
+	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_RadialBlurB.Get(),
+		D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE));
+	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(ResourceIn,
+		D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_COPY_DEST));
+	CommandList->CopyResource(ResourceIn, m_RadialBlurB.Get());
+	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_RadialBlurB.Get(),
+		D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_COMMON));
+	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(ResourceIn,
+		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET));
 }
 
 void CRadialBlur::CreateResources()
@@ -82,7 +106,7 @@ void CRadialBlur::CreateResources()
 		&texDesc,
 		D3D12_RESOURCE_STATE_COMMON,
 		nullptr,
-		IID_PPV_ARGS(&m_RadialBlurIn)));
+		IID_PPV_ARGS(&m_RadialBlurA)));
 
 	ThrowIfFailed(m_D3DDevice->CreateCommittedResource(
 		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
@@ -90,7 +114,7 @@ void CRadialBlur::CreateResources()
 		&texDesc,
 		D3D12_RESOURCE_STATE_COMMON,
 		nullptr,
-		IID_PPV_ARGS(&m_RadialBlurOut)));
+		IID_PPV_ARGS(&m_RadialBlurB)));
 }
 
 void CRadialBlur::CreateDescriptors()
@@ -108,9 +132,9 @@ void CRadialBlur::CreateDescriptors()
 	uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
 	uavDesc.Texture2D.MipSlice = 0;
 
-	m_D3DDevice->CreateShaderResourceView(m_RadialBlurIn.Get(), &srvDesc, m_CpuSrvHandleIn);
-	m_D3DDevice->CreateUnorderedAccessView(m_RadialBlurIn.Get(), nullptr, &uavDesc, m_CpuUavHandleIn);
+	m_D3DDevice->CreateShaderResourceView(m_RadialBlurA.Get(), &srvDesc, m_CpuSrvHandleA);
+	m_D3DDevice->CreateUnorderedAccessView(m_RadialBlurA.Get(), nullptr, &uavDesc, m_CpuUavHandleA);
 
-	m_D3DDevice->CreateShaderResourceView(m_RadialBlurOut.Get(), &srvDesc, m_CpuSrvHandleOut);
-	m_D3DDevice->CreateUnorderedAccessView(m_RadialBlurOut.Get(), nullptr, &uavDesc, m_CpuUavHandleOut);
+	m_D3DDevice->CreateShaderResourceView(m_RadialBlurB.Get(), &srvDesc, m_CpuSrvHandleB);
+	m_D3DDevice->CreateUnorderedAccessView(m_RadialBlurB.Get(), nullptr, &uavDesc, m_CpuUavHandleB);
 }

@@ -277,8 +277,8 @@ void CMaterialManager::UpdateMaterialImGui()
 				}
 				ImGui::EndTabItem();
 			}
+			ImGui::EndTabBar();
 		}
-		
 		ImGui::End();
 	}
 }

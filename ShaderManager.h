@@ -30,6 +30,7 @@ enum class ShaderTypeIndex :int
 	Shader_Type_ShadowMap,
 	Shader_Type_ShadowMapWithAlphaTest,
 	Shader_Type_ShadowMapDebug,
+	Shader_Type_RadialBlur,
 	Shader_Type_Max
 };
 
@@ -37,6 +38,7 @@ struct ShaderType
 {
 	Microsoft::WRL::ComPtr<ID3DBlob>       vertexShader;
 	Microsoft::WRL::ComPtr<ID3DBlob>       pixelShader;
+	Microsoft::WRL::ComPtr<ID3DBlob>       computeShader;
 	std::vector<D3D12_INPUT_ELEMENT_DESC>* inputLayout;
 };
 

@@ -17,6 +17,7 @@ enum class PSOTypeIndex :int
 	PSO_ShadowMap,
 	PSO_ShadowMapWithAlphaTest,
 	PSO_ShadowMapDebug,
+	PSO_RadialBlur,
 	PSO_MAX
 };
 
@@ -41,7 +42,7 @@ private:
 	static Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> m_CommandList;
 
 	static const int m_SwapChainBufferCount;
-	static int       m_CurrentBackBuffer;
+	static int       m_CurrentBackBufferIndex;
 	static Microsoft::WRL::ComPtr<ID3D12Resource> m_SwapChainBuffer[];
 	static Microsoft::WRL::ComPtr<ID3D12Resource> m_DepthStencilBuffer;
 
@@ -120,7 +121,7 @@ public:
 	static ID3D12Device*               GetDevice() { return m_D3DDevice.Get(); }
 	static ID3D12Fence*                GetFence() { return m_Fence.Get(); }
 	static ID3D12GraphicsCommandList*  GetCommandList() { return m_CommandList.Get(); }
-	static ID3D12Resource*             GetCurrentBackBuffer() { return m_SwapChainBuffer[m_CurrentBackBuffer].Get(); }
+	static ID3D12Resource*             GetCurrentBackBuffer() { return m_SwapChainBuffer[m_CurrentBackBufferIndex].Get(); }
 	static D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentBackBufferView();
 	static D3D12_CPU_DESCRIPTOR_HANDLE GetDepthStencilView() { return m_DsvHeap->GetCPUDescriptorHandleForHeapStart(); }
 	static DXGI_FORMAT                 GetBackBufferFormat() { return m_BackBufferFormat; }
@@ -168,5 +169,6 @@ public:
 	static void DrawGameObjectsWithLayer(std::list<CGameObject*>& RenderLayer);
 	static void DrawGameObjectsWithDynamicCubeMap(std::list<CGameObject*>& RenderLayer);
 	static void DrawSingleGameObject(CGameObject* GameObject, ID3D12Resource* ObjectCB);
+	static void DoRadialBlur(RadialBlurCB& RadialBlurCBuffer);
 	static void End();
 };

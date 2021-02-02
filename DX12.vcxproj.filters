@@ -349,5 +349,8 @@
     <FxCompile Include="Shaders\ShadowMap.hlsl">
       <Filter>ソース ファイル\Shader</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\RadialBlur.hlsl">
+      <Filter>ソース ファイル\Shader</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

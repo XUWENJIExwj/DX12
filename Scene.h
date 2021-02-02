@@ -3,6 +3,7 @@
 #include <queue>
 #include "Common\\GameTimer.h"
 #include "FrameResource.h"
+#include "RadialBlur.h"
 
 enum class RenderLayers :int
 {
@@ -41,6 +42,7 @@ protected:
 	CDirLight*    m_MainDirLight;
 	PassConstants m_MainPassCB;
 	PassConstants m_ShadowPassCB;
+	RadialBlurCB  m_RadialBlurCB;
 
 	std::vector<CCamera*>   m_DCMCameras;
 	std::vector<CDirLight*> m_DirLights;

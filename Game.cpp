@@ -96,6 +96,11 @@ void CGame::Init()
 	XMVECTOR cameraFar = XMVectorSet(m_MainCamera->GetFarZ(), m_MainCamera->GetFarZ(), m_MainCamera->GetFarZ(), m_MainCamera->GetFarZ());
 	length = XMVectorMin(length, cameraFar);
 	XMStoreFloat3(&m_SceneBoundingBox.Extents, length);
+
+	// RadialBlurCB
+	DX12App* app = DX12App::GetApp();
+	m_RadialBlurCB.CenterX = app->GetWindowWidth() / 2;
+	m_RadialBlurCB.CenterY = app->GetWindowHeight() / 2;
 	CFrameResourceManager::CreateFrameResources();
 }
 
@@ -229,6 +234,8 @@ void CGame::Draw(const GameTimer& GlobalTimer)
 	//CRenderer::SetPSO((int)PSOTypeIndex::PSO_03_WireFrame_Sky);
 	CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Sky]);
 
+	CRenderer::DoRadialBlur(m_RadialBlurCB);
+
 	CRenderer::SetPSO((int)PSOTypeIndex::PSO_ShadowMapDebug);
 	CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_2D_Debug]);
 }
@@ -258,6 +265,28 @@ void CGame::UpdateSceneImGui(const GameTimer& GlobalTimer)
 		ImGui::DragFloat(u8"ShadowBiasForCascade0", &m_ShadowBias.x, 0.00001f, -0.1f, 0.01f, "%.4f");
 		ImGui::DragFloat(u8"ShadowBiasForCascade1", &m_ShadowBias.y, 0.00001f, -0.1f, 0.01f, "%.4f");
 		ImGui::DragFloat(u8"ShadowBiasForCascade2", &m_ShadowBias.z, 0.00001f, -0.1f, 0.01f, "%.4f");
+		ImGui::PopItemWidth();
+		ImGui::End();
+	}
+
+	static bool showCloseB = true;
+	if (showCloseB)
+	{
+		ImGui::SetNextWindowPos(ImVec2(20, 340), ImGuiCond_Once);
+		ImGui::SetNextWindowSize(ImVec2(300, 120), ImGuiCond_Once);
+
+		ImGuiWindowFlags window_flags = 0;
+		ImGui::Begin(u8"RadialBlur", &showCloseB, window_flags);
+		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.1f);
+		ImGui::InputScalar(u8"CenterX", ImGuiDataType_S32, &m_RadialBlurCB.CenterX, NULL, NULL, "%d", ImGuiInputTextFlags_EnterReturnsTrue);
+		ImGui::SameLine();
+		ImGui::InputScalar(u8"CenterY", ImGuiDataType_S32, &m_RadialBlurCB.CenterY, NULL, NULL, "%d", ImGuiInputTextFlags_EnterReturnsTrue);
+		ImGui::SameLine();
+		ImGui::Checkbox(u8"RadialBlurOn", &m_RadialBlurCB.RadialBlurOn);
+		ImGui::PopItemWidth();
+		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.2f);
+		ImGui::DragInt(u8"SampleDistance", &m_RadialBlurCB.SampleDistance, 0.5f, 1, 200);
+		ImGui::DragInt(u8"SampleStrength", &m_RadialBlurCB.SampleStrength, 0.5f, 0, 200);
 		ImGui::PopItemWidth();
 		ImGui::End();
 	}
