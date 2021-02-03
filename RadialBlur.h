@@ -46,7 +46,7 @@ public:
 		UINT DescSize);
 
 	void OnResize(UINT NewWidth, UINT NewHeight);
-	void Execute(
+	void DoRadialBlur(
 		ID3D12GraphicsCommandList* CommandList,
 		ID3D12RootSignature* RootSignature,
 		ID3D12PipelineState* RadialBlurPSO,

@@ -390,7 +390,7 @@ void CRenderer::RestDirectCmdListAlloc()
 
 void CRenderer::ExecuteCommandLists()
 {
-	// Execute the initialization commands.
+	// DoRadialBlur the initialization commands.
 	ThrowIfFailed(m_CommandList->Close());
 	ID3D12CommandList* cmdsLists[] = { m_CommandList.Get() };
 	m_CommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
@@ -1191,7 +1191,7 @@ void CRenderer::DoRadialBlur(RadialBlurCB& RadialBlurCBuffer)
 {
 	if (RadialBlurCBuffer.RadialBlurOn)
 	{
-		m_RadialBlur->Execute(m_CommandList.Get(), m_PostProcessRootSignature.Get(), m_PSOs[(int)PSOTypeIndex::PSO_RadialBlur].Get(), m_SwapChainBuffer[m_CurrentBackBufferIndex].Get(), RadialBlurCBuffer);
+		m_RadialBlur->DoRadialBlur(m_CommandList.Get(), m_PostProcessRootSignature.Get(), m_PSOs[(int)PSOTypeIndex::PSO_RadialBlur].Get(), m_SwapChainBuffer[m_CurrentBackBufferIndex].Get(), RadialBlurCBuffer);
 	}
 }
 

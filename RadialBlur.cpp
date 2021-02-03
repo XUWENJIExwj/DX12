@@ -41,7 +41,7 @@ void CRadialBlur::OnResize(UINT NewWidth, UINT NewHeight)
 	}
 }
 
-void CRadialBlur::Execute(ID3D12GraphicsCommandList* CommandList, ID3D12RootSignature* RootSignature, ID3D12PipelineState* RadialBlurPSO, ID3D12Resource* ResourceIn, RadialBlurCB& RadialBlurCBuffer)
+void CRadialBlur::DoRadialBlur(ID3D12GraphicsCommandList* CommandList, ID3D12RootSignature* RootSignature, ID3D12PipelineState* RadialBlurPSO, ID3D12Resource* ResourceIn, RadialBlurCB& RadialBlurCBuffer)
 {
 	CommandList->SetComputeRootSignature(RootSignature);
 
