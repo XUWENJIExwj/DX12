@@ -56,19 +56,19 @@ void CGame::Init()
 
 	// m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque_DynamicReflectors].size() <= CTextureManager::m_DynamicTextureNum
 	// 上式を常に成り立たせる必要がある
-	CSphere* sphereDR0 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror00");
+	//CSphere* sphereDR0 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror00");
 
-	CSphere* sphereDR1 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror01");
-	sphereDR1->SetPosition(XMFLOAT3(-3.0f, 1.5f, 0.0f));
-	sphereDR1->SetWorldMatrix();
+	//CSphere* sphereDR1 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror01");
+	//sphereDR1->SetPosition(XMFLOAT3(-3.0f, 1.5f, 0.0f));
+	//sphereDR1->SetWorldMatrix();
 
-	CSphere* sphereDR2 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror02");
-	sphereDR2->SetPosition(XMFLOAT3(0.0f, 2.0f, 3.0f));
-	sphereDR2->SetWorldMatrix();
+	//CSphere* sphereDR2 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror02");
+	//sphereDR2->SetPosition(XMFLOAT3(0.0f, 2.0f, 3.0f));
+	//sphereDR2->SetWorldMatrix();
 
-	CSphere* sphereDR3 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror03");
-	sphereDR3->SetPosition(XMFLOAT3(0.0f, 1.5f, 2.0f));
-	sphereDR3->SetWorldMatrix();
+	//CSphere* sphereDR3 = AddGameObject<CSphereDR>((int)RenderLayers::Layer_3D_Opaque_DynamicReflectors, "DynamicMirror03");
+	//sphereDR3->SetPosition(XMFLOAT3(0.0f, 1.5f, 2.0f));
+	//sphereDR3->SetWorldMatrix();
 
 	CLogo* logo00 = AddGameObject<CLogo>((int)RenderLayers::Layer_3D_Opaque, "Logo00");
 	CLogo* logo01 = AddGameObject<CLogo>((int)RenderLayers::Layer_3D_Opaque, "Logo01");
@@ -90,12 +90,7 @@ void CGame::Init()
 	SetSceneBoundingSphere(meshField->GetBoundingBox());
 
 	// SceneのBoundingBoxの生成（全てのObjのBoundingBoxをマージすべきだが、Demoの中では、MeshFieldとCubeのサイズをもって、Objを網羅できるので、それでいく）
-	//m_SceneBoundingBox = *meshField->GetBoundingBox();
 	BoundingBox::CreateMerged(m_SceneBoundingBox, *meshField->GetBoundingBox(), *cube0->GetBoundingBox());
-	XMVECTOR length = XMLoadFloat3(&m_SceneBoundingBox.Extents);
-	XMVECTOR cameraFar = XMVectorSet(m_MainCamera->GetFarZ(), m_MainCamera->GetFarZ(), m_MainCamera->GetFarZ(), m_MainCamera->GetFarZ());
-	length = XMVectorMin(length, cameraFar);
-	XMStoreFloat3(&m_SceneBoundingBox.Extents, length);
 
 	// RadialBlurCB
 	DX12App* app = DX12App::GetApp();
@@ -159,26 +154,6 @@ void CGame::UpdateMainPassCB(const GameTimer & GlobalTimer)
 	XMStoreFloat4x4(&m_MainPassCB.ShadowView, XMMatrixTranspose(lightView));
 
 	ComputeFitCascadeCSMPassCB(invView);
-
-	//vector<vector<XMVECTOR>> frustumPoints(CRenderer::GetCascadNum());
-	//m_MainCamera->ComputeFrustumPointsInWorldSpace(frustumPoints, invView);
-	//vector<XMMATRIX> shadowTransforms(CRenderer::GetCascadNum());
-	//m_DirLights[0]->ComputeShadowTransformWithCameraFrustum(shadowTransforms, &m_SceneBoundingSphere, frustumPoints);
-
-	//XMFLOAT4X4 shadowTransform;
-	//for (UINT i = 0; i < shadowTransforms.size(); ++i)
-	//{
-	//	XMStoreFloat4x4(&shadowTransform, shadowTransforms[i]);
-	//	m_MainPassCB.ShadowTexScale[i].x = shadowTransform(0, 0);
-	//	m_MainPassCB.ShadowTexScale[i].y = shadowTransform(1, 1);
-	//	m_MainPassCB.ShadowTexScale[i].z = shadowTransform(2, 2);
-	//	m_MainPassCB.ShadowTexScale[i].w = 1.0f;
-
-	//	m_MainPassCB.ShadowTexOffset[i].x = shadowTransform(3, 0);
-	//	m_MainPassCB.ShadowTexOffset[i].y = shadowTransform(3, 1);
-	//	m_MainPassCB.ShadowTexOffset[i].z = shadowTransform(3, 2);
-	//	m_MainPassCB.ShadowTexOffset[i].w = 0.0f;
-	//}
 
 	float shadowMapSize = (float)CRenderer::GetShadowMapSize();
 	m_MainPassCB.MaxBorderPadding = (shadowMapSize - 1.0f) / shadowMapSize;

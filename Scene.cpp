@@ -410,7 +410,7 @@ void XM_CALLCONV CScene::ComputeFitCascadeCSMPassCB(XMMATRIX& CameraInvView)
 	CreateSceneAABBPoints(sceneAABBPointsLiS, &m_SceneBoundingBox);
 	for (int i = 0; i < 8; ++i)
 	{
-		sceneAABBPointsLiS[i] = XMVector4Transform(sceneAABBPointsLiS[i], lightView);
+		sceneAABBPointsLiS[i] = XMVector3TransformCoord(sceneAABBPointsLiS[i], lightView);
 	}
 
 	float frustumIntervalBegin, frustumIntervalEnd;
@@ -419,7 +419,7 @@ void XM_CALLCONV CScene::ComputeFitCascadeCSMPassCB(XMMATRIX& CameraInvView)
 	float cameraNearFarRange = m_MainCamera->GetFarZ() - m_MainCamera->GetNearZ();
 	XMVECTOR worldUnitsPerTexel = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 
-	static float cascadePartitions[] = { 0.03f, 0.20f, 1.0f }; // óvëfêî = CASCADE_NUM
+	static float cascadePartitions[] = { 0.03f, 0.20f, 0.60f }; // óvëfêî = CASCADE_NUM
 
 	for (UINT i = 0; i < CRenderer::GetCascadNum(); ++i)
 	{
@@ -436,8 +436,8 @@ void XM_CALLCONV CScene::ComputeFitCascadeCSMPassCB(XMMATRIX& CameraInvView)
 		XMVECTOR tempfrustumPoint;
 		for (int j = 0; j < 8; ++j)
 		{
-			frustumPoints[j] = XMVector4Transform(frustumPoints[j], CameraInvView); // FrustumPointsÇWorldãÛä‘Ç÷ì]ä∑
-			tempfrustumPoint = XMVector4Transform(frustumPoints[j], lightView);  // FrustumPointÇLightãÛä‘Ç÷ì]ä∑
+			frustumPoints[j] = XMVector3TransformCoord(frustumPoints[j], CameraInvView); // FrustumPointsÇWorldãÛä‘Ç÷ì]ä∑
+			tempfrustumPoint = XMVector3TransformCoord(frustumPoints[j], lightView);  // FrustumPointÇLightãÛä‘Ç÷ì]ä∑
 			lightOrthographicMin = XMVectorMin(tempfrustumPoint, lightOrthographicMin);
 			lightOrthographicMax = XMVectorMax(tempfrustumPoint, lightOrthographicMax);
 		}
@@ -472,14 +472,7 @@ void XM_CALLCONV CScene::ComputeFitCascadeCSMPassCB(XMMATRIX& CameraInvView)
 		float farPlane = 10000.0f;
 		ComputeNearAndFarInCSM(nearPlane, farPlane, lightOrthographicMin, lightOrthographicMax, sceneAABBPointsLiS);
 
-		if (m_NearFarCorrection)
-		{
-			//nearPlane = nearPlane * (i + 1) / 2 + lightOrthographicMinZ;
-			//farPlane = farPlane * (i + 1) / 2 + lightOrthographicMaxZ;
-			nearPlane = nearPlane + lightOrthographicMinZ;
-			farPlane = farPlane + lightOrthographicMaxZ;
-		}
-		else
+		if (!m_NearFarCorrection)
 		{
 			nearPlane = lightOrthographicMinZ;
 			farPlane = lightOrthographicMaxZ;
