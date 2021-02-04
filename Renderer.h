@@ -2,7 +2,7 @@
 
 #include "DX12App.h"
 #include "CubeRenderTarget.h"
-#include "ShadowMap.h"
+#include "CascadeShadowMap.h"
 #include "RadialBlur.h"
 #include "GameObject.h"
 #include "FrameResource.h"
@@ -75,11 +75,8 @@ private:
 	static std::vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> m_SkyCubeMapDescHandles;
 	static int                                        m_CurrentSkyCubeMapIndex;
 
-	// ShadowMap
-	static UINT                                       m_ShadowMapSize;
-	static UINT                                       m_CascadNum;
-	static std::vector<std::unique_ptr<CShadowMap>>   m_ShadowMap;
-	static std::vector<CD3DX12_GPU_DESCRIPTOR_HANDLE> m_ShadowMapDescHandle;
+	// CascadeShadowMap
+	static std::unique_ptr<CCascadeShadowMap> m_CascadeShadowMap;
 
 	// DynamicCubeMap
 	static bool                                   m_DynamicCubeMapOn;
@@ -133,9 +130,10 @@ public:
 	// CubeMap
 	static int GetCurrentSkyCubeMapIndex() { return m_CurrentSkyCubeMapIndex; }
 
-	// ShadowMap
-	static UINT GetShadowMapSize() { return m_ShadowMapSize; }
-	static UINT GetCascadNum() { return m_CascadNum; }
+	// CascadeShadowMap
+	static CCascadeShadowMap* GetCascadeShadowMap() { return m_CascadeShadowMap.get(); }
+	static UINT               GetShadowMapSize() { return m_CascadeShadowMap->GetShadowMapSize(); }
+	static UINT               GetCascadNum() { return m_CascadeShadowMap->GetCascadeNum(); }
 
 	// DynamicCubeMap
 	static bool GetDynamicCubeOn() { return m_DynamicCubeMapOn; }

@@ -189,10 +189,10 @@
     <ClInclude Include="QuadShadowDebug.h">
       <Filter>ソース ファイル\GameObject\Quad</Filter>
     </ClInclude>
-    <ClInclude Include="CSMManager.h">
-      <Filter>ソース ファイル\System\Manager</Filter>
-    </ClInclude>
     <ClInclude Include="RadialBlur.h">
+      <Filter>ソース ファイル\System\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="CascadeShadowMap.h">
       <Filter>ソース ファイル\System\Renderer</Filter>
     </ClInclude>
   </ItemGroup>
@@ -320,10 +320,10 @@
     <ClCompile Include="QuadShadowDebug.cpp">
       <Filter>ソース ファイル\GameObject\Quad</Filter>
     </ClCompile>
-    <ClCompile Include="CSMManager.cpp">
-      <Filter>ソース ファイル\System\Manager</Filter>
-    </ClCompile>
     <ClCompile Include="RadialBlur.cpp">
+      <Filter>ソース ファイル\System\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="CascadeShadowMap.cpp">
       <Filter>ソース ファイル\System\Renderer</Filter>
     </ClCompile>
   </ItemGroup>

@@ -96,15 +96,15 @@ float4 PS(VertexOut pin) : SV_Target
     const float shininess = max(1.0 - roughness, 0.01);
     Material mat = { diffuseAlbedo, fresnelR0, shininess };
 
-    // Cascade
+    // CSM
     float3 shadowFactor = float3(1.0, 1.0, 1.0);
-    float pcfBlursize = gPCFBlurForLoopEnd - gPCFBlurForLoopStart;
-    pcfBlursize *= pcfBlursize;
-    float4 shadowMapTexHS = 0.0;
     int currentCascadeIndex = 0;
-    ComputeCascadeIndex(pin.ShadowPosLiS, shadowMapTexHS, currentCascadeIndex);
-
-    shadowFactor[0] *= CalcShadowFactor(shadowMapTexHS, pcfBlursize, currentCascadeIndex);
+    ComputeShadowFactorAndCurrentCascadeIndexWithCSM(pin.DepthCamS, pin.ShadowPosLiS, shadowFactor[0], currentCascadeIndex);
+    float4 visualCascadeColor = 1.0f;
+    if (gVisualCascade)
+    {
+        visualCascadeColor = gCascadeColorsMultiplier[currentCascadeIndex];
+    }
     
     float4 directLight = ComputeLighting(gLights, mat, pin.PosWS,
         bumpedNormalWS, toEyeWS, shadowFactor);
@@ -117,12 +117,6 @@ float4 PS(VertexOut pin) : SV_Target
     float3 fresnelFactor = SchlickFresnel(fresnelR0, bumpedNormalWS, r);
 	litColor.rgb += shininess * fresnelFactor * reflectionColor.rgb;
     
-    // CascadeVisualOn
-    float4 visualCascadeColor = 1.0f;
-    if (gVisualCascade)
-    {
-        visualCascadeColor = gCascadeColorsMultiplier[currentCascadeIndex];
-    }
     litColor *= visualCascadeColor;
 
     // Common convention to take alpha from diffuse albedo.

@@ -5,7 +5,7 @@
 class CShadowMap
 {
 private:
-	ID3D12Device* m_D3dDevice = nullptr;
+	ID3D12Device* m_D3DDevice = nullptr;
 
 	D3D12_VIEWPORT m_Viewport;
 	D3D12_RECT     m_ScissorRect;

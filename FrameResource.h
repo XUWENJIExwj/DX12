@@ -53,7 +53,7 @@ struct PassConstants
 	int PCFBlurForLoopEnd = 2;
 	int cbPerObjectPad2 = 0;
 	int cbPerObjectPad3 = 0;
-	BOOL ViualCascade = false;
+	BOOL VisualCascade = false;
 	BOOL BlendCascade = true;
 	BOOL cbPerObjectPad5 = false;
 	BOOL cbPerObjectPad6 = false;

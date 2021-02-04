@@ -47,19 +47,9 @@ protected:
 	std::vector<CCamera*>   m_DCMCameras;
 	std::vector<CDirLight*> m_DirLights;
 
-	// CSM óp
 	DirectX::BoundingSphere m_SceneBoundingSphere;
 	DirectX::BoundingBox    m_SceneBoundingBox;
 	DirectX::XMFLOAT4X4     m_ShadowTransform = MathHelper::Identity4x4();
-	int                     m_PCFBlurSize = 3;
-	int                     m_PCFBlurForLoopStart = -1;
-	int                     m_PCFBlurForLoopEnd = 2;
-	DirectX::XMFLOAT3       m_ShadowBias = DirectX::XMFLOAT3(0.000f, 0.0001f, 0.00001f);
-	bool                    m_VisualCascade = false;
-	bool                    m_BlendCascade = true;
-	bool                    m_CancelJitter = true;
-	bool                    m_NearFarCorrection = true;
-	float                   m_CascadePartitionsFrustum[3];
 
 	int m_BeginPSOIndex; // SceneÇÃInitÇ≈ÇÃê›íËÇñYÇÍÇ∏Ç…
 
@@ -93,10 +83,6 @@ public:
 	void SetSceneBoundingSphere(DirectX::BoundingBox* Bounds);
 	void SetSceneBoundingSphere(DirectX::BoundingSphere* Bounds) { m_SceneBoundingSphere = *Bounds; }
 	void SetSceneBoundingSphere(float Width, float Height, DirectX::XMFLOAT3 Center = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f));
-	void CreateSceneAABBPoints(DirectX::XMVECTOR* SceneAABBPoints, const DirectX::BoundingBox* SceneBoundingBox);
-
-	void XM_CALLCONV ComputeFitCascadeCSMPassCB(DirectX::XMMATRIX& CameraInvView);
-	void XM_CALLCONV ComputeNearAndFarInCSM(float& Near, float& Far, DirectX::XMVECTOR LightOrthographicMin, DirectX::XMVECTOR LightOrthographicMax, DirectX::XMVECTOR* SceneAABBPointsLiS);
 
 	template<typename T>
 	T* AddGameObject(int Layer, std::string Name = "")

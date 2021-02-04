@@ -2,7 +2,7 @@
  
 CShadowMap::CShadowMap(ID3D12Device* Device, UINT Width, UINT Height)
 {
-	m_D3dDevice = Device;
+	m_D3DDevice = Device;
 
 	m_Width = Width;
 	m_Height = Height;
@@ -53,7 +53,7 @@ void CShadowMap::CreateDescriptors()
 	srvDesc.Texture2D.MipLevels = 1;
 	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
     srvDesc.Texture2D.PlaneSlice = 0;
-    m_D3dDevice->CreateShaderResourceView(m_ShadowMap.Get(), &srvDesc, m_CpuSrvHandle);
+    m_D3DDevice->CreateShaderResourceView(m_ShadowMap.Get(), &srvDesc, m_CpuSrvHandle);
 
 	// Create DSV to resource so we can render to the shadow map.
 	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc; 
@@ -61,7 +61,7 @@ void CShadowMap::CreateDescriptors()
     dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
     dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
     dsvDesc.Texture2D.MipSlice = 0;
-	m_D3dDevice->CreateDepthStencilView(m_ShadowMap.Get(), &dsvDesc, m_CpuDsvHandle);
+	m_D3DDevice->CreateDepthStencilView(m_ShadowMap.Get(), &dsvDesc, m_CpuDsvHandle);
 }
 
 void CShadowMap::CreateResource()
@@ -85,7 +85,7 @@ void CShadowMap::CreateResource()
     optClear.DepthStencil.Depth = 1.0f;
     optClear.DepthStencil.Stencil = 0;
 
-	ThrowIfFailed(m_D3dDevice->CreateCommittedResource(
+	ThrowIfFailed(m_D3DDevice->CreateCommittedResource(
 		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 		D3D12_HEAP_FLAG_NONE,
 		&texDesc,

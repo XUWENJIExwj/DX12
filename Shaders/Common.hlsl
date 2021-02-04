@@ -224,19 +224,6 @@ void ComputeCascadeIndex(float4 ShadowPosLiS, out float4 ShadowMapTexHS, out int
 //--------------------------------------------------------------------------------------
 // Calculate amount to blend between two cascades and the band where blending will occure.
 //--------------------------------------------------------------------------------------
-void CalculateBlendAmountForMap(float4 ShadowMapTexHS, in out float CurrentPixelsBlendBandLocation, out float BlendBetweenCascadesAmount)
-{
-    // Calcaulte the blend band for the map based selection.
-    float2 distanceToOne = float2(1.0f - ShadowMapTexHS.x, 1.0f - ShadowMapTexHS.y);
-    CurrentPixelsBlendBandLocation = min(ShadowMapTexHS.x, ShadowMapTexHS.y);
-    float CurrentPixelsBlendBandLocation2 = min(distanceToOne.x, distanceToOne.y);
-    CurrentPixelsBlendBandLocation = min(CurrentPixelsBlendBandLocation, CurrentPixelsBlendBandLocation2);
-    BlendBetweenCascadesAmount = CurrentPixelsBlendBandLocation / gCascadeBlendArea;
-}
-
-//--------------------------------------------------------------------------------------
-// Calculate amount to blend between two cascades and the band where blending will occure.
-//--------------------------------------------------------------------------------------
 void CalculateBlendAmountForInterval(int CurrentCascadeIndex, in out float PixelDepth, in out float CurrentPixelsBlendBandLocation, out float BlendBetweenCascadesAmount)
 {
     // We need to calculate the band of the current shadow map where it will fade into the next cascade.
@@ -253,4 +240,45 @@ void CalculateBlendAmountForInterval(int CurrentCascadeIndex, in out float Pixel
     CurrentPixelsBlendBandLocation = 1.0f - CurrentPixelsBlendBandLocation;
     // The fBlendBetweenCascadesAmount is our location in the blend band.
     BlendBetweenCascadesAmount = CurrentPixelsBlendBandLocation / gCascadeBlendArea;
+}
+
+void ComputeShadowFactorAndCurrentCascadeIndexWithCSM(float DepthCamS, float4 ShadowPosLiS, in out float ShadowFactor, in out int CurrentCascadeIndex)
+{
+    float pcfBlursize = gPCFBlurForLoopEnd - gPCFBlurForLoopStart;
+    pcfBlursize *= pcfBlursize;
+    float4 shadowMapTexHS = 0.0;
+    float currentPixelDepth1f = DepthCamS;
+    float4 shadowPosLiS = ShadowPosLiS;
+    
+    // ForInterval
+    float4 currentPixelDepth = currentPixelDepth1f;
+    float4 comparison = (currentPixelDepth > gCascadeFrustumsEyeSpaceDepthsFloat);
+    float index = dot(float4(CASCADE_NUM > 0, CASCADE_NUM > 1, CASCADE_NUM > 2, CASCADE_NUM > 3), comparison);
+    index = min(index, CASCADE_NUM - 1);
+    CurrentCascadeIndex = (int)index;
+    shadowMapTexHS = ComputeShadowTexCoord(shadowPosLiS, CurrentCascadeIndex);
+    float shadowFactor_blend0 = CalcShadowFactor(shadowMapTexHS, pcfBlursize, CurrentCascadeIndex);
+    
+    //Blend
+    //if (gBlendCascade)
+    //{
+    //    int nextCascadeIndex = 0;
+    //    nextCascadeIndex = min(CASCADE_NUM - 1, CurrentCascadeIndex + 1);
+    //    float blendBetweenCascadesAmount = 1.0;
+    //    float currentPixelsBlendBandLocation = 1.0;
+    //    CalculateBlendAmountForInterval(CurrentCascadeIndex, currentPixelDepth1f, currentPixelsBlendBandLocation, blendBetweenCascadesAmount);
+    //    float shadowFactor_blend1 = 1.0;
+    //    float4 shadowMapTexHS_blend = 0.0;
+    //    if (currentPixelsBlendBandLocation < gCascadeBlendArea)
+    //    {
+    //        shadowMapTexHS_blend = ComputeShadowTexCoord(shadowPosLiS, nextCascadeIndex);
+        
+    //        if (currentPixelsBlendBandLocation < gCascadeBlendArea)
+    //        {
+    //            shadowFactor_blend1 = CalcShadowFactor(shadowMapTexHS_blend, pcfBlursize, nextCascadeIndex);
+    //            shadowFactor_blend0 = lerp(shadowFactor_blend1, shadowFactor_blend0, blendBetweenCascadesAmount);
+    //        }
+    //    }
+    //}
+    ShadowFactor *= shadowFactor_blend0;
 }
