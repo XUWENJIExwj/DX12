@@ -53,11 +53,11 @@ public:
 	void CreateSceneAABBPoints(DirectX::XMVECTOR* SceneAABBPoints, const DirectX::BoundingBox* SceneBoundingBox);
 
 	void XM_CALLCONV ComputeFitCascadeCSMPassCB(
-		DirectX::XMMATRIX& CameraInvView, const DirectX::BoundingBox* SceneBoundingBox,
+		const DirectX::FXMMATRIX& CameraInvView, const DirectX::BoundingBox* SceneBoundingBox,
 		CCamera* Camera, CLight* Light);
 
 	void XM_CALLCONV ComputeNearAndFarInCSM(float& Near, float& Far,
-		DirectX::XMVECTOR LightOrthographicMin, DirectX::XMVECTOR LightOrthographicMax, DirectX::XMVECTOR* SceneAABBPointsLiS);
+		DirectX::FXMVECTOR LightOrthographicMin, DirectX::FXMVECTOR LightOrthographicMax, DirectX::XMVECTOR* SceneAABBPointsLiS);
 
 	CSMPassCB* GetCSMPassCB() { return &m_CSMPassCB; }
 	UINT GetShadowMapSize() { return m_ShadowMapSize; }

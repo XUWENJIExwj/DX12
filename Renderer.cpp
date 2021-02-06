@@ -66,8 +66,8 @@ CD3DX12_CPU_DESCRIPTOR_HANDLE CRenderer::m_DynamicCubeMapDsvHandle;
 UINT                          CRenderer::m_DynamicCubeMapSize = 512;
 ComPtr<ID3D12Resource>        CRenderer::m_DynamicCubeMapDepthStencilBuffer = nullptr;
 
-// RadialBlur
-unique_ptr<CRadialBlur> CRenderer::m_RadialBlur = nullptr;
+// PostProcessing
+unique_ptr<CPostProcessing> CRenderer::m_PostProcessing = nullptr;
 
 // DX12èâä˙âª
 bool CRenderer::Init()
@@ -232,7 +232,7 @@ void CRenderer::CreateRtvAndDsvDescriptorHeaps()
 
 	m_CascadeShadowMap = make_unique<CCascadeShadowMap>(m_D3DDevice.Get(), cascadeNum);
 
-	m_RadialBlur = make_unique<CRadialBlur>(m_D3DDevice.Get(), m_App->GetWindowWidth(), m_App->GetWindowHeight());
+	m_PostProcessing = make_unique<CPostProcessing>(m_D3DDevice.Get(), m_App->GetWindowWidth(), m_App->GetWindowHeight());
 
 	if (m_DynamicCubeMapOn)
 	{
@@ -339,9 +339,9 @@ void CRenderer::OnResize()
 	m_ScissorRect = { 0, 0, m_App->GetWindowWidth(), m_App->GetWindowHeight() };
 
 	// RadialBlur
-	if (m_RadialBlur)
+	if (m_PostProcessing)
 	{
-		m_RadialBlur->OnResize(m_App->GetWindowWidth(), m_App->GetWindowHeight());
+		m_PostProcessing->OnResize(m_App->GetWindowWidth(), m_App->GetWindowHeight());
 	}
 }
 
@@ -563,7 +563,7 @@ void CRenderer::CreateDescriptorHeaps()
 	// PostProcess
 	UINT postProcessIndex = CTextureManager::GetPostProcessIndex();
 	// RadialBlur
-	m_RadialBlur->CreateDescriptors(
+	m_PostProcessing->CreateDescriptors(
 		CD3DX12_CPU_DESCRIPTOR_HANDLE(cpuSrvStart, postProcessIndex, m_CbvSrvUavDescSize),
 		CD3DX12_GPU_DESCRIPTOR_HANDLE(gpuSrvStart, postProcessIndex, m_CbvSrvUavDescSize),
 		m_CbvSrvUavDescSize);
@@ -1174,14 +1174,6 @@ void CRenderer::DrawSingleGameObject(CGameObject* GameObject, ID3D12Resource* Ob
 	m_CommandList->DrawIndexedInstanced(GameObject->GetIndexCount(), 1, GameObject->GetStartIndexLocation(), GameObject->GetBaseVertexLocation(), 0);
 }
 
-void CRenderer::DoRadialBlur(RadialBlurCB& RadialBlurCBuffer)
-{
-	if (RadialBlurCBuffer.RadialBlurOn)
-	{
-		m_RadialBlur->DoRadialBlur(m_CommandList.Get(), m_PostProcessRootSignature.Get(), m_PSOs[(int)PSOTypeIndex::PSO_RadialBlur].Get(), m_SwapChainBuffer[m_CurrentBackBufferIndex].Get(), RadialBlurCBuffer);
-	}
-}
-
 void CRenderer::End()
 {
 	// Indicate a state transition on the resource usage.
@@ -1203,4 +1195,13 @@ void CRenderer::End()
 	m_CommandQueue->Signal(m_Fence.Get(), m_CurrentFence);
 
 	//FlushCommandQueue();
+}
+
+// PostProcessing
+void CRenderer::DoRadialBlur(RadialBlurCB& RadialBlurCBuffer)
+{
+	if (RadialBlurCBuffer.RadialBlurOn)
+	{
+		m_PostProcessing->DoRadialBlur(m_CommandList.Get(), m_PostProcessRootSignature.Get(), m_PSOs[(int)PSOTypeIndex::PSO_RadialBlur].Get(), m_SwapChainBuffer[m_CurrentBackBufferIndex].Get(), RadialBlurCBuffer);
+	}
 }

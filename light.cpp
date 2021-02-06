@@ -16,14 +16,7 @@ DirectX::XMFLOAT4X4 CLight::ComputeLightView4x4(DirectX::BoundingSphere * SceneB
 	return m_View;
 }
 
-XMFLOAT4X4 CLight::ComputeShadowTransformWithSceneBounds4x4(BoundingSphere* SceneBounds)
-{
-	XMFLOAT4X4 shadowTransform;
-	XMStoreFloat4x4(&shadowTransform, ComputeShadowTransformWithSceneBounds(SceneBounds));
-	return shadowTransform;
-}
-
-XMMATRIX XM_CALLCONV CLight::ComputeShadowTransformFromLightOrthographicAndNearFar(int CascadeIndex, float Near, float Far, XMVECTOR LightOrthographicMin, XMVECTOR LightOrthographicMax)
+XMMATRIX XM_CALLCONV CLight::ComputeShadowTransformFromLightOrthographicAndNearFar(int CascadeIndex, float Near, float Far, FXMVECTOR LightOrthographicMin, FXMVECTOR LightOrthographicMax)
 {
 	XMMATRIX lightProj = XMMatrixOrthographicOffCenterLH(
 		XMVectorGetX(LightOrthographicMin), XMVectorGetX(LightOrthographicMax),

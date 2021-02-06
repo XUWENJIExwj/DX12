@@ -11,7 +11,7 @@ struct RadialBlurCB
 	int SampleStrength = 100;
 };
 
-class CRadialBlur
+class CPostProcessing
 {
 private:
 	ID3D12Device* m_D3DDevice = nullptr;
@@ -29,16 +29,16 @@ private:
 	CD3DX12_GPU_DESCRIPTOR_HANDLE m_GpuSrvHandleB;
 	CD3DX12_GPU_DESCRIPTOR_HANDLE m_GpuUavHandleB;
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> m_RadialBlurA;
-	Microsoft::WRL::ComPtr<ID3D12Resource> m_RadialBlurB;
+	Microsoft::WRL::ComPtr<ID3D12Resource> m_ResourceA;
+	Microsoft::WRL::ComPtr<ID3D12Resource> m_ResourceB;
 
 public:
-	CRadialBlur(ID3D12Device* Device, UINT Width, UINT Height, DXGI_FORMAT Format = DXGI_FORMAT_R8G8B8A8_UNORM);
-	CRadialBlur(const CRadialBlur& rhs) = delete;
-	CRadialBlur& operator=(const CRadialBlur& rhs) = delete;
-	~CRadialBlur() = default;
+	CPostProcessing(ID3D12Device* Device, UINT Width, UINT Height, DXGI_FORMAT Format = DXGI_FORMAT_R8G8B8A8_UNORM);
+	CPostProcessing(const CPostProcessing& rhs) = delete;
+	CPostProcessing& operator=(const CPostProcessing& rhs) = delete;
+	~CPostProcessing() = default;
 
-	//ID3D12Resource* GetResource() { return m_RadialBlurB.Get(); }
+	//ID3D12Resource* GetResource() { return m_ResourceB.Get(); }
 
 	void CreateDescriptors(
 		CD3DX12_CPU_DESCRIPTOR_HANDLE CpuSrvHandle,

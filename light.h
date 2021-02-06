@@ -32,13 +32,7 @@ public:
 	DirectX::XMMATRIX XM_CALLCONV GetProj(int CascadeIndex = 0)const { return XMLoadFloat4x4(&m_Proj[CascadeIndex]); }
 
 	DirectX::XMFLOAT4X4 ComputeLightView4x4(DirectX::BoundingSphere* SceneBounds);
-	DirectX::XMFLOAT4X4 ComputeShadowTransformWithSceneBounds4x4(DirectX::BoundingSphere* SceneBounds);
-
-	virtual DirectX::XMMATRIX XM_CALLCONV ComputeShadowTransformWithCameraFrustumForEachCascade(std::vector<DirectX::XMVECTOR>& FrustumPoints, int CascadeIndex) { return XMLoadFloat4x4(&MathHelper::Identity4x4()); }
 
 	virtual DirectX::XMMATRIX XM_CALLCONV ComputeLightView(DirectX::BoundingSphere* SceneBounds) = 0;
-	virtual DirectX::XMMATRIX XM_CALLCONV ComputeShadowTransformWithSceneBounds(DirectX::BoundingSphere* SceneBounds) { return XMLoadFloat4x4(&MathHelper::Identity4x4()); }
-	virtual DirectX::XMMATRIX XM_CALLCONV ComputeShadowTransformWithCameraFrustum(DirectX::BoundingSphere* SceneBounds, DirectX::XMVECTOR FrustumPoints[8]) { return XMLoadFloat4x4(&MathHelper::Identity4x4()); }
-	virtual void              XM_CALLCONV ComputeShadowTransformWithCameraFrustum(std::vector<DirectX::XMMATRIX>& ShadowTransforms, DirectX::BoundingSphere* SceneBounds, std::vector<std::vector<DirectX::XMVECTOR>>& FrustumPoints) {}
-	virtual DirectX::XMMATRIX XM_CALLCONV ComputeShadowTransformFromLightOrthographicAndNearFar(int CascadeIndex, float Near, float Far, DirectX::XMVECTOR LightOrthographicMin, DirectX::XMVECTOR LightOrthographicMax);
+	virtual DirectX::XMMATRIX XM_CALLCONV ComputeShadowTransformFromLightOrthographicAndNearFar(int CascadeIndex, float Near, float Far, DirectX::FXMVECTOR LightOrthographicMin, DirectX::FXMVECTOR LightOrthographicMax);
 };

@@ -3,7 +3,7 @@
 #include <queue>
 #include "Common\\GameTimer.h"
 #include "FrameResource.h"
-#include "RadialBlur.h"
+#include "PostProcessing.h"
 
 enum class RenderLayers :int
 {
@@ -70,7 +70,6 @@ public:
 	virtual void UpdateGameObjectsCB(const GameTimer& GlobalTimer);
 	virtual void UpdateMaterialBuffer(const GameTimer& GlobalTimer);
 	virtual void UpdateMainPassCB(const GameTimer& GlobalTimer);
-	virtual void UpdateShadowPassCB(const GameTimer& GlobalTimer);
 	virtual void UpdateShadowPassCB(const GameTimer& GlobalTimer, int CascadeIndex);
 	virtual void UpdateDynamicCubeMapPassCB(const GameTimer& GlobalTimer, int DCMResourcesIndex);
 

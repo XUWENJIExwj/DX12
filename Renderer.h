@@ -3,7 +3,7 @@
 #include "DX12App.h"
 #include "CubeRenderTarget.h"
 #include "CascadeShadowMap.h"
-#include "RadialBlur.h"
+#include "PostProcessing.h"
 #include "GameObject.h"
 #include "FrameResource.h"
 
@@ -85,8 +85,8 @@ private:
 	static UINT                                   m_DynamicCubeMapSize;
 	static Microsoft::WRL::ComPtr<ID3D12Resource> m_DynamicCubeMapDepthStencilBuffer;
 
-	// RadialBlur
-	static std::unique_ptr<CRadialBlur> m_RadialBlur;
+	// PostProcessing
+	static std::unique_ptr<CPostProcessing> m_PostProcessing;
 
 public:
 	// DX12èâä˙âª
@@ -167,6 +167,8 @@ public:
 	static void DrawGameObjectsWithLayer(std::list<CGameObject*>& RenderLayer);
 	static void DrawGameObjectsWithDynamicCubeMap(std::list<CGameObject*>& RenderLayer);
 	static void DrawSingleGameObject(CGameObject* GameObject, ID3D12Resource* ObjectCB);
-	static void DoRadialBlur(RadialBlurCB& RadialBlurCBuffer);
 	static void End();
+
+	// PostProcessing
+	static void DoRadialBlur(RadialBlurCB& RadialBlurCBuffer);
 };

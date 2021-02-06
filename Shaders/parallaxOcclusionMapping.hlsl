@@ -232,7 +232,6 @@ float4 PS(VertexOut pin) : SV_Target
         {
             float4 shadow = gTextureMaps[heightMapIndex].Sample(gsamAnisotropicWrap, parallaxTex + finalTexOffset) - gTextureMaps[heightMapIndex].Sample(gsamAnisotropicWrap, parallaxTex);
             float finalShadow = useACForPOM * shadow.a + (1 - useACForPOM) * shadow.r;
-            //shadowFactor[0] = 1 - saturate((1 - finalShadow) * shadowSoftening);
             shadowFactor[0] = useACForPOM * saturate((1 - finalShadow) * (1 - shadowSoftening * 0.5)) + (1 - useACForPOM) * (1 - saturate((1 - finalShadow) * shadowSoftening));
         }
     }
@@ -240,7 +239,7 @@ float4 PS(VertexOut pin) : SV_Target
     // CSM
     int currentCascadeIndex = 0;
     ComputeShadowFactorAndCurrentCascadeIndexWithCSM(pin.DepthCamS, pin.ShadowPosLiS, shadowFactor[0], currentCascadeIndex);
-    float4 visualCascadeColor = 1.0f;
+    float4 visualCascadeColor = 1.0;
     if (gVisualCascade)
     {
         visualCascadeColor = gCascadeColorsMultiplier[currentCascadeIndex];

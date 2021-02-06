@@ -185,10 +185,8 @@ void CGame::Draw(const GameTimer& GlobalTimer)
 {
 	CRenderer::SetUpCommonResources();
 
-	// CreateShadowMap
-	CRenderer::SetUpNullCubeMapResource();
-
 	// CreateCascadeShadowMap
+	CRenderer::SetUpNullCubeMapResource();
 	for (UINT i = 0; i < CRenderer::GetCascadNum(); ++i)
 	{
 		CRenderer::SetUpBeforeCreateCascadeShadowMapReources(i);
@@ -208,6 +206,7 @@ void CGame::Draw(const GameTimer& GlobalTimer)
 	CRenderer::SetUpBeforeDrawScene();
 	CRenderer::DrawGameObjectsWithDynamicCubeMap(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque_DynamicReflectors]);
 
+	// Draw3DObjInScene
 	CRenderer::SetUpSkyCubeMapResources();
 	//CRenderer::SetPSO((int)PSOTypeIndex::PSO_01_WireFrame_Opaque);
 	CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Opaque]);
@@ -219,8 +218,10 @@ void CGame::Draw(const GameTimer& GlobalTimer)
 	//CRenderer::SetPSO((int)PSOTypeIndex::PSO_03_WireFrame_Sky);
 	CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Sky]);
 
+	// PostProcessing
 	CRenderer::DoRadialBlur(m_RadialBlurCB);
 
+	// Draw2DObjInScene
 	CRenderer::SetPSO((int)PSOTypeIndex::PSO_ShadowMapDebug);
 	CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_2D_Debug]);
 }
@@ -232,21 +233,25 @@ void CGame::UpdateSceneImGui(const GameTimer& GlobalTimer)
 	if (showClose)
 	{
 		ImGui::SetNextWindowPos(ImVec2(20, 340), ImGuiCond_Once);
-		ImGui::SetNextWindowSize(ImVec2(300, 120), ImGuiCond_Once);
+		ImGui::SetNextWindowSize(ImVec2(300, 150), ImGuiCond_Once);
 
 		ImGuiWindowFlags window_flags = 0;
-		ImGui::Begin(u8"RadialBlur", &showClose, window_flags);
-		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.1f);
-		ImGui::InputScalar(u8"CenterX", ImGuiDataType_S32, &m_RadialBlurCB.CenterX, NULL, NULL, "%d", ImGuiInputTextFlags_EnterReturnsTrue);
-		ImGui::SameLine();
-		ImGui::InputScalar(u8"CenterY", ImGuiDataType_S32, &m_RadialBlurCB.CenterY, NULL, NULL, "%d", ImGuiInputTextFlags_EnterReturnsTrue);
-		ImGui::SameLine();
-		ImGui::Checkbox(u8"RadialBlurOn", &m_RadialBlurCB.RadialBlurOn);
-		ImGui::PopItemWidth();
-		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.2f);
-		ImGui::DragInt(u8"SampleDistance", &m_RadialBlurCB.SampleDistance, 0.5f, 1, 200);
-		ImGui::DragInt(u8"SampleStrength", &m_RadialBlurCB.SampleStrength, 0.5f, 0, 200);
-		ImGui::PopItemWidth();
+		ImGui::Begin(u8"PostProcessing", &showClose, window_flags);
+		if (ImGui::TreeNode("RadialBlur"))
+		{
+			ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.1f);
+			ImGui::InputScalar(u8"CenterX", ImGuiDataType_S32, &m_RadialBlurCB.CenterX, NULL, NULL, "%d", ImGuiInputTextFlags_EnterReturnsTrue);
+			ImGui::SameLine();
+			ImGui::InputScalar(u8"CenterY", ImGuiDataType_S32, &m_RadialBlurCB.CenterY, NULL, NULL, "%d", ImGuiInputTextFlags_EnterReturnsTrue);
+			ImGui::SameLine();
+			ImGui::Checkbox(u8"EffectOn", &m_RadialBlurCB.RadialBlurOn);
+			ImGui::PopItemWidth();
+			ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.2f);
+			ImGui::DragInt(u8"SampleDistance", &m_RadialBlurCB.SampleDistance, 0.5f, 1, 200);
+			ImGui::DragInt(u8"SampleStrength", &m_RadialBlurCB.SampleStrength, 0.5f, 0, 200);
+			ImGui::PopItemWidth();
+			ImGui::TreePop();
+		}
 		ImGui::End();
 	}
 }

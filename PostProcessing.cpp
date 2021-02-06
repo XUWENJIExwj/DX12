@@ -1,8 +1,8 @@
-#include "RadialBlur.h"
+#include "PostProcessing.h"
 
 using namespace std;
 
-CRadialBlur::CRadialBlur(ID3D12Device* Device, UINT Width, UINT Height, DXGI_FORMAT Format)
+CPostProcessing::CPostProcessing(ID3D12Device* Device, UINT Width, UINT Height, DXGI_FORMAT Format)
 {
 	m_D3DDevice = Device;
 	m_Width = Width;
@@ -12,7 +12,7 @@ CRadialBlur::CRadialBlur(ID3D12Device* Device, UINT Width, UINT Height, DXGI_FOR
 	CreateResources();
 }
 
-void CRadialBlur::CreateDescriptors(CD3DX12_CPU_DESCRIPTOR_HANDLE CpuSrvHandle, CD3DX12_GPU_DESCRIPTOR_HANDLE GpuSrvHandle, UINT DescSize)
+void CPostProcessing::CreateDescriptors(CD3DX12_CPU_DESCRIPTOR_HANDLE CpuSrvHandle, CD3DX12_GPU_DESCRIPTOR_HANDLE GpuSrvHandle, UINT DescSize)
 {
 	m_CpuSrvHandleA = CpuSrvHandle;
 	m_CpuUavHandleA = CpuSrvHandle.Offset(1, DescSize);
@@ -27,7 +27,7 @@ void CRadialBlur::CreateDescriptors(CD3DX12_CPU_DESCRIPTOR_HANDLE CpuSrvHandle, 
 	CreateDescriptors();
 }
 
-void CRadialBlur::OnResize(UINT NewWidth, UINT NewHeight)
+void CPostProcessing::OnResize(UINT NewWidth, UINT NewHeight)
 {
 	if ((m_Width != NewWidth) || (m_Height != NewHeight))
 	{
@@ -41,18 +41,18 @@ void CRadialBlur::OnResize(UINT NewWidth, UINT NewHeight)
 	}
 }
 
-void CRadialBlur::DoRadialBlur(ID3D12GraphicsCommandList* CommandList, ID3D12RootSignature* RootSignature, ID3D12PipelineState* RadialBlurPSO, ID3D12Resource* ResourceIn, RadialBlurCB& RadialBlurCBuffer)
+void CPostProcessing::DoRadialBlur(ID3D12GraphicsCommandList* CommandList, ID3D12RootSignature* RootSignature, ID3D12PipelineState* RadialBlurPSO, ID3D12Resource* ResourceIn, RadialBlurCB& RadialBlurCBuffer)
 {
 	CommandList->SetComputeRootSignature(RootSignature);
 
 	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(ResourceIn,
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE));
-	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_RadialBlurA.Get(),
+	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_ResourceA.Get(),
 		D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST));
-	CommandList->CopyResource(m_RadialBlurA.Get(), ResourceIn);
-	CommandList->ResourceBarrier(1,&CD3DX12_RESOURCE_BARRIER::Transition(m_RadialBlurA.Get(),
+	CommandList->CopyResource(m_ResourceA.Get(), ResourceIn);
+	CommandList->ResourceBarrier(1,&CD3DX12_RESOURCE_BARRIER::Transition(m_ResourceA.Get(),
 		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ));
-	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_RadialBlurB.Get(),
+	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_ResourceB.Get(),
 		D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_UNORDERED_ACCESS));
 
 	UINT numGroupsX = (UINT)ceilf(m_Width / 16.0f);
@@ -71,20 +71,20 @@ void CRadialBlur::DoRadialBlur(ID3D12GraphicsCommandList* CommandList, ID3D12Roo
 
 	CommandList->Dispatch(numGroupsX, numGroupsY, 1);
 
-	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_RadialBlurA.Get(),
+	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_ResourceA.Get(),
 		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_COMMON));
-	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_RadialBlurB.Get(),
+	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_ResourceB.Get(),
 		D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE));
 	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(ResourceIn,
 		D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_COPY_DEST));
-	CommandList->CopyResource(ResourceIn, m_RadialBlurB.Get());
-	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_RadialBlurB.Get(),
+	CommandList->CopyResource(ResourceIn, m_ResourceB.Get());
+	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_ResourceB.Get(),
 		D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_COMMON));
 	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(ResourceIn,
 		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET));
 }
 
-void CRadialBlur::CreateResources()
+void CPostProcessing::CreateResources()
 {
 	D3D12_RESOURCE_DESC texDesc;
 	ZeroMemory(&texDesc, sizeof(D3D12_RESOURCE_DESC));
@@ -106,7 +106,7 @@ void CRadialBlur::CreateResources()
 		&texDesc,
 		D3D12_RESOURCE_STATE_COMMON,
 		nullptr,
-		IID_PPV_ARGS(&m_RadialBlurA)));
+		IID_PPV_ARGS(&m_ResourceA)));
 
 	ThrowIfFailed(m_D3DDevice->CreateCommittedResource(
 		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
@@ -114,10 +114,10 @@ void CRadialBlur::CreateResources()
 		&texDesc,
 		D3D12_RESOURCE_STATE_COMMON,
 		nullptr,
-		IID_PPV_ARGS(&m_RadialBlurB)));
+		IID_PPV_ARGS(&m_ResourceB)));
 }
 
-void CRadialBlur::CreateDescriptors()
+void CPostProcessing::CreateDescriptors()
 {
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -132,9 +132,9 @@ void CRadialBlur::CreateDescriptors()
 	uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
 	uavDesc.Texture2D.MipSlice = 0;
 
-	m_D3DDevice->CreateShaderResourceView(m_RadialBlurA.Get(), &srvDesc, m_CpuSrvHandleA);
-	m_D3DDevice->CreateUnorderedAccessView(m_RadialBlurA.Get(), nullptr, &uavDesc, m_CpuUavHandleA);
+	m_D3DDevice->CreateShaderResourceView(m_ResourceA.Get(), &srvDesc, m_CpuSrvHandleA);
+	m_D3DDevice->CreateUnorderedAccessView(m_ResourceA.Get(), nullptr, &uavDesc, m_CpuUavHandleA);
 
-	m_D3DDevice->CreateShaderResourceView(m_RadialBlurB.Get(), &srvDesc, m_CpuSrvHandleB);
-	m_D3DDevice->CreateUnorderedAccessView(m_RadialBlurB.Get(), nullptr, &uavDesc, m_CpuUavHandleB);
+	m_D3DDevice->CreateShaderResourceView(m_ResourceB.Get(), &srvDesc, m_CpuSrvHandleB);
+	m_D3DDevice->CreateUnorderedAccessView(m_ResourceB.Get(), nullptr, &uavDesc, m_CpuUavHandleB);
 }

@@ -9,7 +9,7 @@ using namespace DirectX;
 
 CCascadeShadowMap::CCascadeShadowMap(ID3D12Device* Device, UINT CascadeNum) :m_D3DDevice(Device), m_CascadeNum(CascadeNum)
 {
-	m_ShadowMapSize = 1024;
+	m_ShadowMapSize = 1024 * 2;
 	m_ShadowMap.resize(m_CascadeNum);
 	m_ShadowMapDescHandle.resize(m_CascadeNum);
 
@@ -93,7 +93,7 @@ void CCascadeShadowMap::CreateSceneAABBPoints(XMVECTOR* SceneAABBPoints, const B
 }
 
 void XM_CALLCONV CCascadeShadowMap::ComputeFitCascadeCSMPassCB(
-	XMMATRIX& CameraInvView, const BoundingBox* SceneBoundingBox,
+	const FXMMATRIX& CameraInvView, const BoundingBox* SceneBoundingBox,
 	CCamera* Camera, CLight* Light)
 {
 	XMMATRIX lightView = Light->GetView();
@@ -164,9 +164,11 @@ void XM_CALLCONV CCascadeShadowMap::ComputeFitCascadeCSMPassCB(
 		// NearFarCorrection
 		float nearPlane = 0.0f;
 		float farPlane = 10000.0f;
-		ComputeNearAndFarInCSM(nearPlane, farPlane, lightOrthographicMin, lightOrthographicMax, sceneAABBPointsLiS);
-
-		if (!m_CSMPassCB.NearFarCorrection)
+		if (m_CSMPassCB.NearFarCorrection)
+		{
+			ComputeNearAndFarInCSM(nearPlane, farPlane, lightOrthographicMin, lightOrthographicMax, sceneAABBPointsLiS);
+		}
+		else
 		{
 			nearPlane = lightOrthographicMinZ;
 			farPlane = lightOrthographicMaxZ;
@@ -198,7 +200,7 @@ struct Triangle
 	BOOL Culled;
 };
 
-void XM_CALLCONV CCascadeShadowMap::ComputeNearAndFarInCSM(float& Near, float& Far, XMVECTOR LightOrthographicMin, XMVECTOR LightOrthographicMax, XMVECTOR* SceneAABBPointsLiS)
+void XM_CALLCONV CCascadeShadowMap::ComputeNearAndFarInCSM(float& Near, float& Far, FXMVECTOR LightOrthographicMin, FXMVECTOR LightOrthographicMax, XMVECTOR* SceneAABBPointsLiS)
 {
 	// Initialize the near and far planes
 	Near = FLT_MAX;

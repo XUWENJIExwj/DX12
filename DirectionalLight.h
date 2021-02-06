@@ -25,8 +25,4 @@ public:
 
 	DirectX::XMVECTOR XM_CALLCONV ComputeDirection();
 	DirectX::XMMATRIX XM_CALLCONV ComputeLightView(DirectX::BoundingSphere* SceneBounds)override;
-	DirectX::XMMATRIX XM_CALLCONV ComputeShadowTransformWithSceneBounds(DirectX::BoundingSphere* SceneBounds)override;
-	DirectX::XMMATRIX XM_CALLCONV ComputeShadowTransformWithCameraFrustum(DirectX::BoundingSphere* SceneBounds, DirectX::XMVECTOR FrustumPoints[8])override; // LiSPSM—p
-	void              XM_CALLCONV ComputeShadowTransformWithCameraFrustum(std::vector<DirectX::XMMATRIX>& ShadowTransforms, DirectX::BoundingSphere* SceneBounds, std::vector<std::vector<DirectX::XMVECTOR>>& FrustumPoints)override; // CSM—p
-	DirectX::XMMATRIX XM_CALLCONV ComputeShadowTransformWithCameraFrustumForEachCascade(std::vector<DirectX::XMVECTOR>& FrustumPoints, int CascadeIndex)override; // CSM—p
 };

@@ -35,9 +35,6 @@ public:
 
 	void CreateFrustumBounds();
 	void ComputeFrustumPointsFromCascadeInterval(DirectX::XMVECTOR* FrustumPoints, float CascadeIntervalBegin, float CascadeIntervalEnd);
-	void ComputeFrustumPointsInWorldSpace(std::vector<std::vector<DirectX::XMVECTOR>>& FrustumPoints); // CSM—p
-	void ComputeFrustumPointsInWorldSpace(std::vector<std::vector<DirectX::XMVECTOR>>& FrustumPoints, const DirectX::XMMATRIX& InvView); // CSM—p
-	void ComputeFrustumPointsInWorldSpaceForEachCascade(std::vector<DirectX::XMVECTOR>& FrustumPoints, const DirectX::XMMATRIX& InvView, float Near, float Far); // CSM—p
 
 	// Get frustum properties.
 	float GetNearZ()const { return m_NearZ; }
@@ -56,7 +53,8 @@ public:
 	void ComputeProjectionMatrix(float fovY, float aspect, float zn, float zf);
 
 	// Define camera space via LookAt parameters.
-	void LookAt(DirectX::FXMVECTOR pos, DirectX::FXMVECTOR target, DirectX::FXMVECTOR worldUp);
+	void XM_CALLCONV LookAt(DirectX::FXMVECTOR pos, DirectX::FXMVECTOR target, DirectX::FXMVECTOR worldUp);
+
 	void LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up);
 
 	// Get View/Proj matrices.
