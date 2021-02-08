@@ -67,6 +67,7 @@ UINT                          CRenderer::m_DynamicCubeMapSize = 512;
 ComPtr<ID3D12Resource>        CRenderer::m_DynamicCubeMapDepthStencilBuffer = nullptr;
 
 // PostProcessing
+unordered_map<int, string>  CRenderer::m_PostProcessingNameList;
 unique_ptr<CPostProcessing> CRenderer::m_PostProcessing = nullptr;
 
 // DX12‰Šú‰»
@@ -383,7 +384,7 @@ void CRenderer::RestDirectCmdListAlloc()
 
 void CRenderer::ExecuteCommandLists()
 {
-	// DoRadialBlur the initialization commands.
+	// Execute the initialization commands.
 	ThrowIfFailed(m_CommandList->Close());
 	ID3D12CommandList* cmdsLists[] = { m_CommandList.Get() };
 	m_CommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
@@ -779,6 +780,13 @@ void CRenderer::CreataPSOs()
 	};
 	radialBlurPsoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 	ThrowIfFailed(m_D3DDevice->CreateComputePipelineState(&radialBlurPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_RadialBlur])));
+	CreatePostProcessingNameListAndExecutions((int)PSOTypeIndex::PSO_RadialBlur, "RadialBlur", new CRadialBlur);
+}
+
+void CRenderer::CreatePostProcessingNameListAndExecutions(int PSOType, std::string PPName, CPostProcessingExecution* PPExecution)
+{
+	m_PostProcessingNameList[PSOType] = PPName;
+	m_PostProcessing->CreatePostProcessingExecution(PPName, PPExecution);
 }
 
 // ƒQƒbƒ^[
@@ -1198,10 +1206,7 @@ void CRenderer::End()
 }
 
 // PostProcessing
-void CRenderer::DoRadialBlur(RadialBlurCB& RadialBlurCBuffer)
+void CRenderer::DoPostProcessing(int PSOType, void* CB)
 {
-	if (RadialBlurCBuffer.RadialBlurOn)
-	{
-		m_PostProcessing->DoRadialBlur(m_CommandList.Get(), m_PostProcessRootSignature.Get(), m_PSOs[(int)PSOTypeIndex::PSO_RadialBlur].Get(), m_SwapChainBuffer[m_CurrentBackBufferIndex].Get(), RadialBlurCBuffer);
-	}
+	m_PostProcessing->Execute(m_CommandList.Get(), m_PostProcessRootSignature.Get(), m_PSOs[PSOType].Get(), m_SwapChainBuffer[m_CurrentBackBufferIndex].Get(), m_PostProcessingNameList[PSOType], CB);
 }

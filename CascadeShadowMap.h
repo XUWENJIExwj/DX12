@@ -9,7 +9,7 @@ struct CSMPassCB
 	float MaxBorderPadding = 0.0f;
 	float MinBorderPadding = 0.0f;
 	float CascadeBlendArea = 0.005f;
-	DirectX::XMFLOAT4 ShadowBias = DirectX::XMFLOAT4(0.000f, 0.0002f, 0.0008f, 0.0000f);
+	DirectX::XMFLOAT4 ShadowBias = DirectX::XMFLOAT4(-0.0002f, 0.0002f, 0.0008f, 0.0000f);
 	DirectX::XMFLOAT4 ShadowTexScale[3]; // óvëfêî = CascadeNum
 	DirectX::XMFLOAT4 ShadowTexOffset[3]; // óvëfêî = CascadeNum
 	int PCFBlurSize = 3;

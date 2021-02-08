@@ -49,6 +49,9 @@
     <Filter Include="ソース ファイル\GameObject\Quad">
       <UniqueIdentifier>{ecb907ff-c73e-451c-b0f2-f0727c91a197}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\System\Renderer\PostProcessing">
+      <UniqueIdentifier>{716f76ca-23fc-4c0c-8a53-5b411e6c619d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DX12App.h">
@@ -193,7 +196,16 @@
       <Filter>ソース ファイル\System\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="PostProcessing.h">
-      <Filter>ソース ファイル\System\Renderer</Filter>
+      <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="RadialBlur.h">
+      <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="PostProcessingResource.h">
+      <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="GaussBlur.h">
+      <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -324,7 +336,13 @@
       <Filter>ソース ファイル\System\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="PostProcessing.cpp">
-      <Filter>ソース ファイル\System\Renderer</Filter>
+      <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="RadialBlur.cpp">
+      <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="GaussBlur.cpp">
+      <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

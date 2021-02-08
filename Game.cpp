@@ -219,7 +219,7 @@ void CGame::Draw(const GameTimer& GlobalTimer)
 	CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Sky]);
 
 	// PostProcessing
-	CRenderer::DoRadialBlur(m_RadialBlurCB);
+	CRenderer::DoPostProcessing((int)PSOTypeIndex::PSO_RadialBlur, &m_RadialBlurCB);
 
 	// Draw2DObjInScene
 	CRenderer::SetPSO((int)PSOTypeIndex::PSO_ShadowMapDebug);
@@ -240,15 +240,16 @@ void CGame::UpdateSceneImGui(const GameTimer& GlobalTimer)
 		if (ImGui::TreeNode("RadialBlur"))
 		{
 			ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.1f);
-			ImGui::InputScalar(u8"CenterX", ImGuiDataType_S32, &m_RadialBlurCB.CenterX, NULL, NULL, "%d", ImGuiInputTextFlags_EnterReturnsTrue);
+			ImGui::InputScalar(u8"CenterX", ImGuiDataType_U32, &m_RadialBlurCB.CenterX, NULL, NULL, "%d", ImGuiInputTextFlags_EnterReturnsTrue);
 			ImGui::SameLine();
-			ImGui::InputScalar(u8"CenterY", ImGuiDataType_S32, &m_RadialBlurCB.CenterY, NULL, NULL, "%d", ImGuiInputTextFlags_EnterReturnsTrue);
+			ImGui::InputScalar(u8"CenterY", ImGuiDataType_U32, &m_RadialBlurCB.CenterY, NULL, NULL, "%d", ImGuiInputTextFlags_EnterReturnsTrue);
+			ImGui::Checkbox(u8"EffectOn", &m_RadialBlurCB.EffectOn);
 			ImGui::SameLine();
-			ImGui::Checkbox(u8"EffectOn", &m_RadialBlurCB.RadialBlurOn);
 			ImGui::PopItemWidth();
 			ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.2f);
-			ImGui::DragInt(u8"SampleDistance", &m_RadialBlurCB.SampleDistance, 0.5f, 1, 200);
-			ImGui::DragInt(u8"SampleStrength", &m_RadialBlurCB.SampleStrength, 0.5f, 0, 200);
+			ImGui::DragInt(u8"BlurCount", &m_RadialBlurCB.BlurCount, 0.1f, 1, 20);
+			ImGui::DragInt(u8"SampleDistance", &m_RadialBlurCB.SampleDistance, 0.5f, 1, 100);
+			ImGui::DragInt(u8"SampleStrength", &m_RadialBlurCB.SampleStrength, 0.5f, 0, 100);
 			ImGui::PopItemWidth();
 			ImGui::TreePop();
 		}

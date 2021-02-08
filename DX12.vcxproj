@@ -164,6 +164,7 @@
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="GaussBlur.h" />
     <ClInclude Include="GeoShapeManager.h" />
     <ClInclude Include="ImGuiManager.h" />
     <ClInclude Include="ImGui\imconfig.h" />
@@ -180,8 +181,10 @@
     <ClInclude Include="Manager.h" />
     <ClInclude Include="MaterialManager.h" />
     <ClInclude Include="MeshField.h" />
+    <ClInclude Include="PostProcessingResource.h" />
     <ClInclude Include="Quad.h" />
     <ClInclude Include="PostProcessing.h" />
+    <ClInclude Include="RadialBlur.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="ShaderManager.h" />
@@ -211,6 +214,7 @@
     <ClCompile Include="FrameResource.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="GaussBlur.cpp" />
     <ClCompile Include="GeoShapeManager.cpp" />
     <ClCompile Include="ImGuiManager.cpp" />
     <ClCompile Include="ImGui\imgui.cpp" />
@@ -227,6 +231,7 @@
     <ClCompile Include="MeshField.cpp" />
     <ClCompile Include="Quad.cpp" />
     <ClCompile Include="PostProcessing.cpp" />
+    <ClCompile Include="RadialBlur.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="ShaderManager.cpp" />

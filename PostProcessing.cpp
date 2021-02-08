@@ -14,17 +14,23 @@ CPostProcessing::CPostProcessing(ID3D12Device* Device, UINT Width, UINT Height, 
 
 void CPostProcessing::CreateDescriptors(CD3DX12_CPU_DESCRIPTOR_HANDLE CpuSrvHandle, CD3DX12_GPU_DESCRIPTOR_HANDLE GpuSrvHandle, UINT DescSize)
 {
-	m_CpuSrvHandleA = CpuSrvHandle;
-	m_CpuUavHandleA = CpuSrvHandle.Offset(1, DescSize);
-	m_CpuSrvHandleB = CpuSrvHandle.Offset(1, DescSize);
-	m_CpuUavHandleB = CpuSrvHandle.Offset(1, DescSize);
+	m_PPResource.CpuSrvHandleA = CpuSrvHandle;
+	m_PPResource.CpuUavHandleA = CpuSrvHandle.Offset(1, DescSize);
+	m_PPResource.CpuSrvHandleB = CpuSrvHandle.Offset(1, DescSize);
+	m_PPResource.CpuUavHandleB = CpuSrvHandle.Offset(1, DescSize);
 
-	m_GpuSrvHandleA = GpuSrvHandle;
-	m_GpuUavHandleA = GpuSrvHandle.Offset(1, DescSize);
-	m_GpuSrvHandleB = GpuSrvHandle.Offset(1, DescSize);
-	m_GpuUavHandleB = GpuSrvHandle.Offset(1, DescSize);
+	m_PPResource.GpuSrvHandleA = GpuSrvHandle;
+	m_PPResource.GpuUavHandleA = GpuSrvHandle.Offset(1, DescSize);
+	m_PPResource.GpuSrvHandleB = GpuSrvHandle.Offset(1, DescSize);
+	m_PPResource.GpuUavHandleB = GpuSrvHandle.Offset(1, DescSize);
 
 	CreateDescriptors();
+}
+
+void CPostProcessing::CreatePostProcessingExecution(string PPName, CPostProcessingExecution* PPExecution)
+{
+	unique_ptr<CPostProcessingExecution> ppExecution(PPExecution);
+	m_PPExecutions[PPName] = move(ppExecution);
 }
 
 void CPostProcessing::OnResize(UINT NewWidth, UINT NewHeight)
@@ -35,53 +41,13 @@ void CPostProcessing::OnResize(UINT NewWidth, UINT NewHeight)
 		m_Height = NewHeight;
 
 		CreateResources();
-
-		// New resource, so we need new descriptors to that resource.
 		CreateDescriptors();
 	}
 }
 
-void CPostProcessing::DoRadialBlur(ID3D12GraphicsCommandList* CommandList, ID3D12RootSignature* RootSignature, ID3D12PipelineState* RadialBlurPSO, ID3D12Resource* ResourceIn, RadialBlurCB& RadialBlurCBuffer)
+void CPostProcessing::Execute(ID3D12GraphicsCommandList* CommandList, ID3D12RootSignature* RootSignature, ID3D12PipelineState* PSO, ID3D12Resource* ResourceIn, std::string PPName, void* CB)
 {
-	CommandList->SetComputeRootSignature(RootSignature);
-
-	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(ResourceIn,
-		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE));
-	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_ResourceA.Get(),
-		D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST));
-	CommandList->CopyResource(m_ResourceA.Get(), ResourceIn);
-	CommandList->ResourceBarrier(1,&CD3DX12_RESOURCE_BARRIER::Transition(m_ResourceA.Get(),
-		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ));
-	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_ResourceB.Get(),
-		D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_UNORDERED_ACCESS));
-
-	UINT numGroupsX = (UINT)ceilf(m_Width / 16.0f);
-	UINT numGroupsY = (UINT)ceilf(m_Height / 16.0f);
-
-	CommandList->SetPipelineState(RadialBlurPSO);
-	vector<int> cb = 
-	{
-		(int)m_Width, (int)m_Height, 
-		RadialBlurCBuffer.CenterX, RadialBlurCBuffer.CenterY,
-		RadialBlurCBuffer.SampleDistance, RadialBlurCBuffer.SampleStrength
-	};
-	CommandList->SetComputeRoot32BitConstants(0, (UINT)cb.size(), cb.data(), 0);
-	CommandList->SetComputeRootDescriptorTable(1, m_GpuSrvHandleA);
-	CommandList->SetComputeRootDescriptorTable(2, m_GpuUavHandleB);
-
-	CommandList->Dispatch(numGroupsX, numGroupsY, 1);
-
-	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_ResourceA.Get(),
-		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_COMMON));
-	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_ResourceB.Get(),
-		D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE));
-	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(ResourceIn,
-		D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_COPY_DEST));
-	CommandList->CopyResource(ResourceIn, m_ResourceB.Get());
-	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_ResourceB.Get(),
-		D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_COMMON));
-	CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(ResourceIn,
-		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET));
+	m_PPExecutions[PPName]->Execute(CommandList, RootSignature, PSO, ResourceIn, CB, m_PPResource, m_Width, m_Height);
 }
 
 void CPostProcessing::CreateResources()
@@ -106,7 +72,7 @@ void CPostProcessing::CreateResources()
 		&texDesc,
 		D3D12_RESOURCE_STATE_COMMON,
 		nullptr,
-		IID_PPV_ARGS(&m_ResourceA)));
+		IID_PPV_ARGS(&m_PPResource.RA)));
 
 	ThrowIfFailed(m_D3DDevice->CreateCommittedResource(
 		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
@@ -114,7 +80,7 @@ void CPostProcessing::CreateResources()
 		&texDesc,
 		D3D12_RESOURCE_STATE_COMMON,
 		nullptr,
-		IID_PPV_ARGS(&m_ResourceB)));
+		IID_PPV_ARGS(&m_PPResource.RB)));
 }
 
 void CPostProcessing::CreateDescriptors()
@@ -127,14 +93,13 @@ void CPostProcessing::CreateDescriptors()
 	srvDesc.Texture2D.MipLevels = 1;
 
 	D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
-
 	uavDesc.Format = m_Format;
 	uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
 	uavDesc.Texture2D.MipSlice = 0;
 
-	m_D3DDevice->CreateShaderResourceView(m_ResourceA.Get(), &srvDesc, m_CpuSrvHandleA);
-	m_D3DDevice->CreateUnorderedAccessView(m_ResourceA.Get(), nullptr, &uavDesc, m_CpuUavHandleA);
+	m_D3DDevice->CreateShaderResourceView(m_PPResource.RA.Get(), &srvDesc, m_PPResource.CpuSrvHandleA);
+	m_D3DDevice->CreateUnorderedAccessView(m_PPResource.RA.Get(), nullptr, &uavDesc, m_PPResource.CpuUavHandleA);
 
-	m_D3DDevice->CreateShaderResourceView(m_ResourceB.Get(), &srvDesc, m_CpuSrvHandleB);
-	m_D3DDevice->CreateUnorderedAccessView(m_ResourceB.Get(), nullptr, &uavDesc, m_CpuUavHandleB);
+	m_D3DDevice->CreateShaderResourceView(m_PPResource.RB.Get(), &srvDesc, m_PPResource.CpuSrvHandleB);
+	m_D3DDevice->CreateUnorderedAccessView(m_PPResource.RB.Get(), nullptr, &uavDesc, m_PPResource.CpuUavHandleB);
 }

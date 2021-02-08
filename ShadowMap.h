@@ -43,6 +43,8 @@ public:
 	D3D12_VIEWPORT GetViewport()const { return m_Viewport; }
 	D3D12_RECT     GetScissorRect()const { return m_ScissorRect; }
 
+	void* GetSrvHandleForImGui() { return (void*)m_GpuSrvHandle.ptr; }
+
 private:
 	void CreateResource();
 	void CreateDescriptors();

@@ -49,6 +49,11 @@ void CCascadeShadowMap::UpdateCSMImGui()
 		ImGui::DragFloat(u8"ShadowBiasForCascade1", &m_CSMPassCB.ShadowBias.y, 0.00001f, -0.1f, 0.01f, "%.4f");
 		ImGui::DragFloat(u8"ShadowBiasForCascade2", &m_CSMPassCB.ShadowBias.z, 0.00001f, -0.1f, 0.01f, "%.4f");
 		ImGui::PopItemWidth();
+		for (UINT i = 0; i < m_CascadeNum; ++i)
+		{
+			ImGui::Image(m_ShadowMap[i]->GetSrvHandleForImGui(), ImVec2(80.0f, 80.0f), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f));
+			ImGui::SameLine();
+		}
 		ImGui::End();
 	}
 }

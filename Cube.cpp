@@ -16,6 +16,9 @@ void CCube::Init()
 
 	m_BoundsName = "cube";
 	ComputeBoundingBox();
+
+	m_ImGuiCB.ShowClose = true;
+	m_ImGuiCB.MaterialIndex = (int)MaterialNormalIndex::Material_Tile_00;
 }
 
 void CCube::Update(const GameTimer& GlobalTimer)
@@ -34,17 +37,14 @@ void CCube::LateUpdate(const GameTimer& GlobalTimer)
 
 void CCube::UpdateImGui(const GameTimer& GlobalTimer)
 {
-	static bool showClose = true;
-	static int index = (int)MaterialNormalIndex::Material_Tile_00;
-
-	if (showClose)
+	if (m_ImGuiCB.ShowClose)
 	{
 		ImGuiWindowFlags window_flags = 0;
-		ImGui::Begin(u8"ObjMaterialList", &showClose, window_flags);
+		ImGui::Begin(u8"ObjMaterialList", &m_ImGuiCB.ShowClose, window_flags);
 		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.6f);
-		if (ImGui::Combo(m_Name.c_str(), &index, CMaterialManager::GetMaterialNormalNames(), CMaterialManager::GetMaterialNormalCount()))
+		if (ImGui::Combo(m_Name.c_str(), &m_ImGuiCB.MaterialIndex, CMaterialManager::GetMaterialNormalNames(), CMaterialManager::GetMaterialNormalCount()))
 		{
-			m_Material = CMaterialManager::GetMaterialNormal(index);
+			m_Material = CMaterialManager::GetMaterialNormal(m_ImGuiCB.MaterialIndex);
 			m_NumFramesDirty = gNumFrameResources;
 		}
 		ImGui::PopItemWidth();

@@ -37,6 +37,8 @@ protected:
 	std::string          m_BoundsName;
 	DirectX::BoundingBox m_BoundingBox;
 
+	GameObjectImGuiCB m_ImGuiCB;
+
 public:
 	CGameObject();
 	virtual ~CGameObject() = default;

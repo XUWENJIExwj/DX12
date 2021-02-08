@@ -86,7 +86,8 @@ private:
 	static Microsoft::WRL::ComPtr<ID3D12Resource> m_DynamicCubeMapDepthStencilBuffer;
 
 	// PostProcessing
-	static std::unique_ptr<CPostProcessing> m_PostProcessing;
+	static std::unordered_map<int, std::string> m_PostProcessingNameList;
+	static std::unique_ptr<CPostProcessing>     m_PostProcessing;
 
 public:
 	// DX12èâä˙âª
@@ -111,6 +112,7 @@ public:
 	static void CreateDescriptorHeaps();
 	static void CreateCubeDepthStencil();
 	static void CreataPSOs();
+	static void CreatePostProcessingNameListAndExecutions(int PSOType, std::string PPName, CPostProcessingExecution* PPExecution);
 
 	// ÉQÉbÉ^Å[
 	static bool Get4xMsaaState() { return m_4xMsaaState; }
@@ -170,5 +172,5 @@ public:
 	static void End();
 
 	// PostProcessing
-	static void DoRadialBlur(RadialBlurCB& RadialBlurCBuffer);
+	static void DoPostProcessing(int PSOType, void* CB);
 };

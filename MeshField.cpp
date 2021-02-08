@@ -17,6 +17,9 @@ void CMeshField::Init()
 
 	m_BoundsName = "grid";
 	ComputeBoundingBox();
+
+	m_ImGuiCB.ShowClose = true;
+	m_ImGuiCB.MaterialIndex = (int)MaterialHeightIndex::Material_Plane_00;
 }
 
 void CMeshField::LateUpdate(const GameTimer& GlobalTimer)
@@ -26,17 +29,14 @@ void CMeshField::LateUpdate(const GameTimer& GlobalTimer)
 
 void CMeshField::UpdateImGui(const GameTimer& GlobalTimer)
 {
-	static bool showClose = true;
-	static int index = (int)MaterialHeightIndex::Material_Plane_00;
-
-	if (showClose)
+	if (m_ImGuiCB.ShowClose)
 	{
 		ImGuiWindowFlags window_flags = 0;
-		ImGui::Begin(u8"ObjMaterialList", &showClose, window_flags);
+		ImGui::Begin(u8"ObjMaterialList", &m_ImGuiCB.ShowClose, window_flags);
 		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.6f);
-		if (ImGui::Combo(m_Name.c_str(), &index, CMaterialManager::GetMaterialHeightNames(), CMaterialManager::GetMaterialHeightCount()))
+		if (ImGui::Combo(m_Name.c_str(), &m_ImGuiCB.MaterialIndex, CMaterialManager::GetMaterialHeightNames(), CMaterialManager::GetMaterialHeightCount()))
 		{
-			m_Material = CMaterialManager::GetMaterialHeight(index);
+			m_Material = CMaterialManager::GetMaterialHeight(m_ImGuiCB.MaterialIndex);
 			m_NumFramesDirty = gNumFrameResources;
 		}
 		ImGui::PopItemWidth();
