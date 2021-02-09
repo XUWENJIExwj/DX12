@@ -43,6 +43,7 @@ protected:
 	PassConstants m_MainPassCB;
 	PassConstants m_ShadowPassCB;
 	RadialBlurCB  m_RadialBlurCB;
+	GaussBlurCB   m_GaussBlurCB;
 
 	std::vector<CCamera*>   m_DCMCameras;
 	std::vector<CDirLight*> m_DirLights;

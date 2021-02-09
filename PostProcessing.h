@@ -33,9 +33,10 @@ public:
 	void Execute(
 		ID3D12GraphicsCommandList* CommandList,
 		ID3D12RootSignature* RootSignature,
-		ID3D12PipelineState* PSO,
 		ID3D12Resource* ResourceIn,
-		std::string PPName, void* CB);
+		std::string PPName, void* CB,
+		ID3D12PipelineState* PSOA,
+		ID3D12PipelineState* PSOB);
 
 private:
 	void CreateResources();

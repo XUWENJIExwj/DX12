@@ -47,4 +47,7 @@ void CShaderManager::LoadShaders()
 	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapDebug].pixelShader = d3dUtil::CompileShader(L"Shaders\\ShadowMapDebug.hlsl", nullptr, "PS", "ps_5_1");
 
 	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_RadialBlur].computeShader = d3dUtil::CompileShader(L"Shaders\\RadialBlur.hlsl", nullptr, "RadialBlurCS", "cs_5_0");
+
+	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_GaussBlurHorizontal].computeShader = d3dUtil::CompileShader(L"Shaders\\GaussBlur.hlsl", nullptr, "HorizontalBlurCS", "cs_5_0");
+	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_GaussBlurVertical].computeShader = d3dUtil::CompileShader(L"Shaders\\GaussBlur.hlsl", nullptr, "VerticalBlurCS", "cs_5_0");
 }

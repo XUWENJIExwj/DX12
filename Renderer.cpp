@@ -467,7 +467,7 @@ void CRenderer::CreatePostProcessRootSignature()
 	uavTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0);
 
 	CD3DX12_ROOT_PARAMETER slotRootParameter[3];
-	slotRootParameter[0].InitAsConstants(12, 0);
+	slotRootParameter[0].InitAsConstants(12, 0); // 必要に応じて拡張（最大64個にできるが、他のDescも上限を消費しているので、ケースバイケース）
 	slotRootParameter[1].InitAsDescriptorTable(1, &srvTable);
 	slotRootParameter[2].InitAsDescriptorTable(1, &uavTable);
 
@@ -781,9 +781,25 @@ void CRenderer::CreataPSOs()
 	radialBlurPsoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 	ThrowIfFailed(m_D3DDevice->CreateComputePipelineState(&radialBlurPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_RadialBlur])));
 	CreatePostProcessingNameListAndExecutions((int)PSOTypeIndex::PSO_RadialBlur, "RadialBlur", new CRadialBlur);
+
+	// GaussBlur
+	D3D12_COMPUTE_PIPELINE_STATE_DESC gaussBlurPsoDesc = radialBlurPsoDesc;
+	gaussBlurPsoDesc.CS=
+	{
+		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_GaussBlurHorizontal].computeShader->GetBufferPointer()),
+		shaderTypes[(int)ShaderTypeIndex::Shader_Type_GaussBlurHorizontal].computeShader->GetBufferSize()
+	};
+	ThrowIfFailed(m_D3DDevice->CreateComputePipelineState(&gaussBlurPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_GaussBlurHorizontal])));
+	gaussBlurPsoDesc.CS =
+	{
+		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_GaussBlurVertical].computeShader->GetBufferPointer()),
+		shaderTypes[(int)ShaderTypeIndex::Shader_Type_GaussBlurVertical].computeShader->GetBufferSize()
+	};
+	ThrowIfFailed(m_D3DDevice->CreateComputePipelineState(&gaussBlurPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_GaussBlurVertical])));
+	CreatePostProcessingNameListAndExecutions((int)PSOTypeIndex::PSO_GaussBlurHorizontal, "GaussBlur", new CGaussBlur);
 }
 
-void CRenderer::CreatePostProcessingNameListAndExecutions(int PSOType, std::string PPName, CPostProcessingExecution* PPExecution)
+void CRenderer::CreatePostProcessingNameListAndExecutions(int PSOType, string PPName, CPostProcessingExecution* PPExecution)
 {
 	m_PostProcessingNameList[PSOType] = PPName;
 	m_PostProcessing->CreatePostProcessingExecution(PPName, PPExecution);
@@ -1206,7 +1222,9 @@ void CRenderer::End()
 }
 
 // PostProcessing
-void CRenderer::DoPostProcessing(int PSOType, void* CB)
+void CRenderer::DoPostProcessing(void* CB, int PSOTypeA, int PSOTypeB)
 {
-	m_PostProcessing->Execute(m_CommandList.Get(), m_PostProcessRootSignature.Get(), m_PSOs[PSOType].Get(), m_SwapChainBuffer[m_CurrentBackBufferIndex].Get(), m_PostProcessingNameList[PSOType], CB);
+	m_PostProcessing->Execute(m_CommandList.Get(), m_PostProcessRootSignature.Get(),
+		m_SwapChainBuffer[m_CurrentBackBufferIndex].Get(), m_PostProcessingNameList[PSOTypeA], CB,
+		m_PSOs[PSOTypeA].Get(), PSOTypeB >= 0 ? m_PSOs[PSOTypeB].Get() : nullptr);
 }

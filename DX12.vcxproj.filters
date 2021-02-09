@@ -370,5 +370,8 @@
     <FxCompile Include="Shaders\RadialBlur.hlsl">
       <Filter>ソース ファイル\Shader</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\GaussBlur.hlsl">
+      <Filter>ソース ファイル\Shader</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

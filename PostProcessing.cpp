@@ -45,9 +45,12 @@ void CPostProcessing::OnResize(UINT NewWidth, UINT NewHeight)
 	}
 }
 
-void CPostProcessing::Execute(ID3D12GraphicsCommandList* CommandList, ID3D12RootSignature* RootSignature, ID3D12PipelineState* PSO, ID3D12Resource* ResourceIn, std::string PPName, void* CB)
+void CPostProcessing::Execute(
+	ID3D12GraphicsCommandList* CommandList, ID3D12RootSignature* RootSignature,
+	ID3D12Resource* ResourceIn, std::string PPName, void* CB,
+	ID3D12PipelineState* PSOA, ID3D12PipelineState* PSOB)
 {
-	m_PPExecutions[PPName]->Execute(CommandList, RootSignature, PSO, ResourceIn, CB, m_PPResource, m_Width, m_Height);
+	m_PPExecutions[PPName]->Execute(CommandList, RootSignature, ResourceIn, CB, m_PPResource, m_Width, m_Height, PSOA, PSOB);
 }
 
 void CPostProcessing::CreateResources()
@@ -72,7 +75,7 @@ void CPostProcessing::CreateResources()
 		&texDesc,
 		D3D12_RESOURCE_STATE_COMMON,
 		nullptr,
-		IID_PPV_ARGS(&m_PPResource.RA)));
+		IID_PPV_ARGS(&m_PPResource.FullA)));
 
 	ThrowIfFailed(m_D3DDevice->CreateCommittedResource(
 		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
@@ -80,7 +83,7 @@ void CPostProcessing::CreateResources()
 		&texDesc,
 		D3D12_RESOURCE_STATE_COMMON,
 		nullptr,
-		IID_PPV_ARGS(&m_PPResource.RB)));
+		IID_PPV_ARGS(&m_PPResource.FullB)));
 }
 
 void CPostProcessing::CreateDescriptors()
@@ -97,9 +100,9 @@ void CPostProcessing::CreateDescriptors()
 	uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
 	uavDesc.Texture2D.MipSlice = 0;
 
-	m_D3DDevice->CreateShaderResourceView(m_PPResource.RA.Get(), &srvDesc, m_PPResource.CpuSrvHandleA);
-	m_D3DDevice->CreateUnorderedAccessView(m_PPResource.RA.Get(), nullptr, &uavDesc, m_PPResource.CpuUavHandleA);
+	m_D3DDevice->CreateShaderResourceView(m_PPResource.FullA.Get(), &srvDesc, m_PPResource.CpuSrvHandleA);
+	m_D3DDevice->CreateUnorderedAccessView(m_PPResource.FullA.Get(), nullptr, &uavDesc, m_PPResource.CpuUavHandleA);
 
-	m_D3DDevice->CreateShaderResourceView(m_PPResource.RB.Get(), &srvDesc, m_PPResource.CpuSrvHandleB);
-	m_D3DDevice->CreateUnorderedAccessView(m_PPResource.RB.Get(), nullptr, &uavDesc, m_PPResource.CpuUavHandleB);
+	m_D3DDevice->CreateShaderResourceView(m_PPResource.FullB.Get(), &srvDesc, m_PPResource.CpuSrvHandleB);
+	m_D3DDevice->CreateUnorderedAccessView(m_PPResource.FullB.Get(), nullptr, &uavDesc, m_PPResource.CpuUavHandleB);
 }

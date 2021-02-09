@@ -18,6 +18,8 @@ enum class PSOTypeIndex :int
 	PSO_ShadowMapWithAlphaTest,
 	PSO_ShadowMapDebug,
 	PSO_RadialBlur,
+	PSO_GaussBlurHorizontal,
+	PSO_GaussBlurVertical,
 	PSO_MAX
 };
 
@@ -172,5 +174,5 @@ public:
 	static void End();
 
 	// PostProcessing
-	static void DoPostProcessing(int PSOType, void* CB);
+	static void DoPostProcessing(void* CB, int PSOTypeA, int PSOTypeB = -1);
 };

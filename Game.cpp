@@ -219,7 +219,8 @@ void CGame::Draw(const GameTimer& GlobalTimer)
 	CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Sky]);
 
 	// PostProcessing
-	CRenderer::DoPostProcessing((int)PSOTypeIndex::PSO_RadialBlur, &m_RadialBlurCB);
+	CRenderer::DoPostProcessing(&m_RadialBlurCB, (int)PSOTypeIndex::PSO_RadialBlur);
+	CRenderer::DoPostProcessing(&m_GaussBlurCB, (int)PSOTypeIndex::PSO_GaussBlurHorizontal, (int)PSOTypeIndex::PSO_GaussBlurVertical);
 
 	// Draw2DObjInScene
 	CRenderer::SetPSO((int)PSOTypeIndex::PSO_ShadowMapDebug);
@@ -250,6 +251,15 @@ void CGame::UpdateSceneImGui(const GameTimer& GlobalTimer)
 			ImGui::DragInt(u8"BlurCount", &m_RadialBlurCB.BlurCount, 0.1f, 1, 20);
 			ImGui::DragInt(u8"SampleDistance", &m_RadialBlurCB.SampleDistance, 0.5f, 1, 100);
 			ImGui::DragInt(u8"SampleStrength", &m_RadialBlurCB.SampleStrength, 0.5f, 0, 100);
+			ImGui::PopItemWidth();
+			ImGui::TreePop();
+		}
+		if (ImGui::TreeNode("GaussBlur"))
+		{
+			ImGui::Checkbox(u8"EffectOn", &m_GaussBlurCB.EffectOn);
+			ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.2f);
+			ImGui::SameLine();
+			ImGui::DragInt(u8"BlurCount", &m_GaussBlurCB.BlurCount, 0.1f, 1, 20);
 			ImGui::PopItemWidth();
 			ImGui::TreePop();
 		}

@@ -12,8 +12,8 @@ struct PostProcessingResource
 	CD3DX12_GPU_DESCRIPTOR_HANDLE GpuSrvHandleB;
 	CD3DX12_GPU_DESCRIPTOR_HANDLE GpuUavHandleB;
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> RA;
-	Microsoft::WRL::ComPtr<ID3D12Resource> RB;
+	Microsoft::WRL::ComPtr<ID3D12Resource> FullA;
+	Microsoft::WRL::ComPtr<ID3D12Resource> FullB;
 };
 
 struct PostProcessingCB
@@ -32,9 +32,10 @@ public:
 	virtual void Execute(
 		ID3D12GraphicsCommandList* CommandList,
 		ID3D12RootSignature* RootSignature,
-		ID3D12PipelineState* PSO,
 		ID3D12Resource* ResourceIn,
 		void* CB,
 		PostProcessingResource& PPResource,
-		UINT Width, UINT Height) = 0;
+		UINT Width, UINT Height,
+		ID3D12PipelineState* PSOA,
+		ID3D12PipelineState* PSOB) = 0;
 };
