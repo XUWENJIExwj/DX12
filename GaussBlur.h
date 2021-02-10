@@ -5,6 +5,7 @@
 struct GaussBlurCB :public PostProcessingCB
 {
 	int   BlurCount = 4;
+	int   MaxBlurRadius = 5;
 	float Sigma = 2.5f;
 };
 
@@ -23,9 +24,8 @@ public:
 		void* CB,
 		PostProcessingResource& PPResource,
 		UINT Width, UINT Height,
-		ID3D12PipelineState* PSOA,
-		ID3D12PipelineState* PSOB)override;
+		const std::vector<ID3D12PipelineState*>& PSOs)override;
 
-private:
-	std::vector<float> ComputeGaussWeights(float Sigma);
+protected:
+	std::vector<float> ComputeGaussWeights(int MaxBlurRadius, float Sigma);
 };

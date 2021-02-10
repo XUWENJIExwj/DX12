@@ -1,11 +1,16 @@
 #include "RadialBlur.h"
 
+enum class RadialBlurPSO :int
+{
+	RadialBlur,
+};
+
 using namespace std;
 
 void CRadialBlur::Execute(
 	ID3D12GraphicsCommandList* CommandList, ID3D12RootSignature* RootSignature, 
 	ID3D12Resource* ResourceIn, void* CB, PostProcessingResource& PPResource, 
-	UINT Width, UINT Height, ID3D12PipelineState* PSOA, ID3D12PipelineState* PSOB)
+	UINT Width, UINT Height, const vector<ID3D12PipelineState*>& PSOs)
 {
 	RadialBlurCB* rbCB = (RadialBlurCB*)CB;
 	if (rbCB->EffectOn)
@@ -22,10 +27,7 @@ void CRadialBlur::Execute(
 		CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(PPResource.FullB.Get(),
 			D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_UNORDERED_ACCESS));
 
-		UINT numGroupsX = (UINT)ceilf(Width / 16.0f);
-		UINT numGroupsY = (UINT)ceilf(Height / 16.0f);
-
-		CommandList->SetPipelineState(PSOA);
+		CommandList->SetPipelineState(PSOs[(int)RadialBlurPSO::RadialBlur]);
 
 		vector<int> cb =
 		{
@@ -39,12 +41,14 @@ void CRadialBlur::Execute(
 		D3D12_GPU_DESCRIPTOR_HANDLE workSrvHandls[2] = { PPResource.GpuSrvHandleA, PPResource.GpuSrvHandleB };
 		D3D12_GPU_DESCRIPTOR_HANDLE workUavHandls[2] = { PPResource.GpuUavHandleA, PPResource.GpuUavHandleB };
 		int currentInput, currentOutput;
+		UINT numGroupsX = (UINT)ceilf(Width / 16.0f);
+		UINT numGroupsY = (UINT)ceilf(Height / 16.0f);
 		for (int i = 0; i < rbCB->BlurCount; ++i)
 		{
 			currentInput = i % 2;
 			currentOutput = (i + 1) % 2;
 			CommandList->SetComputeRootDescriptorTable(1, workSrvHandls[currentInput]);
-			CommandList->SetComputeRootDescriptorTable(2, workUavHandls[currentOutput]);
+			CommandList->SetComputeRootDescriptorTable(3, workUavHandls[currentOutput]);
 
 			CommandList->Dispatch(numGroupsX, numGroupsY, 1);
 

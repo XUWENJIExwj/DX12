@@ -67,8 +67,8 @@ UINT                          CRenderer::m_DynamicCubeMapSize = 512;
 ComPtr<ID3D12Resource>        CRenderer::m_DynamicCubeMapDepthStencilBuffer = nullptr;
 
 // PostProcessing
-unordered_map<int, string>  CRenderer::m_PostProcessingNameList;
-unique_ptr<CPostProcessing> CRenderer::m_PostProcessing = nullptr;
+vector<vector<ID3D12PipelineState*>> CRenderer::m_PostProcessingPSOs((int)PostProcessingType::Max);
+unique_ptr<CPostProcessing>          CRenderer::m_PostProcessing = nullptr;
 
 // DX12初期化
 bool CRenderer::Init()
@@ -338,7 +338,7 @@ void CRenderer::OnResize()
 	m_ScreenViewport.MaxDepth = 1.0f;
 
 	m_ScissorRect = { 0, 0, m_App->GetWindowWidth(), m_App->GetWindowHeight() };
-
+	
 	// RadialBlur
 	if (m_PostProcessing)
 	{
@@ -460,18 +460,23 @@ void CRenderer::CreateRootSignature()
 
 void CRenderer::CreatePostProcessRootSignature()
 {
-	CD3DX12_DESCRIPTOR_RANGE srvTable;
-	srvTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
+	CD3DX12_DESCRIPTOR_RANGE srvTableA;
+	srvTableA.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
+
+	CD3DX12_DESCRIPTOR_RANGE srvTableB;
+	srvTableB.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1);
 
 	CD3DX12_DESCRIPTOR_RANGE uavTable;
 	uavTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0);
 
-	CD3DX12_ROOT_PARAMETER slotRootParameter[3];
-	slotRootParameter[0].InitAsConstants(12, 0); // 必要に応じて拡張（最大64個にできるが、他のDescも上限を消費しているので、ケースバイケース）
-	slotRootParameter[1].InitAsDescriptorTable(1, &srvTable);
-	slotRootParameter[2].InitAsDescriptorTable(1, &uavTable);
+	CD3DX12_ROOT_PARAMETER slotRootParameter[4];
+	int cbNum = 42;
+	slotRootParameter[0].InitAsConstants(cbNum, 0); // cbNum * 1DWORD（以下含めて最大64DWORDまで拡張可能）
+	slotRootParameter[1].InitAsDescriptorTable(1, &srvTableA); // 1DWORD
+	slotRootParameter[2].InitAsDescriptorTable(1, &srvTableB); // 1DWORD
+	slotRootParameter[3].InitAsDescriptorTable(1, &uavTable); // 1DWORD
 
-	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(3, slotRootParameter,
+	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(4, slotRootParameter,
 		0, nullptr,
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
@@ -563,7 +568,6 @@ void CRenderer::CreateDescriptorHeaps()
 
 	// PostProcess
 	UINT postProcessIndex = CTextureManager::GetPostProcessIndex();
-	// RadialBlur
 	m_PostProcessing->CreateDescriptors(
 		CD3DX12_CPU_DESCRIPTOR_HANDLE(cpuSrvStart, postProcessIndex, m_CbvSrvUavDescSize),
 		CD3DX12_GPU_DESCRIPTOR_HANDLE(gpuSrvStart, postProcessIndex, m_CbvSrvUavDescSize),
@@ -770,6 +774,7 @@ void CRenderer::CreataPSOs()
 	};
 	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&debugPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_ShadowMapDebug])));
 
+	// PostProcessing
 	// RadialBlur
 	D3D12_COMPUTE_PIPELINE_STATE_DESC radialBlurPsoDesc = {};
 	radialBlurPsoDesc.pRootSignature = m_PostProcessRootSignature.Get();
@@ -780,11 +785,12 @@ void CRenderer::CreataPSOs()
 	};
 	radialBlurPsoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 	ThrowIfFailed(m_D3DDevice->CreateComputePipelineState(&radialBlurPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_RadialBlur])));
-	CreatePostProcessingNameListAndExecutions((int)PSOTypeIndex::PSO_RadialBlur, "RadialBlur", new CRadialBlur);
+	CreatePostProcessingExecutions((int)PostProcessingType::RadialBlur, new CRadialBlur);
+	PackPostProcessingPSOs((int)PostProcessingType::RadialBlur, (int)PSOTypeIndex::PSO_RadialBlur, 1);
 
 	// GaussBlur
 	D3D12_COMPUTE_PIPELINE_STATE_DESC gaussBlurPsoDesc = radialBlurPsoDesc;
-	gaussBlurPsoDesc.CS=
+	gaussBlurPsoDesc.CS =
 	{
 		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_GaussBlurHorizontal].computeShader->GetBufferPointer()),
 		shaderTypes[(int)ShaderTypeIndex::Shader_Type_GaussBlurHorizontal].computeShader->GetBufferSize()
@@ -796,13 +802,55 @@ void CRenderer::CreataPSOs()
 		shaderTypes[(int)ShaderTypeIndex::Shader_Type_GaussBlurVertical].computeShader->GetBufferSize()
 	};
 	ThrowIfFailed(m_D3DDevice->CreateComputePipelineState(&gaussBlurPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_GaussBlurVertical])));
-	CreatePostProcessingNameListAndExecutions((int)PSOTypeIndex::PSO_GaussBlurHorizontal, "GaussBlur", new CGaussBlur);
+	CreatePostProcessingExecutions((int)PostProcessingType::GaussBlur, new CGaussBlur);
+	PackPostProcessingPSOs((int)PostProcessingType::GaussBlur, (int)PSOTypeIndex::PSO_GaussBlurHorizontal, 2);
+
+	// Bloom
+	D3D12_COMPUTE_PIPELINE_STATE_DESC bloomPsoDesc = radialBlurPsoDesc;
+	bloomPsoDesc.CS =
+	{
+		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_LuminanceMap].computeShader->GetBufferPointer()),
+		shaderTypes[(int)ShaderTypeIndex::Shader_Type_LuminanceMap].computeShader->GetBufferSize()
+	};
+	ThrowIfFailed(m_D3DDevice->CreateComputePipelineState(&bloomPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_LuminanceMap])));
+	bloomPsoDesc.CS =
+	{
+		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_BlendOpAdd].computeShader->GetBufferPointer()),
+		shaderTypes[(int)ShaderTypeIndex::Shader_Type_BlendOpAdd].computeShader->GetBufferSize()
+	};
+	ThrowIfFailed(m_D3DDevice->CreateComputePipelineState(&bloomPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_BlendOpAdd])));
+	CreatePostProcessingExecutions((int)PostProcessingType::Bloom, new CBloom);
+	PackPostProcessingPSOs((int)PostProcessingType::Bloom, m_PostProcessingPSOs[(int)PostProcessingType::GaussBlur], (int)PSOTypeIndex::PSO_LuminanceMap, 2);
 }
 
-void CRenderer::CreatePostProcessingNameListAndExecutions(int PSOType, string PPName, CPostProcessingExecution* PPExecution)
+void CRenderer::CreatePostProcessingExecutions(int PPType, CPostProcessingExecution* PPExecution)
 {
-	m_PostProcessingNameList[PSOType] = PPName;
-	m_PostProcessing->CreatePostProcessingExecution(PPName, PPExecution);
+	m_PostProcessing->CreatePostProcessingExecution(PPType, PPExecution);
+}
+
+void CRenderer::PackPostProcessingPSOs(int PPType, int FirstPSOType, int PSONum)
+{
+	m_PostProcessingPSOs[PPType].resize(PSONum);
+	for (int i = 0; i < PSONum; ++i)
+	{
+		m_PostProcessingPSOs[PPType][i] = m_PSOs[FirstPSOType + i].Get();
+	}
+}
+
+void CRenderer::PackPostProcessingPSOs(int PPType, vector<ID3D12PipelineState*> PPPSOs, int FirstPSOType, int PSONum)
+{
+	int psoNum = (int)PPPSOs.size();
+	m_PostProcessingPSOs[PPType].resize(psoNum + PSONum);
+
+	for (int i = 0; i < psoNum; ++i)
+	{
+		m_PostProcessingPSOs[PPType][i] = PPPSOs[i];
+	}
+
+	for (int i = psoNum; i < psoNum + PSONum; ++i)
+	{
+		m_PostProcessingPSOs[PPType][i] = m_PSOs[FirstPSOType + i - psoNum].Get();
+	}
 }
 
 // ゲッター
@@ -1222,9 +1270,8 @@ void CRenderer::End()
 }
 
 // PostProcessing
-void CRenderer::DoPostProcessing(void* CB, int PSOTypeA, int PSOTypeB)
+void CRenderer::DoPostProcessing(int PPType, void* CB)
 {
 	m_PostProcessing->Execute(m_CommandList.Get(), m_PostProcessRootSignature.Get(),
-		m_SwapChainBuffer[m_CurrentBackBufferIndex].Get(), m_PostProcessingNameList[PSOTypeA], CB,
-		m_PSOs[PSOTypeA].Get(), PSOTypeB >= 0 ? m_PSOs[PSOTypeB].Get() : nullptr);
+		m_SwapChainBuffer[m_CurrentBackBufferIndex].Get(), PPType, CB, m_PostProcessingPSOs[PPType]);
 }

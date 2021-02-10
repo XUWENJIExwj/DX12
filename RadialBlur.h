@@ -26,6 +26,5 @@ public:
 		void* CB,
 		PostProcessingResource& PPResource,
 		UINT Width, UINT Height,
-		ID3D12PipelineState* PSOA,
-		ID3D12PipelineState* PSOB)override;
+		const std::vector<ID3D12PipelineState*>& PSOs)override;
 };

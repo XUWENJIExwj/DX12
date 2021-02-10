@@ -4,11 +4,10 @@ cbuffer cbSettings : register(b0)
     int2 gCenter;
     int  gSampleDistance;
     int  gSampleStrength;
-    int  cbPad0;
-    int  cbPad1;
 }
 
 Texture2D gInput : register(t0);
+Texture2D gNone : register(t1);
 RWTexture2D<float4> gOutput : register(u0);
 
 static const int samples[10] =
@@ -29,7 +28,6 @@ static const int samples[10] =
 void RadialBlurCS(int3 DispatchThreadID : SV_DispatchThreadID)
 {
     int2 direction = gCenter - DispatchThreadID.xy;
-    float distance = length(float2(direction) / float2(gScreenSize)); // Normalize‚µ‚Ä‚©‚ç
     
     float4 color = gInput[DispatchThreadID.xy];
     float4 sum = color;
@@ -38,6 +36,8 @@ void RadialBlurCS(int3 DispatchThreadID : SV_DispatchThreadID)
         sum += gInput[DispatchThreadID.xy + direction * samples[i] / gSampleDistance];
     }
     sum /= 11.0;
+    
+    float distance = length(float2(direction) / float2(gScreenSize)); // Normalize‚µ‚Ä‚©‚ç
     float t = saturate(distance * gSampleStrength);
     gOutput[DispatchThreadID.xy] = lerp(color, sum, t);
 }

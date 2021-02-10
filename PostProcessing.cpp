@@ -8,29 +8,33 @@ CPostProcessing::CPostProcessing(ID3D12Device* Device, UINT Width, UINT Height, 
 	m_Width = Width;
 	m_Height = Height;
 	m_Format = Format;
-
+	m_PPExecutions.resize((int)PostProcessingType::Max);
 	CreateResources();
 }
 
 void CPostProcessing::CreateDescriptors(CD3DX12_CPU_DESCRIPTOR_HANDLE CpuSrvHandle, CD3DX12_GPU_DESCRIPTOR_HANDLE GpuSrvHandle, UINT DescSize)
 {
 	m_PPResource.CpuSrvHandleA = CpuSrvHandle;
-	m_PPResource.CpuUavHandleA = CpuSrvHandle.Offset(1, DescSize);
 	m_PPResource.CpuSrvHandleB = CpuSrvHandle.Offset(1, DescSize);
+	m_PPResource.CpuSrvHandleC = CpuSrvHandle.Offset(1, DescSize);
+	m_PPResource.CpuUavHandleA = CpuSrvHandle.Offset(1, DescSize);
 	m_PPResource.CpuUavHandleB = CpuSrvHandle.Offset(1, DescSize);
+	m_PPResource.CpuUavHandleC = CpuSrvHandle.Offset(1, DescSize);
 
 	m_PPResource.GpuSrvHandleA = GpuSrvHandle;
-	m_PPResource.GpuUavHandleA = GpuSrvHandle.Offset(1, DescSize);
 	m_PPResource.GpuSrvHandleB = GpuSrvHandle.Offset(1, DescSize);
+	m_PPResource.GpuSrvHandleC = GpuSrvHandle.Offset(1, DescSize);
+	m_PPResource.GpuUavHandleA = GpuSrvHandle.Offset(1, DescSize);
 	m_PPResource.GpuUavHandleB = GpuSrvHandle.Offset(1, DescSize);
+	m_PPResource.GpuUavHandleC = GpuSrvHandle.Offset(1, DescSize);
 
 	CreateDescriptors();
 }
 
-void CPostProcessing::CreatePostProcessingExecution(string PPName, CPostProcessingExecution* PPExecution)
+void CPostProcessing::CreatePostProcessingExecution(int PPType, CPostProcessingExecution* PPExecution)
 {
 	unique_ptr<CPostProcessingExecution> ppExecution(PPExecution);
-	m_PPExecutions[PPName] = move(ppExecution);
+	m_PPExecutions[PPType] = move(ppExecution);
 }
 
 void CPostProcessing::OnResize(UINT NewWidth, UINT NewHeight)
@@ -47,10 +51,10 @@ void CPostProcessing::OnResize(UINT NewWidth, UINT NewHeight)
 
 void CPostProcessing::Execute(
 	ID3D12GraphicsCommandList* CommandList, ID3D12RootSignature* RootSignature,
-	ID3D12Resource* ResourceIn, std::string PPName, void* CB,
-	ID3D12PipelineState* PSOA, ID3D12PipelineState* PSOB)
+	ID3D12Resource* ResourceIn, int PPType, void* CB,
+	const vector<ID3D12PipelineState*>& PSOs)
 {
-	m_PPExecutions[PPName]->Execute(CommandList, RootSignature, ResourceIn, CB, m_PPResource, m_Width, m_Height, PSOA, PSOB);
+	m_PPExecutions[PPType]->Execute(CommandList, RootSignature, ResourceIn, CB, m_PPResource, m_Width, m_Height, PSOs);
 }
 
 void CPostProcessing::CreateResources()
@@ -84,6 +88,14 @@ void CPostProcessing::CreateResources()
 		D3D12_RESOURCE_STATE_COMMON,
 		nullptr,
 		IID_PPV_ARGS(&m_PPResource.FullB)));
+
+	ThrowIfFailed(m_D3DDevice->CreateCommittedResource(
+		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+		D3D12_HEAP_FLAG_NONE,
+		&texDesc,
+		D3D12_RESOURCE_STATE_COMMON,
+		nullptr,
+		IID_PPV_ARGS(&m_PPResource.FullC)));
 }
 
 void CPostProcessing::CreateDescriptors()
@@ -105,4 +117,7 @@ void CPostProcessing::CreateDescriptors()
 
 	m_D3DDevice->CreateShaderResourceView(m_PPResource.FullB.Get(), &srvDesc, m_PPResource.CpuSrvHandleB);
 	m_D3DDevice->CreateUnorderedAccessView(m_PPResource.FullB.Get(), nullptr, &uavDesc, m_PPResource.CpuUavHandleB);
+
+	m_D3DDevice->CreateShaderResourceView(m_PPResource.FullC.Get(), &srvDesc, m_PPResource.CpuSrvHandleC);
+	m_D3DDevice->CreateUnorderedAccessView(m_PPResource.FullC.Get(), nullptr, &uavDesc, m_PPResource.CpuUavHandleC);
 }

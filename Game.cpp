@@ -219,8 +219,9 @@ void CGame::Draw(const GameTimer& GlobalTimer)
 	CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_3D_Sky]);
 
 	// PostProcessing
-	CRenderer::DoPostProcessing(&m_RadialBlurCB, (int)PSOTypeIndex::PSO_RadialBlur);
-	CRenderer::DoPostProcessing(&m_GaussBlurCB, (int)PSOTypeIndex::PSO_GaussBlurHorizontal, (int)PSOTypeIndex::PSO_GaussBlurVertical);
+	CRenderer::DoPostProcessing((int)PostProcessingType::RadialBlur, &m_RadialBlurCB);
+	CRenderer::DoPostProcessing((int)PostProcessingType::GaussBlur, &m_GaussBlurCB);
+	CRenderer::DoPostProcessing((int)PostProcessingType::Bloom, &m_BloomCB);
 
 	// Draw2DObjInScene
 	CRenderer::SetPSO((int)PSOTypeIndex::PSO_ShadowMapDebug);
@@ -260,6 +261,29 @@ void CGame::UpdateSceneImGui(const GameTimer& GlobalTimer)
 			ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.2f);
 			ImGui::SameLine();
 			ImGui::DragInt(u8"BlurCount", &m_GaussBlurCB.BlurCount, 0.1f, 1, 20);
+			if (ImGui::DragInt(u8"MaxBlurRadius", &m_GaussBlurCB.MaxBlurRadius, 0.1f, 1, 20)) // è„å¿ílÇÕShaderë§ÇÃíËêîÇ∆ìØÇ∂ÇÊÇ§Ç…ê›íËÇ∑ÇÈ
+			{
+				if (m_GaussBlurCB.MaxBlurRadius < (int)(m_GaussBlurCB.Sigma * 2))
+					m_GaussBlurCB.Sigma = m_GaussBlurCB.MaxBlurRadius * 0.5f;
+			}
+			ImGui::DragFloat(u8"Sigma", &m_GaussBlurCB.Sigma, 0.01f, 0.5f, m_GaussBlurCB.MaxBlurRadius * 0.5f);
+			ImGui::PopItemWidth();
+			ImGui::TreePop();
+		}
+		if (ImGui::TreeNode("Bloom"))
+		{
+			ImGui::Checkbox(u8"EffectOn", &m_BloomCB.EffectOn);
+			ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.2f);
+			ImGui::SameLine();
+			ImGui::DragInt(u8"BlurCount", &m_BloomCB.BlurCount, 0.1f, 1, 20);
+			if (ImGui::DragInt(u8"MaxBlurRadius", &m_BloomCB.MaxBlurRadius, 0.1f, 1, 20)) // è„å¿ílÇÕShaderë§ÇÃíËêîÇ∆ìØÇ∂ÇÊÇ§Ç…ê›íËÇ∑ÇÈ
+			{
+				if (m_BloomCB.MaxBlurRadius < (int)(m_BloomCB.Sigma * 2))
+					m_BloomCB.Sigma = m_BloomCB.MaxBlurRadius * 0.5f;
+			}
+			ImGui::DragFloat(u8"Sigma", &m_BloomCB.Sigma, 0.01f, 0.5f, m_BloomCB.MaxBlurRadius * 0.5f);
+			ImGui::DragFloat(u8"LuminanceThreshold", &m_BloomCB.LuminanceThreshold, 0.01f, 0.0f, 1.0f);
+			ImGui::DragFloat(u8"LuminanceStrength", &m_BloomCB.LuminanceStrength, 0.05f, 1.0f, 1.5f);
 			ImGui::PopItemWidth();
 			ImGui::TreePop();
 		}

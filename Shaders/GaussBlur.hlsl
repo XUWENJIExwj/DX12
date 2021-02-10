@@ -1,22 +1,50 @@
 cbuffer cbSettings : register(b0)
 {
-    int gBlurRadius;
-    
-    float w0;
-    float w1;
-    float w2;
-    float w3;
-    float w4;
-    float w5;
-    float w6;
-    float w7;
-    float w8;
-    float w9;
+    int   gBlurRadius;
+    float w00;
+    float w01;
+    float w02;
+    float w03;
+    float w04;
+    float w05;
+    float w06;
+    float w07;
+    float w08;
+    float w09;
     float w10;
-    float cbPad0;
+    float w11;
+    float w12;
+    float w13;
+    float w14;
+    float w15;
+    float w16;
+    float w17;
+    float w18;
+    float w19;
+    float w20;
+    float w21;
+    float w22;
+    float w23;
+    float w24;
+    float w25;
+    float w26;
+    float w27;
+    float w28;
+    float w29;
+    float w30;
+    float w31;
+    float w32;
+    float w33;
+    float w34;
+    float w35;
+    float w36;
+    float w37;
+    float w38;
+    float w39;
+    float w40;
 }
 
-static const int gMaxBlurRadius = 5;
+static const int gMaxBlurRadius = 20;
 
 Texture2D gInput : register(t0);
 RWTexture2D<float4> gOutput : register(u0);
@@ -29,7 +57,14 @@ groupshared float4 gCache[CacheSize];
 [numthreads(NumThreads, 1, 1)]
 void HorizontalBlurCS(int3 GroupThreadID : SV_GroupThreadID, int3 DispatchThreadID : SV_DispatchThreadID)
 {
-    float weights[11] = { w0, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10 };
+    float weights[41] =
+    { 
+        w00, w01, w02, w03, w04, w05, w06, w07, w08, w09,
+        w10, w11, w12, w13, w14, w15, w16, w17, w18, w19,
+        w20, w21, w22, w23, w24, w25, w26, w27, w28, w29,
+        w30, w31, w32, w33, w34, w35, w36, w37, w38, w39,
+        w40
+    };
 
     if (GroupThreadID.x < gBlurRadius)
     {
@@ -56,7 +91,14 @@ void HorizontalBlurCS(int3 GroupThreadID : SV_GroupThreadID, int3 DispatchThread
 [numthreads(1, NumThreads, 1)]
 void VerticalBlurCS(int3 GroupThreadID : SV_GroupThreadID, int3 DispatchThreadID : SV_DispatchThreadID)
 {
-    float weights[11] = { w0, w1, w2, w3, w4, w5, w6, w7, w8, w9, w10 };
+    float weights[41] =
+    {
+        w00, w01, w02, w03, w04, w05, w06, w07, w08, w09,
+        w10, w11, w12, w13, w14, w15, w16, w17, w18, w19,
+        w20, w21, w22, w23, w24, w25, w26, w27, w28, w29,
+        w30, w31, w32, w33, w34, w35, w36, w37, w38, w39,
+        w40
+    };
 
     if (GroupThreadID.y < gBlurRadius)
     {

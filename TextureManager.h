@@ -56,7 +56,6 @@ private:
 	static UINT m_SkyCubeMapIndex;
 	static UINT m_ShadowMapIndex;
 	static UINT m_ShadowMapNum;
-	static UINT m_RadialBlurNum;
 	static UINT m_PostProcessIndex;
 	static UINT m_PostProcessNum;
 	static UINT m_NullCubeMapIndex;

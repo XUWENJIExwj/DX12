@@ -11,6 +11,8 @@ enum class ShaderTypeIndex :int
 	Shader_Type_RadialBlur,
 	Shader_Type_GaussBlurHorizontal,
 	Shader_Type_GaussBlurVertical,
+	Shader_Type_LuminanceMap,
+	Shader_Type_BlendOpAdd,
 	Shader_Type_Max
 };
 

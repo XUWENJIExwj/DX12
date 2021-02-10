@@ -20,6 +20,8 @@ enum class PSOTypeIndex :int
 	PSO_RadialBlur,
 	PSO_GaussBlurHorizontal,
 	PSO_GaussBlurVertical,
+	PSO_LuminanceMap,
+	PSO_BlendOpAdd,
 	PSO_MAX
 };
 
@@ -88,8 +90,8 @@ private:
 	static Microsoft::WRL::ComPtr<ID3D12Resource> m_DynamicCubeMapDepthStencilBuffer;
 
 	// PostProcessing
-	static std::unordered_map<int, std::string> m_PostProcessingNameList;
-	static std::unique_ptr<CPostProcessing>     m_PostProcessing;
+	static std::vector<std::vector<ID3D12PipelineState*>> m_PostProcessingPSOs;
+	static std::unique_ptr<CPostProcessing>               m_PostProcessing;
 
 public:
 	// DX12èâä˙âª
@@ -114,7 +116,9 @@ public:
 	static void CreateDescriptorHeaps();
 	static void CreateCubeDepthStencil();
 	static void CreataPSOs();
-	static void CreatePostProcessingNameListAndExecutions(int PSOType, std::string PPName, CPostProcessingExecution* PPExecution);
+	static void CreatePostProcessingExecutions(int PPType, CPostProcessingExecution* PPExecution);
+	static void PackPostProcessingPSOs(int PPType, int FirstPSOType, int PSONum);
+	static void PackPostProcessingPSOs(int PPType, std::vector<ID3D12PipelineState*> PPPSOs, int FirstPSOType, int PSONum);
 
 	// ÉQÉbÉ^Å[
 	static bool Get4xMsaaState() { return m_4xMsaaState; }
@@ -174,5 +178,5 @@ public:
 	static void End();
 
 	// PostProcessing
-	static void DoPostProcessing(void* CB, int PSOTypeA, int PSOTypeB = -1);
+	static void DoPostProcessing(int PPType, void* CB);
 };

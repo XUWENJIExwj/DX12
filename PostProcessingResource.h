@@ -4,16 +4,22 @@
 struct PostProcessingResource
 {
 	CD3DX12_CPU_DESCRIPTOR_HANDLE CpuSrvHandleA;
-	CD3DX12_CPU_DESCRIPTOR_HANDLE CpuUavHandleA;
 	CD3DX12_CPU_DESCRIPTOR_HANDLE CpuSrvHandleB;
+	CD3DX12_CPU_DESCRIPTOR_HANDLE CpuSrvHandleC;
+	CD3DX12_CPU_DESCRIPTOR_HANDLE CpuUavHandleA;
 	CD3DX12_CPU_DESCRIPTOR_HANDLE CpuUavHandleB;
+	CD3DX12_CPU_DESCRIPTOR_HANDLE CpuUavHandleC;
+
 	CD3DX12_GPU_DESCRIPTOR_HANDLE GpuSrvHandleA;
-	CD3DX12_GPU_DESCRIPTOR_HANDLE GpuUavHandleA;
 	CD3DX12_GPU_DESCRIPTOR_HANDLE GpuSrvHandleB;
+	CD3DX12_GPU_DESCRIPTOR_HANDLE GpuSrvHandleC;
+	CD3DX12_GPU_DESCRIPTOR_HANDLE GpuUavHandleA;
 	CD3DX12_GPU_DESCRIPTOR_HANDLE GpuUavHandleB;
+	CD3DX12_GPU_DESCRIPTOR_HANDLE GpuUavHandleC;
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> FullA;
 	Microsoft::WRL::ComPtr<ID3D12Resource> FullB;
+	Microsoft::WRL::ComPtr<ID3D12Resource> FullC;
 };
 
 struct PostProcessingCB
@@ -36,6 +42,5 @@ public:
 		void* CB,
 		PostProcessingResource& PPResource,
 		UINT Width, UINT Height,
-		ID3D12PipelineState* PSOA,
-		ID3D12PipelineState* PSOB) = 0;
+		const std::vector<ID3D12PipelineState*>& PSOs) = 0;
 };

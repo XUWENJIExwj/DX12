@@ -50,4 +50,8 @@ void CShaderManager::LoadShaders()
 
 	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_GaussBlurHorizontal].computeShader = d3dUtil::CompileShader(L"Shaders\\GaussBlur.hlsl", nullptr, "HorizontalBlurCS", "cs_5_0");
 	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_GaussBlurVertical].computeShader = d3dUtil::CompileShader(L"Shaders\\GaussBlur.hlsl", nullptr, "VerticalBlurCS", "cs_5_0");
+
+	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_LuminanceMap].computeShader = d3dUtil::CompileShader(L"Shaders\\LuminanceMap.hlsl", nullptr, "LuminanceMapCS", "cs_5_0");
+
+	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_BlendOpAdd].computeShader = d3dUtil::CompileShader(L"Shaders\\Blend.hlsl", nullptr, "BlendOpAddCS", "cs_5_0");
 }

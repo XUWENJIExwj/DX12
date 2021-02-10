@@ -52,6 +52,9 @@
     <Filter Include="ソース ファイル\System\Renderer\PostProcessing">
       <UniqueIdentifier>{716f76ca-23fc-4c0c-8a53-5b411e6c619d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\System\Renderer\ShadowMap">
+      <UniqueIdentifier>{f99dbaeb-6ad6-4118-b3db-88067594265a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DX12App.h">
@@ -177,9 +180,6 @@
     <ClInclude Include="ImGuiManager.h">
       <Filter>ソース ファイル\System\Manager</Filter>
     </ClInclude>
-    <ClInclude Include="ShadowMap.h">
-      <Filter>ソース ファイル\System\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="Light.h">
       <Filter>ソース ファイル\GameObject\Light</Filter>
     </ClInclude>
@@ -192,9 +192,6 @@
     <ClInclude Include="QuadShadowDebug.h">
       <Filter>ソース ファイル\GameObject\Quad</Filter>
     </ClInclude>
-    <ClInclude Include="CascadeShadowMap.h">
-      <Filter>ソース ファイル\System\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="PostProcessing.h">
       <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
     </ClInclude>
@@ -205,6 +202,15 @@
       <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
     </ClInclude>
     <ClInclude Include="GaussBlur.h">
+      <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowMap.h">
+      <Filter>ソース ファイル\System\Renderer\ShadowMap</Filter>
+    </ClInclude>
+    <ClInclude Include="CascadeShadowMap.h">
+      <Filter>ソース ファイル\System\Renderer\ShadowMap</Filter>
+    </ClInclude>
+    <ClInclude Include="Bloom.h">
       <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
     </ClInclude>
   </ItemGroup>
@@ -317,9 +323,6 @@
     <ClCompile Include="ImGuiManager.cpp">
       <Filter>ソース ファイル\System\Manager</Filter>
     </ClCompile>
-    <ClCompile Include="ShadowMap.cpp">
-      <Filter>ソース ファイル\System\Renderer</Filter>
-    </ClCompile>
     <ClCompile Include="Light.cpp">
       <Filter>ソース ファイル\GameObject\Light</Filter>
     </ClCompile>
@@ -332,9 +335,6 @@
     <ClCompile Include="QuadShadowDebug.cpp">
       <Filter>ソース ファイル\GameObject\Quad</Filter>
     </ClCompile>
-    <ClCompile Include="CascadeShadowMap.cpp">
-      <Filter>ソース ファイル\System\Renderer</Filter>
-    </ClCompile>
     <ClCompile Include="PostProcessing.cpp">
       <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
     </ClCompile>
@@ -342,6 +342,15 @@
       <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
     </ClCompile>
     <ClCompile Include="GaussBlur.cpp">
+      <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="ShadowMap.cpp">
+      <Filter>ソース ファイル\System\Renderer\ShadowMap</Filter>
+    </ClCompile>
+    <ClCompile Include="CascadeShadowMap.cpp">
+      <Filter>ソース ファイル\System\Renderer\ShadowMap</Filter>
+    </ClCompile>
+    <ClCompile Include="Bloom.cpp">
       <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
     </ClCompile>
   </ItemGroup>
@@ -371,6 +380,12 @@
       <Filter>ソース ファイル\Shader</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\GaussBlur.hlsl">
+      <Filter>ソース ファイル\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\LuminanceMap.hlsl">
+      <Filter>ソース ファイル\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Blend.hlsl">
       <Filter>ソース ファイル\Shader</Filter>
     </FxCompile>
   </ItemGroup>
