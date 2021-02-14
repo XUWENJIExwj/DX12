@@ -4,6 +4,7 @@
 
 struct BloomCB :public GaussBlurCB
 {
+	float BaseColor = 0.0f;
 	float LuminanceThreshold = 0.8f;
 	float LuminanceStrength = 1.2f;
 };

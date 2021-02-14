@@ -32,8 +32,9 @@ void CBloom::Execute(
 			D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_UNORDERED_ACCESS));
 
 		CommandList->SetPipelineState(PSOs[(int)BloomPSO::LuminanceMap]);
-		CommandList->SetComputeRoot32BitConstants(0, 1, &bCB->LuminanceThreshold, 0);
-		CommandList->SetComputeRoot32BitConstants(0, 1, &bCB->LuminanceStrength, 1);
+		CommandList->SetComputeRoot32BitConstants(0, 1, &bCB->BaseColor, 0);
+		CommandList->SetComputeRoot32BitConstants(0, 1, &bCB->LuminanceThreshold, 1);
+		CommandList->SetComputeRoot32BitConstants(0, 1, &bCB->LuminanceStrength, 2);
 		CommandList->SetComputeRootDescriptorTable(1, PPResource.GpuSrvHandleA);
 		CommandList->SetComputeRootDescriptorTable(3, PPResource.GpuUavHandleB);
 

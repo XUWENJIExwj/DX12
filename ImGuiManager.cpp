@@ -110,6 +110,8 @@ void CImGuiManager::Draw()
 		ImGui::Text(u8"・CacadeShadowMappingの実装");
 		ImGui::Text(u8"・PostProcessingの実装");
 		ImGui::Text(u8"　・RadialBlur");
+		ImGui::Text(u8"　・GaussBlur");
+		ImGui::Text(u8"　・Bloom");
 		ImGui::End();
 	}
 

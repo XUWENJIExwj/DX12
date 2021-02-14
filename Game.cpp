@@ -266,7 +266,7 @@ void CGame::UpdateSceneImGui(const GameTimer& GlobalTimer)
 				if (m_GaussBlurCB.MaxBlurRadius < (int)(m_GaussBlurCB.Sigma * 2))
 					m_GaussBlurCB.Sigma = m_GaussBlurCB.MaxBlurRadius * 0.5f;
 			}
-			ImGui::DragFloat(u8"Sigma", &m_GaussBlurCB.Sigma, 0.01f, 0.5f, m_GaussBlurCB.MaxBlurRadius * 0.5f);
+			ImGui::DragFloat(u8"Sigma", &m_GaussBlurCB.Sigma, 0.1f, 0.5f, m_GaussBlurCB.MaxBlurRadius * 0.5f);
 			ImGui::PopItemWidth();
 			ImGui::TreePop();
 		}
@@ -281,7 +281,9 @@ void CGame::UpdateSceneImGui(const GameTimer& GlobalTimer)
 				if (m_BloomCB.MaxBlurRadius < (int)(m_BloomCB.Sigma * 2))
 					m_BloomCB.Sigma = m_BloomCB.MaxBlurRadius * 0.5f;
 			}
-			ImGui::DragFloat(u8"Sigma", &m_BloomCB.Sigma, 0.01f, 0.5f, m_BloomCB.MaxBlurRadius * 0.5f);
+			ImGui::DragFloat(u8"Sigma", &m_BloomCB.Sigma, 0.1f, 0.5f, m_BloomCB.MaxBlurRadius * 0.5f);
+			ImGui::SameLine();
+			ImGui::DragFloat(u8"BaseColor", &m_BloomCB.BaseColor, 0.01f, 0.0f, 1.0f);
 			ImGui::DragFloat(u8"LuminanceThreshold", &m_BloomCB.LuminanceThreshold, 0.01f, 0.0f, 1.0f);
 			ImGui::DragFloat(u8"LuminanceStrength", &m_BloomCB.LuminanceStrength, 0.05f, 1.0f, 1.5f);
 			ImGui::PopItemWidth();

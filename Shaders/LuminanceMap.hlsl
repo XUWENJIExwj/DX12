@@ -1,7 +1,8 @@
 cbuffer cbSettings : register(b0)
 {
-    float LuminanceThreshold;
-    float LuminanceStrength;
+    float gBaseColor;
+    float gLuminanceThreshold;
+    float gLuminanceStrength;
 }
 
 Texture2D gInput : register(t0);
@@ -18,9 +19,11 @@ void LuminanceMapCS(int3 DispatchThreadID : SV_DispatchThreadID)
     float4 color = gInput[DispatchThreadID.xy];
     color.a = 0.0;
     float luminance = ComputeLuminance(color.rgb);
-    gOutput[DispatchThreadID.xy] = 0.0;
-    if (luminance > LuminanceThreshold)
+    float4 baseColor = gBaseColor;
+    baseColor.a = 0.0;
+    gOutput[DispatchThreadID.xy] = baseColor;
+    if (luminance > gLuminanceThreshold)
     {
-        gOutput[DispatchThreadID.xy] = color * LuminanceStrength;
+        gOutput[DispatchThreadID.xy] = color * gLuminanceStrength;
     }
 }
