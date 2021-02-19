@@ -2,7 +2,7 @@
 
 #include "Quad.h"
 
-class CQuadShadowDebug :public CQuad
+class CQuadDebug :public CQuad
 {
 protected:
 	UINT m_OrderColNum = 0;

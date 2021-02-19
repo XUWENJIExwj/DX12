@@ -419,7 +419,9 @@ void CRenderer::CreateRootSignature()
 	shadowMapTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, CTextureManager::GetShadowMapNum(), 0, 1);
 
 	CD3DX12_DESCRIPTOR_RANGE texturesTable;
-	texturesTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, CTextureManager::GetTexturesNum() + CTextureManager::GetDynamicCubeMapsNum(), 1, 0);
+	texturesTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV,
+		CTextureManager::GetTexturesNum() + CTextureManager::GetDynamicCubeMapsNum() + CTextureManager::GetShadowMapNum() + CTextureManager::GetPostProcessNum(),
+		1, 0);
 
 	// Root parameter can be a table, root descriptor or root constants.
 	CD3DX12_ROOT_PARAMETER slotRootParameter[8];

@@ -1,8 +1,8 @@
-#include "QuadShadowDebug.h"
+#include "QuadDebug.h"
 
 using namespace DirectX;
 
-void CQuadShadowDebug::Init()
+void CQuadDebug::Init()
 {
 	m_Rotation = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_Scale = XMFLOAT3(200.0f, 200.0f, 1.0f);
@@ -18,12 +18,12 @@ void CQuadShadowDebug::Init()
 	m_BaseVertexLocation = m_MeshGeometry->DrawArgs["quad"].BaseVertexLocation;
 }
 
-void CQuadShadowDebug::Update(const GameTimer& GlobalTimer)
+void CQuadDebug::Update(const GameTimer& GlobalTimer)
 {
 	//AnimateMaterial(GlobalTimer);
 }
 
-void CQuadShadowDebug::OnResize()
+void CQuadDebug::OnResize()
 {
 	CGameObject::OnResize();
 	m_Position = XMFLOAT3(m_Scale.x / 2 + m_Scale.x * m_OrderColNum, m_Scale.y / 2, m_Position.z);

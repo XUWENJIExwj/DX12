@@ -13,7 +13,7 @@
 #include "Sphere.h"
 #include "SphereDR.h"
 #include "Quad.h"
-#include "QuadShadowDebug.h"
+#include "QuadDebug.h"
 
 using namespace std;
 using namespace DirectX;
@@ -75,17 +75,23 @@ void CGame::Init()
 	logo01->SetRotation(XMFLOAT3(0.0f, MathHelper::Pi, 0.0f));
 	logo01->SetWorldMatrix();
 
-	CQuadShadowDebug* shadowDebug00 = AddGameObject<CQuadShadowDebug>((int)RenderLayers::Layer_2D_Debug, "ShadowDebug00");
-	CQuadShadowDebug* shadowDebug01 = AddGameObject<CQuadShadowDebug>((int)RenderLayers::Layer_2D_Debug, "ShadowDebug01");
+	CQuadDebug* shadowDebug00 = AddGameObject<CQuadDebug>((int)RenderLayers::Layer_2D_Debug, "ShadowDebug00");
+	CQuadDebug* shadowDebug01 = AddGameObject<CQuadDebug>((int)RenderLayers::Layer_2D_Debug, "ShadowDebug01");
 	shadowDebug01->SetMaterialNormal((int)MaterialNormalIndex::Material_ShadowMap_01);
 	shadowDebug01->SetPositionX(shadowDebug00->GetPosition3f().x + shadowDebug00->GetScale3f().x);
 	shadowDebug01->SetOrderColNum(1);
 	shadowDebug01->Set2DWVPMatrix();
-	CQuadShadowDebug* shadowDebug02 = AddGameObject<CQuadShadowDebug>((int)RenderLayers::Layer_2D_Debug, "ShadowDebug02");
+	CQuadDebug* shadowDebug02 = AddGameObject<CQuadDebug>((int)RenderLayers::Layer_2D_Debug, "ShadowDebug02");
 	shadowDebug02->SetMaterialNormal((int)MaterialNormalIndex::Material_ShadowMap_02);
 	shadowDebug02->SetPositionX(shadowDebug01->GetPosition3f().x + shadowDebug01->GetScale3f().x);
 	shadowDebug02->SetOrderColNum(2);
 	shadowDebug02->Set2DWVPMatrix();
+
+	CQuadDebug* luinanceDebug00 = AddGameObject<CQuadDebug>((int)RenderLayers::Layer_2D_Debug, "LuinanceDebug00");
+	luinanceDebug00->SetMaterialNormal((int)MaterialNormalIndex::Material_PostProcessing_01);
+	luinanceDebug00->SetPositionX(shadowDebug02->GetPosition3f().x + shadowDebug02->GetScale3f().x);
+	luinanceDebug00->SetOrderColNum(2);
+	luinanceDebug00->Set2DWVPMatrix();
 
 	SetSceneBoundingSphere(meshField->GetBoundingBox());
 
@@ -287,6 +293,9 @@ void CGame::UpdateSceneImGui(const GameTimer& GlobalTimer)
 			ImGui::DragFloat(u8"LuminanceThreshold", &m_BloomCB.LuminanceThreshold, 0.01f, 0.0f, 1.0f);
 			ImGui::DragFloat(u8"LuminanceStrength", &m_BloomCB.LuminanceStrength, 0.05f, 1.0f, 1.5f);
 			ImGui::PopItemWidth();
+			//ImGui::Image(CRenderer::GetPostProcessing()->GetSrvHandleAForImGui(), ImVec2(80.0f, 80.0f), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f));
+			//ImGui::Image(CRenderer::GetPostProcessing()->GetSrvHandleBForImGui(), ImVec2(80.0f, 80.0f), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f));
+			//ImGui::Image(CRenderer::GetPostProcessing()->GetSrvHandleCForImGui(), ImVec2(80.0f, 80.0f), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f));
 			ImGui::TreePop();
 		}
 		ImGui::End();

@@ -143,6 +143,9 @@ public:
 	static UINT               GetShadowMapSize() { return m_CascadeShadowMap->GetShadowMapSize(); }
 	static UINT               GetCascadNum() { return m_CascadeShadowMap->GetCascadeNum(); }
 
+	// PostProcessing
+	static CPostProcessing* GetPostProcessing() { return m_PostProcessing.get(); }
+
 	// DynamicCubeMap
 	static bool GetDynamicCubeOn() { return m_DynamicCubeMapOn; }
 	static UINT GetDynamicCubeMapSize() { return m_DynamicCubeMapSize; }

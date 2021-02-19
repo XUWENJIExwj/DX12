@@ -46,6 +46,10 @@ public:
 		int PPType, void* CB,
 		const std::vector<ID3D12PipelineState*>& PSOs);
 
+	void* GetSrvHandleAForImGui() { return (void*)m_PPResource.GpuSrvHandleA.ptr; }
+	void* GetSrvHandleBForImGui() { return (void*)m_PPResource.GpuSrvHandleB.ptr; }
+	void* GetSrvHandleCForImGui() { return (void*)m_PPResource.GpuSrvHandleC.ptr; }
+
 private:
 	void CreateResources();
 	void CreateDescriptors();

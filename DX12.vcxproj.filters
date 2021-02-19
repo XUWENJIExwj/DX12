@@ -189,9 +189,6 @@
     <ClInclude Include="Quad.h">
       <Filter>ソース ファイル\GameObject\Quad</Filter>
     </ClInclude>
-    <ClInclude Include="QuadShadowDebug.h">
-      <Filter>ソース ファイル\GameObject\Quad</Filter>
-    </ClInclude>
     <ClInclude Include="PostProcessing.h">
       <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
     </ClInclude>
@@ -212,6 +209,9 @@
     </ClInclude>
     <ClInclude Include="Bloom.h">
       <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="QuadDebug.h">
+      <Filter>ソース ファイル\GameObject\Quad</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -332,9 +332,6 @@
     <ClCompile Include="Quad.cpp">
       <Filter>ソース ファイル\GameObject\Quad</Filter>
     </ClCompile>
-    <ClCompile Include="QuadShadowDebug.cpp">
-      <Filter>ソース ファイル\GameObject\Quad</Filter>
-    </ClCompile>
     <ClCompile Include="PostProcessing.cpp">
       <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
     </ClCompile>
@@ -352,6 +349,9 @@
     </ClCompile>
     <ClCompile Include="Bloom.cpp">
       <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="QuadDebug.cpp">
+      <Filter>ソース ファイル\GameObject\Quad</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
