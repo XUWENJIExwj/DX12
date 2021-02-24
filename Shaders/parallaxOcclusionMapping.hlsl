@@ -35,8 +35,6 @@ struct VertexOut
 
 VertexOut VS(VertexIn vin)
 {
-    //int cascadeIndex = 0;
-    
     VertexOut vout = (VertexOut) 0.0;
 
 	// Fetch the material data.
@@ -106,7 +104,7 @@ float4 PS(VertexOut pin) : SV_Target
     
     float2 texStep = maxParallaxOffset * zStep;
     
-     // Precompute texture gradients since we cannot compute texture
+    // Precompute texture gradients since we cannot compute texture
     // gradients in a loop. Texture gradients are used to select the right
     // mipmap level when sampling textures. Then we use Texture2D.SampleGrad()
     // instead of Texture2D.Sample().

@@ -87,11 +87,11 @@ void CGame::Init()
 	shadowDebug02->SetOrderColNum(2);
 	shadowDebug02->Set2DWVPMatrix();
 
-	CQuadDebug* luinanceDebug00 = AddGameObject<CQuadDebug>((int)RenderLayers::Layer_2D_Debug, "LuinanceDebug00");
-	luinanceDebug00->SetMaterialNormal((int)MaterialNormalIndex::Material_PostProcessing_01);
-	luinanceDebug00->SetPositionX(shadowDebug02->GetPosition3f().x + shadowDebug02->GetScale3f().x);
-	luinanceDebug00->SetOrderColNum(2);
-	luinanceDebug00->Set2DWVPMatrix();
+	CQuadDebug* luminanceDebug00 = AddGameObject<CQuadDebug>((int)RenderLayers::Layer_2D_Debug, "LuminanceDebug00");
+	luminanceDebug00->SetMaterialNormal((int)MaterialNormalIndex::Material_PostProcessing_01);
+	luminanceDebug00->SetPositionX(shadowDebug02->GetPosition3f().x + shadowDebug02->GetScale3f().x);
+	luminanceDebug00->SetOrderColNum(3);
+	luminanceDebug00->Set2DWVPMatrix();
 
 	SetSceneBoundingSphere(meshField->GetBoundingBox());
 

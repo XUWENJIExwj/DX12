@@ -51,7 +51,7 @@ Texture2D gShadowMap[CASCADE_NUM] : register(t0, space1);
 // Texture‚Ì”‚É‚æ‚Á‚ÄA”z—ñ—v‘f”‚ğ‘‚â‚µ‚Ä‚¢‚­
 Texture2D gTextureMaps[41 + CASCADE_NUM] : register(t1);
 
-// Put in space1, so the texture array does not overlap with these resources.  
+// Put in space2, so the texture array does not overlap with these resources.  
 // The texture array will occupy registers t0, t1, ..., t3 in space2. 
 StructuredBuffer<MaterialData> gMaterialData : register(t0, space2);
 

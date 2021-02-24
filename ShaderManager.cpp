@@ -31,8 +31,8 @@ void CShaderManager::LoadShaders()
 	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_Opaque].vertexShader = d3dUtil::CompileShader(L"Shaders\\Default.hlsl", nullptr, "VS", "vs_5_1");
 	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_Opaque].pixelShader = d3dUtil::CompileShader(L"Shaders\\Default.hlsl", nullptr, "PS", "ps_5_1");
 
-	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_Opaque_POM].vertexShader = d3dUtil::CompileShader(L"Shaders\\parallaxOcclusionMapping.hlsl", nullptr, "VS", "vs_5_1");
-	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_Opaque_POM].pixelShader = d3dUtil::CompileShader(L"Shaders\\parallaxOcclusionMapping.hlsl", nullptr, "PS", "ps_5_1");
+	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_Opaque_POM].vertexShader = d3dUtil::CompileShader(L"Shaders\\ParallaxOcclusionMapping.hlsl", nullptr, "VS", "vs_5_1");
+	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_Opaque_POM].pixelShader = d3dUtil::CompileShader(L"Shaders\\ParallaxOcclusionMapping.hlsl", nullptr, "PS", "ps_5_1");
 
 	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_Sky].vertexShader = d3dUtil::CompileShader(L"Shaders\\Sky.hlsl", nullptr, "VS", "vs_5_1");
 	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_Sky].pixelShader = d3dUtil::CompileShader(L"Shaders\\Sky.hlsl", nullptr, "PS", "ps_5_1");
