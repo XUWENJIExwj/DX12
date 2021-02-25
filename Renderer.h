@@ -17,6 +17,7 @@ enum class PSOTypeIndex :int
 	PSO_ShadowMap,
 	PSO_ShadowMapWithAlphaTest,
 	PSO_ShadowMapDebug,
+	PSO_QuadDebug,
 	PSO_RadialBlur,
 	PSO_GaussBlurHorizontal,
 	PSO_GaussBlurVertical,

@@ -8,6 +8,7 @@ enum class ShaderTypeIndex :int
 	Shader_Type_ShadowMap,
 	Shader_Type_ShadowMapWithAlphaTest,
 	Shader_Type_ShadowMapDebug,
+	Shader_Type_QuadDebug,
 	Shader_Type_RadialBlur,
 	Shader_Type_GaussBlurHorizontal,
 	Shader_Type_GaussBlurVertical,

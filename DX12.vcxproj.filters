@@ -367,12 +367,6 @@
     <FxCompile Include="Shaders\Sky.hlsl">
       <Filter>ソース ファイル\Shader</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\parallaxOcclusionMapping.hlsl">
-      <Filter>ソース ファイル\Shader</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\ShadowMapDebug.hlsl">
-      <Filter>ソース ファイル\Shader</Filter>
-    </FxCompile>
     <FxCompile Include="Shaders\ShadowMap.hlsl">
       <Filter>ソース ファイル\Shader</Filter>
     </FxCompile>
@@ -386,6 +380,12 @@
       <Filter>ソース ファイル\Shader</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Blend.hlsl">
+      <Filter>ソース ファイル\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\ParallaxOcclusionMapping.hlsl">
+      <Filter>ソース ファイル\Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\QuadDebug.hlsl">
       <Filter>ソース ファイル\Shader</Filter>
     </FxCompile>
   </ItemGroup>

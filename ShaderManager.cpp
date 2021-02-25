@@ -15,6 +15,18 @@ void CShaderManager::LoadShaders()
 		NULL, NULL
 	};
 
+	const D3D_SHADER_MACRO shadowDebugDefines[] =
+	{
+		"SHADOW", "1",
+		NULL, NULL
+	};
+
+	const D3D_SHADER_MACRO quadDebugDefines[] =
+	{
+		"QUAD", "1",
+		NULL, NULL
+	};
+
 	m_InputLayout =
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,     D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
@@ -43,8 +55,11 @@ void CShaderManager::LoadShaders()
 	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapWithAlphaTest].vertexShader = d3dUtil::CompileShader(L"Shaders\\ShadowMap.hlsl", nullptr, "VS", "vs_5_1");
 	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapWithAlphaTest].pixelShader = d3dUtil::CompileShader(L"Shaders\\ShadowMap.hlsl", alphaTestDefines, "PS", "ps_5_1");
 
-	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapDebug].vertexShader = d3dUtil::CompileShader(L"Shaders\\ShadowMapDebug.hlsl", nullptr, "VS", "vs_5_1");
-	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapDebug].pixelShader = d3dUtil::CompileShader(L"Shaders\\ShadowMapDebug.hlsl", nullptr, "PS", "ps_5_1");
+	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapDebug].vertexShader = d3dUtil::CompileShader(L"Shaders\\QuadDebug.hlsl", nullptr, "VS", "vs_5_1");
+	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_ShadowMapDebug].pixelShader = d3dUtil::CompileShader(L"Shaders\\QuadDebug.hlsl", shadowDebugDefines, "PS", "ps_5_1");
+
+	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_QuadDebug].vertexShader = d3dUtil::CompileShader(L"Shaders\\QuadDebug.hlsl", nullptr, "VS", "vs_5_1");
+	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_QuadDebug].pixelShader = d3dUtil::CompileShader(L"Shaders\\QuadDebug.hlsl", quadDebugDefines, "PS", "ps_5_1");
 
 	m_ShaderTypes[(int)ShaderTypeIndex::Shader_Type_RadialBlur].computeShader = d3dUtil::CompileShader(L"Shaders\\RadialBlur.hlsl", nullptr, "RadialBlurCS", "cs_5_0");
 

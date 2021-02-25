@@ -75,19 +75,19 @@ void CGame::Init()
 	logo01->SetRotation(XMFLOAT3(0.0f, MathHelper::Pi, 0.0f));
 	logo01->SetWorldMatrix();
 
-	CQuadDebug* shadowDebug00 = AddGameObject<CQuadDebug>((int)RenderLayers::Layer_2D_Debug, "ShadowDebug00");
-	CQuadDebug* shadowDebug01 = AddGameObject<CQuadDebug>((int)RenderLayers::Layer_2D_Debug, "ShadowDebug01");
+	CQuadDebug* shadowDebug00 = AddGameObject<CQuadDebug>((int)RenderLayers::Layer_2D_ShadowDebug, "ShadowDebug00");
+	CQuadDebug* shadowDebug01 = AddGameObject<CQuadDebug>((int)RenderLayers::Layer_2D_ShadowDebug, "ShadowDebug01");
 	shadowDebug01->SetMaterialNormal((int)MaterialNormalIndex::Material_ShadowMap_01);
 	shadowDebug01->SetPositionX(shadowDebug00->GetPosition3f().x + shadowDebug00->GetScale3f().x);
 	shadowDebug01->SetOrderColNum(1);
 	shadowDebug01->Set2DWVPMatrix();
-	CQuadDebug* shadowDebug02 = AddGameObject<CQuadDebug>((int)RenderLayers::Layer_2D_Debug, "ShadowDebug02");
+	CQuadDebug* shadowDebug02 = AddGameObject<CQuadDebug>((int)RenderLayers::Layer_2D_ShadowDebug, "ShadowDebug02");
 	shadowDebug02->SetMaterialNormal((int)MaterialNormalIndex::Material_ShadowMap_02);
 	shadowDebug02->SetPositionX(shadowDebug01->GetPosition3f().x + shadowDebug01->GetScale3f().x);
 	shadowDebug02->SetOrderColNum(2);
 	shadowDebug02->Set2DWVPMatrix();
 
-	CQuadDebug* luminanceDebug00 = AddGameObject<CQuadDebug>((int)RenderLayers::Layer_2D_Debug, "LuminanceDebug00");
+	CQuadDebug* luminanceDebug00 = AddGameObject<CQuadDebug>((int)RenderLayers::Layer_2D_QuadDebug, "LuminanceDebug00");
 	luminanceDebug00->SetMaterialNormal((int)MaterialNormalIndex::Material_PostProcessing_01);
 	luminanceDebug00->SetPositionX(shadowDebug02->GetPosition3f().x + shadowDebug02->GetScale3f().x);
 	luminanceDebug00->SetOrderColNum(3);
@@ -231,7 +231,10 @@ void CGame::Draw(const GameTimer& GlobalTimer)
 
 	// Draw2DObjInScene
 	CRenderer::SetPSO((int)PSOTypeIndex::PSO_ShadowMapDebug);
-	CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_2D_Debug]);
+	CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_2D_ShadowDebug]);
+
+	CRenderer::SetPSO((int)PSOTypeIndex::PSO_QuadDebug);
+	CRenderer::DrawGameObjectsWithLayer(m_AllRenderLayers[(int)RenderLayers::Layer_2D_QuadDebug]);
 }
 
 void CGame::UpdateSceneImGui(const GameTimer& GlobalTimer)
@@ -304,5 +307,5 @@ void CGame::UpdateSceneImGui(const GameTimer& GlobalTimer)
 
 void CGame::OnResize()
 {
-	OnResizeLayer((int)RenderLayers::Layer_2D_Debug);
+	OnResizeLayer((int)RenderLayers::Layer_2D_ShadowDebug);
 }

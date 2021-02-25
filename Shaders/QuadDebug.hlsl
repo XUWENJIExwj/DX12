@@ -29,8 +29,16 @@ VertexOut VS(VertexIn vin)
 float4 PS(VertexOut pin) : SV_Target
 {
     MaterialData matData = gMaterialData[gMaterialIndex];
-    //return float4(gShadowMap[matData.CascadeDebugIndex].Sample(gsamLinearWrap, pin.TexC).rrr, 1.0);
-    return float4(gTextureMaps[matData.DiffuseMapIndex].Sample(gsamLinearWrap, pin.TexC).rrr, 1.0);
+    float4 color = 1.0;
+    
+#ifdef SHADOW
+    color.rgb = gTextureMaps[matData.DiffuseMapIndex].Sample(gsamLinearWrap, pin.TexC).rrr;
+#endif
+    
+#ifdef QUAD
+    color.rgb = gTextureMaps[matData.DiffuseMapIndex].Sample(gsamLinearWrap, pin.TexC).rgb;
+#endif
+    return color;
 }
 
 

@@ -776,6 +776,19 @@ void CRenderer::CreataPSOs()
 	};
 	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&debugPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_ShadowMapDebug])));
 
+	// PSO for quad debug
+	debugPsoDesc.VS =
+	{
+		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_QuadDebug].vertexShader->GetBufferPointer()),
+		shaderTypes[(int)ShaderTypeIndex::Shader_Type_QuadDebug].vertexShader->GetBufferSize()
+	};
+	debugPsoDesc.PS =
+	{
+		reinterpret_cast<BYTE*>(shaderTypes[(int)ShaderTypeIndex::Shader_Type_QuadDebug].pixelShader->GetBufferPointer()),
+		shaderTypes[(int)ShaderTypeIndex::Shader_Type_QuadDebug].pixelShader->GetBufferSize()
+	};
+	ThrowIfFailed(m_D3DDevice->CreateGraphicsPipelineState(&debugPsoDesc, IID_PPV_ARGS(&m_PSOs[(int)PSOTypeIndex::PSO_QuadDebug])));
+
 	// PostProcessing
 	// RadialBlur
 	D3D12_COMPUTE_PIPELINE_STATE_DESC radialBlurPsoDesc = {};

@@ -15,7 +15,8 @@ enum class RenderLayers :int
 	Layer_3D_BillBoard,
 	Layer_3D_Opaque_DynamicReflectors,
 	Layer_2D_Opaque,
-	Layer_2D_Debug,
+	Layer_2D_ShadowDebug,
+	Layer_2D_QuadDebug,
 	Layer_Fade,
 	Layer_Max
 };
