@@ -130,6 +130,7 @@ bool CRenderer::Init()
 
 #ifdef _DEBUG
 	LogAdapters();
+	DebugLayerFilter();
 #endif
 
 	CreateCommandObjects();
@@ -965,6 +966,27 @@ void CRenderer::LogOutputDisplayModes(IDXGIOutput* output, DXGI_FORMAT format)
 
 		::OutputDebugString(text.c_str());
 	}
+}
+
+void CRenderer::DebugLayerFilter()
+{
+	ComPtr<ID3D12InfoQueue> infoQueue;
+	m_D3DDevice.As(&infoQueue);
+
+	D3D12_MESSAGE_ID denyIDs[] =
+	{
+	  D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE,
+	};
+	D3D12_MESSAGE_SEVERITY severities[] = {
+	  D3D12_MESSAGE_SEVERITY_INFO
+	};
+	D3D12_INFO_QUEUE_FILTER filter{};
+	filter.DenyList.NumIDs = _countof(denyIDs);
+	filter.DenyList.pIDList = denyIDs;
+	filter.DenyList.NumSeverities = _countof(severities);
+	filter.DenyList.pSeverityList = severities;
+
+	infoQueue->PushStorageFilter(&filter);
 }
 
 // StaticSamplers

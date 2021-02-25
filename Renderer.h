@@ -155,6 +155,7 @@ public:
 	static void LogAdapters();
 	static void LogAdapterOutputs(IDXGIAdapter* adapter);
 	static void LogOutputDisplayModes(IDXGIOutput* output, DXGI_FORMAT format);
+	static void DebugLayerFilter();
 
 	// StaticSamplers
 	static std::array<const CD3DX12_STATIC_SAMPLER_DESC, 7> GetStaticSamplers();
