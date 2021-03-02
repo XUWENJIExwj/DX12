@@ -32,6 +32,8 @@ private:
 	static std::vector<D3D12_INPUT_ELEMENT_DESC> m_InputLayout;
 
 public:
-	static void LoadShaders();
+	static void ComplieShaders();
+	static void LoadInputLayout();
+	static void LoadCompiledShaders();
 	static std::vector<ShaderType>& GetShaderTypes() { return m_ShaderTypes; }
 };

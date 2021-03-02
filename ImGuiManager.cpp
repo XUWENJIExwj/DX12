@@ -102,7 +102,8 @@ void CImGuiManager::Draw()
 	if (showCloseb)
 	{
 		ImGui::Begin(u8"アピールポイント", &showCloseb, window_flags);
-		ImGui::Text(u8"・DX12で複数のオブジェクトに動的環境マッピングの実装");
+		ImGui::Text(u8"・DX12のフレームワークを独学で1から構築");
+		ImGui::Text(u8"・複数のオブジェクトに動的環境マッピングの実装");
 		ImGui::Text(u8"・ParallaxOcclusionMappingの実装・セルフシャドウ付き");
 		ImGui::Text(u8"・MaterialManagerを作って、それぞれのMaterialを管理する機能の実装");
 		ImGui::Text(u8"　・フレネル反射、Roughness、凹凸具合などの調整");

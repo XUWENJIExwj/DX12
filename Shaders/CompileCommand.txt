@@ -1,0 +1,22 @@
+特定のマクロ定義でコンパイルする必要なShaderは、事前に編集して保存してからコンパイルする
+
+fxc "Default.hlsl" /T vs_5_1 /E "VS" /Fo "../CompiledShaders/DefaultVS.cso" /Fc "Asm/DefaultVS.asm"
+fxc "Default.hlsl" /T ps_5_1 /E "PS" /Fo "../CompiledShaders/DefaultPS.cso" /Fc "Asm/DefaultPS.asm"
+fxc "ParallaxOcclusionMapping.hlsl" /T vs_5_1 /E "VS" /Fo "../CompiledShaders/ParallaxOcclusionMappingVS.cso" /Fc "Asm/ParallaxOcclusionMappingVS.asm"
+fxc "ParallaxOcclusionMapping.hlsl" /T ps_5_1 /E "PS" /Fo "../CompiledShaders/ParallaxOcclusionMappingPS.cso" /Fc "Asm/ParallaxOcclusionMappingPS.asm"
+fxc "Sky.hlsl" /T vs_5_1 /E "VS" /Fo "../CompiledShaders/SkyVS.cso" /Fc "Asm/SkyVS.asm"
+fxc "Sky.hlsl" /T ps_5_1 /E "PS" /Fo "../CompiledShaders/SkyPS.cso" /Fc "Asm/SkyPS.asm"
+fxc "ShadowMap.hlsl" /T vs_5_1 /E "VS" /Fo "../CompiledShaders/ShadowMapVS.cso" /Fc "Asm/ShadowMapVS.asm"
+fxc "ShadowMap.hlsl" /T ps_5_1 /E "PS" /Fo "../CompiledShaders/ShadowMapPS.cso" /Fc "Asm/ShadowMapPS.asm"
+fxc "ShadowMap.hlsl" /T vs_5_1 /E "VS" /Fo "../CompiledShaders/ShadowMapWithAlphaTestVS.cso" /Fc "Asm/ShadowMapWithAlphaTestVS.asm"
+fxc "ShadowMap.hlsl" /T ps_5_1 /E "PS" /Fo "../CompiledShaders/ShadowMapWithAlphaTestPS.cso" /Fc "Asm/ShadowMapWithAlphaTestPS.asm"
+fxc "QuadDebug.hlsl" /T vs_5_1 /E "VS" /Fo "../CompiledShaders/ShadowDebugVS.cso" /Fc "Asm/ShadowDebugVS.asm"
+fxc "QuadDebug.hlsl" /T ps_5_1 /E "PS" /Fo "../CompiledShaders/ShadowDebugPS.cso" /Fc "Asm/ShadowDebugPS.asm"
+fxc "QuadDebug.hlsl" /T vs_5_1 /E "VS" /Fo "../CompiledShaders/QuadDebugVS.cso" /Fc "Asm/QuadDebugVS.asm"
+fxc "QuadDebug.hlsl" /T ps_5_1 /E "PS" /Fo "../CompiledShaders/QuadDebugPS.cso" /Fc "Asm/QuadDebugPS.asm"
+fxc "RadialBlur.hlsl" /T cs_5_0 /E "RadialBlurCS" /Fo "../CompiledShaders/RadialBlurCS.cso" /Fc "Asm/RadialBlurCS.asm"
+fxc "GaussBlur.hlsl" /T cs_5_0 /E "HorizontalBlurCS" /Fo "../CompiledShaders/HorizontalBlurCS.cso" /Fc "Asm/HorizontalBlurCS.asm"
+fxc "GaussBlur.hlsl" /T cs_5_0 /E "VerticalBlurCS" /Fo "../CompiledShaders/VerticalBlurCS.cso" /Fc "Asm/VerticalBlurCS.asm"
+fxc "LuminanceMap.hlsl" /T cs_5_0 /E "LuminanceMapCS" /Fo "../CompiledShaders/LuminanceMapCS.cso" /Fc "Asm/LuminanceMapCS.asm"
+fxc "Blend.hlsl" /T cs_5_0 /E "BlendOpAddCS" /Fo "../CompiledShaders/BlendOpAddCS.cso" /Fc "Asm/BlendOpAddCS.asm"
+

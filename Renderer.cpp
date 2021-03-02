@@ -396,7 +396,8 @@ void CRenderer::CreateCommonResources()
 {
 	RestDirectCmdListAlloc();
 
-	CShaderManager::LoadShaders();
+	//CShaderManager::ComplieShaders();
+	CShaderManager::LoadCompiledShaders();
 	CTextureManager::LoadTextures();
 	CMaterialManager::CreateMaterials();
 	CGeoShapeManager::CreateGeoShapes();
