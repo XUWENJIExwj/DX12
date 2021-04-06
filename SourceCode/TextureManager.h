@@ -76,4 +76,7 @@ public:
 	static UINT GetNullCubeMapIndex() { return m_NullCubeMapIndex; }
 	static UINT GetDynamicCubeMapIndex() { return m_DynamicCubeMapIndex; }
 	static UINT GetDynamicCubeMapsNum() { return m_DynamicCubeMapsNum; }
+
+private:
+	static void LoadEachTexture(int Index, const std::wstring& Filename);
 };

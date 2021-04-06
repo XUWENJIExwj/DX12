@@ -57,9 +57,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DX12App.h">
-      <Filter>ソース ファイル\System</Filter>
-    </ClInclude>
     <ClInclude Include="Common\d3dUtil.h">
       <Filter>ソース ファイル\Common</Filter>
     </ClInclude>
@@ -81,77 +78,11 @@
     <ClInclude Include="Common\UploadBuffer.h">
       <Filter>ソース ファイル\Common</Filter>
     </ClInclude>
-    <ClInclude Include="CommonResource.h">
-      <Filter>ソース ファイル\System</Filter>
-    </ClInclude>
-    <ClInclude Include="FrameResource.h">
-      <Filter>ソース ファイル\System</Filter>
-    </ClInclude>
-    <ClInclude Include="Scene.h">
-      <Filter>ソース ファイル\Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject.h">
-      <Filter>ソース ファイル\GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="Game.h">
-      <Filter>ソース ファイル\Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="Sky.h">
-      <Filter>ソース ファイル\GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="Sphere.h">
-      <Filter>ソース ファイル\GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>ソース ファイル\GameObject\Camera</Filter>
-    </ClInclude>
-    <ClInclude Include="CameraFP.h">
-      <Filter>ソース ファイル\GameObject\Camera</Filter>
-    </ClInclude>
-    <ClInclude Include="CameraDynamicCubeMap.h">
-      <Filter>ソース ファイル\GameObject\Camera</Filter>
-    </ClInclude>
-    <ClInclude Include="Manager.h">
-      <Filter>ソース ファイル\System\Manager</Filter>
-    </ClInclude>
-    <ClInclude Include="GeoShapeManager.h">
-      <Filter>ソース ファイル\System\Manager</Filter>
-    </ClInclude>
-    <ClInclude Include="ShaderManager.h">
-      <Filter>ソース ファイル\System\Manager</Filter>
-    </ClInclude>
-    <ClInclude Include="MaterialManager.h">
-      <Filter>ソース ファイル\System\Manager</Filter>
-    </ClInclude>
-    <ClInclude Include="TextureManager.h">
-      <Filter>ソース ファイル\System\Manager</Filter>
-    </ClInclude>
-    <ClInclude Include="SphereDR.h">
-      <Filter>ソース ファイル\GameObject\DynamicReflectorObj</Filter>
-    </ClInclude>
-    <ClInclude Include="Cube.h">
-      <Filter>ソース ファイル\GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="CubeRenderTarget.h">
-      <Filter>ソース ファイル\System\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer.h">
-      <Filter>ソース ファイル\System\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="MeshField.h">
-      <Filter>ソース ファイル\GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="Logo.h">
-      <Filter>ソース ファイル\GameObject</Filter>
-    </ClInclude>
     <ClInclude Include="Common\Keyboard.h">
       <Filter>ソース ファイル\Common</Filter>
     </ClInclude>
     <ClInclude Include="Common\Mouse.h">
       <Filter>ソース ファイル\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="InputManager.h">
-      <Filter>ソース ファイル\System\Manager</Filter>
     </ClInclude>
     <ClInclude Include="ImGui\imconfig.h">
       <Filter>ソース ファイル\ImGui</Filter>
@@ -177,47 +108,113 @@
     <ClInclude Include="ImGui\imstb_truetype.h">
       <Filter>ソース ファイル\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="ImGuiManager.h">
+    <ClInclude Include="SourceCode\Camera.h">
+      <Filter>ソース ファイル\GameObject\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceCode\CameraDynamicCubeMap.h">
+      <Filter>ソース ファイル\GameObject\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceCode\CameraFP.h">
+      <Filter>ソース ファイル\GameObject\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceCode\SphereDR.h">
+      <Filter>ソース ファイル\GameObject\DynamicReflectorObj</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceCode\DirectionalLight.h">
+      <Filter>ソース ファイル\GameObject\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceCode\Light.h">
+      <Filter>ソース ファイル\GameObject\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceCode\Quad.h">
+      <Filter>ソース ファイル\GameObject\Quad</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceCode\QuadDebug.h">
+      <Filter>ソース ファイル\GameObject\Quad</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceCode\Sky.h">
+      <Filter>ソース ファイル\GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceCode\Sphere.h">
+      <Filter>ソース ファイル\GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceCode\Cube.h">
+      <Filter>ソース ファイル\GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceCode\GameObject.h">
+      <Filter>ソース ファイル\GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceCode\Logo.h">
+      <Filter>ソース ファイル\GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceCode\MeshField.h">
+      <Filter>ソース ファイル\GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceCode\Game.h">
+      <Filter>ソース ファイル\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceCode\Scene.h">
+      <Filter>ソース ファイル\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceCode\ShaderManager.h">
       <Filter>ソース ファイル\System\Manager</Filter>
     </ClInclude>
-    <ClInclude Include="Light.h">
-      <Filter>ソース ファイル\GameObject\Light</Filter>
+    <ClInclude Include="SourceCode\TextureManager.h">
+      <Filter>ソース ファイル\System\Manager</Filter>
     </ClInclude>
-    <ClInclude Include="DirectionalLight.h">
-      <Filter>ソース ファイル\GameObject\Light</Filter>
+    <ClInclude Include="SourceCode\GeoShapeManager.h">
+      <Filter>ソース ファイル\System\Manager</Filter>
     </ClInclude>
-    <ClInclude Include="Quad.h">
-      <Filter>ソース ファイル\GameObject\Quad</Filter>
+    <ClInclude Include="SourceCode\ImGuiManager.h">
+      <Filter>ソース ファイル\System\Manager</Filter>
     </ClInclude>
-    <ClInclude Include="PostProcessing.h">
+    <ClInclude Include="SourceCode\InputManager.h">
+      <Filter>ソース ファイル\System\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceCode\Manager.h">
+      <Filter>ソース ファイル\System\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceCode\MaterialManager.h">
+      <Filter>ソース ファイル\System\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceCode\PostProcessing.h">
       <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
     </ClInclude>
-    <ClInclude Include="RadialBlur.h">
+    <ClInclude Include="SourceCode\PostProcessingResource.h">
       <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
     </ClInclude>
-    <ClInclude Include="PostProcessingResource.h">
+    <ClInclude Include="SourceCode\RadialBlur.h">
       <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
     </ClInclude>
-    <ClInclude Include="GaussBlur.h">
+    <ClInclude Include="SourceCode\Bloom.h">
       <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
     </ClInclude>
-    <ClInclude Include="ShadowMap.h">
+    <ClInclude Include="SourceCode\GaussBlur.h">
+      <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceCode\CascadeShadowMap.h">
       <Filter>ソース ファイル\System\Renderer\ShadowMap</Filter>
     </ClInclude>
-    <ClInclude Include="CascadeShadowMap.h">
+    <ClInclude Include="SourceCode\ShadowMap.h">
       <Filter>ソース ファイル\System\Renderer\ShadowMap</Filter>
     </ClInclude>
-    <ClInclude Include="Bloom.h">
-      <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
+    <ClInclude Include="SourceCode\Renderer.h">
+      <Filter>ソース ファイル\System\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="QuadDebug.h">
-      <Filter>ソース ファイル\GameObject\Quad</Filter>
+    <ClInclude Include="SourceCode\CubeRenderTarget.h">
+      <Filter>ソース ファイル\System\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceCode\DX12App.h">
+      <Filter>ソース ファイル\System</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceCode\FrameResource.h">
+      <Filter>ソース ファイル\System</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceCode\CommonResource.h">
+      <Filter>ソース ファイル\System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DX12App.cpp">
-      <Filter>ソース ファイル\System</Filter>
-    </ClCompile>
     <ClCompile Include="Common\d3dUtil.cpp">
       <Filter>ソース ファイル\Common</Filter>
     </ClCompile>
@@ -233,74 +230,11 @@
     <ClCompile Include="Common\MathHelper.cpp">
       <Filter>ソース ファイル\Common</Filter>
     </ClCompile>
-    <ClCompile Include="FrameResource.cpp">
-      <Filter>ソース ファイル\System</Filter>
-    </ClCompile>
-    <ClCompile Include="GameObject.cpp">
-      <Filter>ソース ファイル\GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="Game.cpp">
-      <Filter>ソース ファイル\Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>ソース ファイル\Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="Sky.cpp">
-      <Filter>ソース ファイル\GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="Sphere.cpp">
-      <Filter>ソース ファイル\GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>ソース ファイル\GameObject\Camera</Filter>
-    </ClCompile>
-    <ClCompile Include="CameraFP.cpp">
-      <Filter>ソース ファイル\GameObject\Camera</Filter>
-    </ClCompile>
-    <ClCompile Include="CameraDynamicCubeMap.cpp">
-      <Filter>ソース ファイル\GameObject\Camera</Filter>
-    </ClCompile>
-    <ClCompile Include="Manager.cpp">
-      <Filter>ソース ファイル\System\Manager</Filter>
-    </ClCompile>
-    <ClCompile Include="GeoShapeManager.cpp">
-      <Filter>ソース ファイル\System\Manager</Filter>
-    </ClCompile>
-    <ClCompile Include="ShaderManager.cpp">
-      <Filter>ソース ファイル\System\Manager</Filter>
-    </ClCompile>
-    <ClCompile Include="MaterialManager.cpp">
-      <Filter>ソース ファイル\System\Manager</Filter>
-    </ClCompile>
-    <ClCompile Include="TextureManager.cpp">
-      <Filter>ソース ファイル\System\Manager</Filter>
-    </ClCompile>
-    <ClCompile Include="SphereDR.cpp">
-      <Filter>ソース ファイル\GameObject\DynamicReflectorObj</Filter>
-    </ClCompile>
-    <ClCompile Include="Cube.cpp">
-      <Filter>ソース ファイル\GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="CubeRenderTarget.cpp">
-      <Filter>ソース ファイル\System\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderer.cpp">
-      <Filter>ソース ファイル\System\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="MeshField.cpp">
-      <Filter>ソース ファイル\GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="Logo.cpp">
-      <Filter>ソース ファイル\GameObject</Filter>
-    </ClCompile>
     <ClCompile Include="Common\Keyboard.cpp">
       <Filter>ソース ファイル\Common</Filter>
     </ClCompile>
     <ClCompile Include="Common\Mouse.cpp">
       <Filter>ソース ファイル\Common</Filter>
-    </ClCompile>
-    <ClCompile Include="InputManager.cpp">
-      <Filter>ソース ファイル\System\Manager</Filter>
     </ClCompile>
     <ClCompile Include="ImGui\imgui.cpp">
       <Filter>ソース ファイル\ImGui</Filter>
@@ -320,38 +254,104 @@
     <ClCompile Include="ImGui\imgui_widgets.cpp">
       <Filter>ソース ファイル\ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="ImGuiManager.cpp">
+    <ClCompile Include="SourceCode\Camera.cpp">
+      <Filter>ソース ファイル\GameObject\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\CameraDynamicCubeMap.cpp">
+      <Filter>ソース ファイル\GameObject\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\CameraFP.cpp">
+      <Filter>ソース ファイル\GameObject\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\SphereDR.cpp">
+      <Filter>ソース ファイル\GameObject\DynamicReflectorObj</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\DirectionalLight.cpp">
+      <Filter>ソース ファイル\GameObject\Light</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\Light.cpp">
+      <Filter>ソース ファイル\GameObject\Light</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\Quad.cpp">
+      <Filter>ソース ファイル\GameObject\Quad</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\QuadDebug.cpp">
+      <Filter>ソース ファイル\GameObject\Quad</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\Sky.cpp">
+      <Filter>ソース ファイル\GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\Sphere.cpp">
+      <Filter>ソース ファイル\GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\Cube.cpp">
+      <Filter>ソース ファイル\GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\GameObject.cpp">
+      <Filter>ソース ファイル\GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\Logo.cpp">
+      <Filter>ソース ファイル\GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\MeshField.cpp">
+      <Filter>ソース ファイル\GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\Game.cpp">
+      <Filter>ソース ファイル\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\Scene.cpp">
+      <Filter>ソース ファイル\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\ShaderManager.cpp">
       <Filter>ソース ファイル\System\Manager</Filter>
     </ClCompile>
-    <ClCompile Include="Light.cpp">
-      <Filter>ソース ファイル\GameObject\Light</Filter>
+    <ClCompile Include="SourceCode\TextureManager.cpp">
+      <Filter>ソース ファイル\System\Manager</Filter>
     </ClCompile>
-    <ClCompile Include="DirectionalLight.cpp">
-      <Filter>ソース ファイル\GameObject\Light</Filter>
+    <ClCompile Include="SourceCode\GeoShapeManager.cpp">
+      <Filter>ソース ファイル\System\Manager</Filter>
     </ClCompile>
-    <ClCompile Include="Quad.cpp">
-      <Filter>ソース ファイル\GameObject\Quad</Filter>
+    <ClCompile Include="SourceCode\ImGuiManager.cpp">
+      <Filter>ソース ファイル\System\Manager</Filter>
     </ClCompile>
-    <ClCompile Include="PostProcessing.cpp">
+    <ClCompile Include="SourceCode\InputManager.cpp">
+      <Filter>ソース ファイル\System\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\Manager.cpp">
+      <Filter>ソース ファイル\System\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\MaterialManager.cpp">
+      <Filter>ソース ファイル\System\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\PostProcessing.cpp">
       <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
     </ClCompile>
-    <ClCompile Include="RadialBlur.cpp">
+    <ClCompile Include="SourceCode\RadialBlur.cpp">
       <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
     </ClCompile>
-    <ClCompile Include="GaussBlur.cpp">
+    <ClCompile Include="SourceCode\Bloom.cpp">
       <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
     </ClCompile>
-    <ClCompile Include="ShadowMap.cpp">
+    <ClCompile Include="SourceCode\GaussBlur.cpp">
+      <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\CascadeShadowMap.cpp">
       <Filter>ソース ファイル\System\Renderer\ShadowMap</Filter>
     </ClCompile>
-    <ClCompile Include="CascadeShadowMap.cpp">
+    <ClCompile Include="SourceCode\ShadowMap.cpp">
       <Filter>ソース ファイル\System\Renderer\ShadowMap</Filter>
     </ClCompile>
-    <ClCompile Include="Bloom.cpp">
-      <Filter>ソース ファイル\System\Renderer\PostProcessing</Filter>
+    <ClCompile Include="SourceCode\Renderer.cpp">
+      <Filter>ソース ファイル\System\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="QuadDebug.cpp">
-      <Filter>ソース ファイル\GameObject\Quad</Filter>
+    <ClCompile Include="SourceCode\CubeRenderTarget.cpp">
+      <Filter>ソース ファイル\System\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\DX12App.cpp">
+      <Filter>ソース ファイル\System</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\FrameResource.cpp">
+      <Filter>ソース ファイル\System</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

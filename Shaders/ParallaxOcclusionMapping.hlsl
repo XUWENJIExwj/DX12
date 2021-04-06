@@ -94,7 +94,7 @@ float4 PS(VertexOut pin) : SV_Target
     
     // Build orthonormal basis.
     float3x3 toTangent = transpose(ComputeTBN(normalWS, pin.TangentWS, -bitangentSign));
-    float3 viewDirTS = mul(viewDirWS, toTangent);
+    float3 viewDirTS = mul(viewDirWS, toTangent); // viewDirWS.xyzÅ®viewDirTS.xzyÅ® x = x, y = z, z = y
     float2 maxParallaxOffset = -viewDirTS.xy * heightScale / viewDirTS.z;
     // Vary number of samples based on view angle between the eye and
     // the surface normal. (Head-on angles require less samples than

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <queue>
-#include "Common\\GameTimer.h"
+#include "..\\Common\\GameTimer.h"
 #include "FrameResource.h"
 #include "PostProcessing.h"
 

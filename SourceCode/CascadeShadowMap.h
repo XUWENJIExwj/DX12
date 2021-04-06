@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Common\\d3dUtil.h"
-#include "Common\\MathHelper.h"
+#include "..\\Common\\d3dUtil.h"
+#include "..\\Common\\MathHelper.h"
 #include "ShadowMap.h"
 
 struct CSMPassCB

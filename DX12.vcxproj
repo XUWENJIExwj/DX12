@@ -107,6 +107,9 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>copy "$(TargetPath)" bin\\DX12Debug.exe</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -141,17 +144,13 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>copy "$(TargetPath)" bin\\DX12Release.exe</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Bloom.h" />
     <ClInclude Include="Common\Keyboard.h" />
     <ClInclude Include="Common\Mouse.h" />
-    <ClInclude Include="CascadeShadowMap.h" />
-    <ClInclude Include="Cube.h" />
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="CameraDynamicCubeMap.h" />
-    <ClInclude Include="CameraFP.h" />
-    <ClInclude Include="CommonResource.h" />
     <ClInclude Include="Common\d3dUtil.h" />
     <ClInclude Include="Common\d3dx12.h" />
     <ClInclude Include="Common\DDSTextureLoader.h" />
@@ -159,15 +158,6 @@
     <ClInclude Include="Common\GeometryGenerator.h" />
     <ClInclude Include="Common\MathHelper.h" />
     <ClInclude Include="Common\UploadBuffer.h" />
-    <ClInclude Include="CubeRenderTarget.h" />
-    <ClInclude Include="DirectionalLight.h" />
-    <ClInclude Include="DX12App.h" />
-    <ClInclude Include="FrameResource.h" />
-    <ClInclude Include="Game.h" />
-    <ClInclude Include="GameObject.h" />
-    <ClInclude Include="GaussBlur.h" />
-    <ClInclude Include="GeoShapeManager.h" />
-    <ClInclude Include="ImGuiManager.h" />
     <ClInclude Include="ImGui\imconfig.h" />
     <ClInclude Include="ImGui\imgui.h" />
     <ClInclude Include="ImGui\imgui_impl_dx12.h" />
@@ -176,73 +166,89 @@
     <ClInclude Include="ImGui\imstb_rectpack.h" />
     <ClInclude Include="ImGui\imstb_textedit.h" />
     <ClInclude Include="ImGui\imstb_truetype.h" />
-    <ClInclude Include="InputManager.h" />
-    <ClInclude Include="Light.h" />
-    <ClInclude Include="Logo.h" />
-    <ClInclude Include="Manager.h" />
-    <ClInclude Include="MaterialManager.h" />
-    <ClInclude Include="MeshField.h" />
-    <ClInclude Include="PostProcessingResource.h" />
-    <ClInclude Include="Quad.h" />
-    <ClInclude Include="PostProcessing.h" />
-    <ClInclude Include="RadialBlur.h" />
-    <ClInclude Include="Renderer.h" />
-    <ClInclude Include="Scene.h" />
-    <ClInclude Include="ShaderManager.h" />
-    <ClInclude Include="QuadDebug.h" />
-    <ClInclude Include="ShadowMap.h" />
-    <ClInclude Include="Sky.h" />
-    <ClInclude Include="Sphere.h" />
-    <ClInclude Include="SphereDR.h" />
-    <ClInclude Include="TextureManager.h" />
+    <ClInclude Include="SourceCode\Bloom.h" />
+    <ClInclude Include="SourceCode\Camera.h" />
+    <ClInclude Include="SourceCode\CameraDynamicCubeMap.h" />
+    <ClInclude Include="SourceCode\CameraFP.h" />
+    <ClInclude Include="SourceCode\CascadeShadowMap.h" />
+    <ClInclude Include="SourceCode\CommonResource.h" />
+    <ClInclude Include="SourceCode\Cube.h" />
+    <ClInclude Include="SourceCode\CubeRenderTarget.h" />
+    <ClInclude Include="SourceCode\DirectionalLight.h" />
+    <ClInclude Include="SourceCode\DX12App.h" />
+    <ClInclude Include="SourceCode\FrameResource.h" />
+    <ClInclude Include="SourceCode\Game.h" />
+    <ClInclude Include="SourceCode\GameObject.h" />
+    <ClInclude Include="SourceCode\GaussBlur.h" />
+    <ClInclude Include="SourceCode\GeoShapeManager.h" />
+    <ClInclude Include="SourceCode\ImGuiManager.h" />
+    <ClInclude Include="SourceCode\InputManager.h" />
+    <ClInclude Include="SourceCode\Light.h" />
+    <ClInclude Include="SourceCode\Logo.h" />
+    <ClInclude Include="SourceCode\Manager.h" />
+    <ClInclude Include="SourceCode\MaterialManager.h" />
+    <ClInclude Include="SourceCode\MeshField.h" />
+    <ClInclude Include="SourceCode\PostProcessing.h" />
+    <ClInclude Include="SourceCode\PostProcessingResource.h" />
+    <ClInclude Include="SourceCode\Quad.h" />
+    <ClInclude Include="SourceCode\QuadDebug.h" />
+    <ClInclude Include="SourceCode\RadialBlur.h" />
+    <ClInclude Include="SourceCode\Renderer.h" />
+    <ClInclude Include="SourceCode\Scene.h" />
+    <ClInclude Include="SourceCode\ShaderManager.h" />
+    <ClInclude Include="SourceCode\ShadowMap.h" />
+    <ClInclude Include="SourceCode\Sky.h" />
+    <ClInclude Include="SourceCode\Sphere.h" />
+    <ClInclude Include="SourceCode\SphereDR.h" />
+    <ClInclude Include="SourceCode\TextureManager.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Bloom.cpp" />
     <ClCompile Include="Common\Keyboard.cpp" />
     <ClCompile Include="Common\Mouse.cpp" />
-    <ClCompile Include="CascadeShadowMap.cpp" />
-    <ClCompile Include="Cube.cpp" />
-    <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="CameraDynamicCubeMap.cpp" />
-    <ClCompile Include="CameraFP.cpp" />
     <ClCompile Include="Common\d3dUtil.cpp" />
     <ClCompile Include="Common\DDSTextureLoader.cpp" />
     <ClCompile Include="Common\GameTimer.cpp" />
     <ClCompile Include="Common\GeometryGenerator.cpp" />
     <ClCompile Include="Common\MathHelper.cpp" />
-    <ClCompile Include="CubeRenderTarget.cpp" />
-    <ClCompile Include="DirectionalLight.cpp" />
-    <ClCompile Include="DX12App.cpp" />
-    <ClCompile Include="FrameResource.cpp" />
-    <ClCompile Include="Game.cpp" />
-    <ClCompile Include="GameObject.cpp" />
-    <ClCompile Include="GaussBlur.cpp" />
-    <ClCompile Include="GeoShapeManager.cpp" />
-    <ClCompile Include="ImGuiManager.cpp" />
     <ClCompile Include="ImGui\imgui.cpp" />
     <ClCompile Include="ImGui\imgui_demo.cpp" />
     <ClCompile Include="ImGui\imgui_draw.cpp" />
     <ClCompile Include="ImGui\imgui_impl_dx12.cpp" />
     <ClCompile Include="ImGui\imgui_impl_win32.cpp" />
     <ClCompile Include="ImGui\imgui_widgets.cpp" />
-    <ClCompile Include="InputManager.cpp" />
-    <ClCompile Include="Light.cpp" />
-    <ClCompile Include="Logo.cpp" />
-    <ClCompile Include="Manager.cpp" />
-    <ClCompile Include="MaterialManager.cpp" />
-    <ClCompile Include="MeshField.cpp" />
-    <ClCompile Include="Quad.cpp" />
-    <ClCompile Include="PostProcessing.cpp" />
-    <ClCompile Include="RadialBlur.cpp" />
-    <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="ShaderManager.cpp" />
-    <ClCompile Include="QuadDebug.cpp" />
-    <ClCompile Include="ShadowMap.cpp" />
-    <ClCompile Include="Sky.cpp" />
-    <ClCompile Include="Sphere.cpp" />
-    <ClCompile Include="SphereDR.cpp" />
-    <ClCompile Include="TextureManager.cpp" />
+    <ClCompile Include="SourceCode\Bloom.cpp" />
+    <ClCompile Include="SourceCode\Camera.cpp" />
+    <ClCompile Include="SourceCode\CameraDynamicCubeMap.cpp" />
+    <ClCompile Include="SourceCode\CameraFP.cpp" />
+    <ClCompile Include="SourceCode\CascadeShadowMap.cpp" />
+    <ClCompile Include="SourceCode\Cube.cpp" />
+    <ClCompile Include="SourceCode\CubeRenderTarget.cpp" />
+    <ClCompile Include="SourceCode\DirectionalLight.cpp" />
+    <ClCompile Include="SourceCode\DX12App.cpp" />
+    <ClCompile Include="SourceCode\FrameResource.cpp" />
+    <ClCompile Include="SourceCode\Game.cpp" />
+    <ClCompile Include="SourceCode\GameObject.cpp" />
+    <ClCompile Include="SourceCode\GaussBlur.cpp" />
+    <ClCompile Include="SourceCode\GeoShapeManager.cpp" />
+    <ClCompile Include="SourceCode\ImGuiManager.cpp" />
+    <ClCompile Include="SourceCode\InputManager.cpp" />
+    <ClCompile Include="SourceCode\Light.cpp" />
+    <ClCompile Include="SourceCode\Logo.cpp" />
+    <ClCompile Include="SourceCode\Manager.cpp" />
+    <ClCompile Include="SourceCode\MaterialManager.cpp" />
+    <ClCompile Include="SourceCode\MeshField.cpp" />
+    <ClCompile Include="SourceCode\PostProcessing.cpp" />
+    <ClCompile Include="SourceCode\Quad.cpp" />
+    <ClCompile Include="SourceCode\QuadDebug.cpp" />
+    <ClCompile Include="SourceCode\RadialBlur.cpp" />
+    <ClCompile Include="SourceCode\Renderer.cpp" />
+    <ClCompile Include="SourceCode\Scene.cpp" />
+    <ClCompile Include="SourceCode\ShaderManager.cpp" />
+    <ClCompile Include="SourceCode\ShadowMap.cpp" />
+    <ClCompile Include="SourceCode\Sky.cpp" />
+    <ClCompile Include="SourceCode\Sphere.cpp" />
+    <ClCompile Include="SourceCode\SphereDR.cpp" />
+    <ClCompile Include="SourceCode\TextureManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\Blend.hlsl">

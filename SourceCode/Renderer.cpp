@@ -128,6 +128,27 @@ bool CRenderer::Init()
 	m_4xMsaaQuality = msQualityLevels.NumQualityLevels;
 	assert(m_4xMsaaQuality > 0 && "Unexpected MSAA quality level.");
 
+	/*
+	D3D_FEATURE_LEVEL featureLevels[7] =
+	{
+		D3D_FEATURE_LEVEL_12_1,
+		D3D_FEATURE_LEVEL_12_0,
+		D3D_FEATURE_LEVEL_11_1,
+		D3D_FEATURE_LEVEL_11_0,
+		D3D_FEATURE_LEVEL_10_1,
+		D3D_FEATURE_LEVEL_10_0,
+		D3D_FEATURE_LEVEL_9_3,
+	};
+
+	D3D12_FEATURE_DATA_FEATURE_LEVELS featureLevelsInfo;
+	featureLevelsInfo.NumFeatureLevels = 7;
+	featureLevelsInfo.pFeatureLevelsRequested = featureLevels;
+	m_D3DDevice->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &featureLevelsInfo, sizeof(featureLevelsInfo));
+
+	D3D12_FEATURE_DATA_D3D12_OPTIONS5 featureOptions;
+	m_D3DDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &featureOptions, sizeof(featureOptions));
+	*/
+
 #ifdef _DEBUG
 	LogAdapters();
 	DebugLayerFilter();
@@ -340,7 +361,7 @@ void CRenderer::OnResize()
 
 	m_ScissorRect = { 0, 0, m_App->GetWindowWidth(), m_App->GetWindowHeight() };
 	
-	// RadialBlur
+	// PostProcessing
 	if (m_PostProcessing)
 	{
 		m_PostProcessing->OnResize(m_App->GetWindowWidth(), m_App->GetWindowHeight());

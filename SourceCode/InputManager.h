@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Common\\Keyboard.h"
-#include "Common\\Mouse.h"
+#include "..\\Common\\Keyboard.h"
+#include "..\\Common\\Mouse.h"
 
 namespace InputManager
 {

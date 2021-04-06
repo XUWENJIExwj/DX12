@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ImGui\\imgui.h"
-#include "Common\\GameTimer.h"
+#include "..\\ImGui\\imgui.h"
+#include "..\\Common\\GameTimer.h"
 
 struct GameObjectImGuiCB
 {

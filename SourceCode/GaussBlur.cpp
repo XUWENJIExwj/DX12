@@ -92,7 +92,7 @@ vector<float> CGaussBlur::ComputeGaussWeights(int MaxBlurRadius, float Sigma)
 		weightSum += weights[i + blurRadius];
 	}
 
-	for (int i = 0; i < weights.size(); ++i)
+	for (UINT i = 0; i < weights.size(); ++i)
 	{
 		weights[i] /= weightSum;
 	}

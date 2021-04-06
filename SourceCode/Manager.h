@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Common\\GameTimer.h"
+#include "..\\Common\\GameTimer.h"
 
 struct ID3D12Device;
 

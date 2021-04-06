@@ -1,4 +1,4 @@
-#include "Common\\GeometryGenerator.h"
+#include "..\\Common\\GeometryGenerator.h"
 #include "Renderer.h"
 
 using namespace std;
@@ -117,7 +117,7 @@ void CGeoShapeManager::CreateGeoShapes()
 		vertices[k].TexC = cylinder.Vertices[i].TexC;
 	}
 
-	for (int i = 0; i < quad.Vertices.size(); ++i, ++k)
+	for (size_t i = 0; i < quad.Vertices.size(); ++i, ++k)
 	{
 		vertices[k].Pos = quad.Vertices[i].Position;
 		vertices[k].Normal = quad.Vertices[i].Normal;

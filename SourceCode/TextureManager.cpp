@@ -108,15 +108,39 @@ void CTextureManager::LoadTextures()
 		L"Asset\\Textures\\IndoorCube_00_Diffuse.dds",
 	};
 
-	for (int i = 0; i < (int)TextureIndex::Texture_Max; ++i)
+	// ソリューションのビルド後の実行ファイルとbinフォルダの実行ファイルが
+	// 参照するAssetのディレクトリが異なるので、処理を分ける
+	auto texture = make_unique<Texture>();
+	texture->Name = m_TextureNames[0];
+	texture->Filename = texFilenames[0];
+	if (FAILED(DirectX::CreateDDSTextureFromFile12(CRenderer::GetDevice(),
+		CRenderer::GetCommandList(), texture->Filename.c_str(),
+		texture->Resource, texture->UploadHeap)))
 	{
-		auto texture = make_unique<Texture>();
-		texture->Name = m_TextureNames[i];
-		texture->Filename = texFilenames[i];
-		ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(CRenderer::GetDevice(),
-			CRenderer::GetCommandList(), texture->Filename.c_str(),
-			texture->Resource, texture->UploadHeap));
-
-		m_Textures[i] = move(texture);
+		for (int i = 0; i < (int)TextureIndex::Texture_Max; ++i)
+		{
+			texFilenames[i] = L"..\\" + texFilenames[i];
+			LoadEachTexture(i, texFilenames[i]);
+		}
 	}
+	else
+	{
+		m_Textures[0] = move(texture);
+		for (int i = 1; i < (int)TextureIndex::Texture_Max; ++i)
+		{
+			LoadEachTexture(i, texFilenames[i]);
+		}
+	}
+}
+
+void CTextureManager::LoadEachTexture(int Index, const wstring& Filename)
+{
+	auto texture = make_unique<Texture>();
+	texture->Name = m_TextureNames[Index];
+	texture->Filename = Filename;
+	ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(CRenderer::GetDevice(),
+		CRenderer::GetCommandList(), texture->Filename.c_str(),
+		texture->Resource, texture->UploadHeap));
+
+	m_Textures[Index] = move(texture);
 }
